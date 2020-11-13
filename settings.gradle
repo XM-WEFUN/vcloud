@@ -1,0 +1,5 @@
+rootProject.name = 'app-cloud'
+include 'gateway'
+include 'common'
+include 'auth'
+include 'api'
