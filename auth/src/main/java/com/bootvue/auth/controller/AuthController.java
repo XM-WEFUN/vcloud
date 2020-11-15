@@ -1,13 +1,13 @@
-package com.bootvue.api.controller;
+package com.bootvue.auth.controller;
 
-import cn.hutool.core.util.RandomUtil;
-import com.bootvue.api.vo.Credentials;
+import com.bootvue.auth.vo.Credentials;
+import com.bootvue.common.config.AppConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -15,13 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Api(tags = "用户认证")
 @RestController
-@RequestMapping("/auth")
 @Slf4j
 public class AuthController {
+    @Autowired
+    private AppConfig appConfig;
 
     @ApiOperation("登录")
     @PostMapping("/login")
     public String login(@RequestBody Credentials credentials) {
-        return RandomUtil.randomNumbers(5);
+
+        log.info("xxxxxxxxx: {}", appConfig.getTest());
+        return null;
     }
 }

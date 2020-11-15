@@ -1,4 +1,4 @@
-package com.bootvue.api.vo;
+package com.bootvue.auth.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
