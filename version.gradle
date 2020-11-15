@@ -1,6 +1,6 @@
 ext {
     versions = [
-            fastjson         : '1.2.74',
+            fastjson         : '1.2.75',
             commonsText      : '1.9',
             mysql            : '8.0.22',
             xxlJob           : '2.2.0',
@@ -11,10 +11,10 @@ ext {
             httpmime         : '4.5.13',
             hutool           : '5.4.4',
             commonsFileupload: '1.4',
+            commonsPool      : '2.9.0',
             okhttp           : '4.9.0',
             commonsLang3     : '3.11',
             guava            : '29.0-jre',
-            thumbnailator    : '0.4.12',
             Excel4J          : '3.0.0',
             javaJwt          : '3.11.0',
             jjwt             : '0.9.1',
@@ -23,7 +23,6 @@ ext {
 
     libs = [
             'fastjson'          : "com.alibaba:fastjson:${versions.fastjson}",
-            'commons-text'      : "org.apache.commons:commons-text:${versions.commonsText}",
             'mysql'             : "mysql:mysql-connector-java:${versions.mysql}",
             'xxl-job'           : "com.xuxueli:xxl-job-core:${versions.xxlJob}",
             'redisson'          : "org.redisson:redisson-spring-boot-starter:${versions.redisson}",
@@ -32,11 +31,12 @@ ext {
             'springfox'         : "io.springfox:springfox-boot-starter:${versions.springfox}",
             'httpmime'          : "org.apache.httpcomponents:httpmime:${versions.httpmime}",
             'hutool'            : "cn.hutool:hutool-all:${versions.hutool}",
+            'commons-text'      : "org.apache.commons:commons-text:${versions.commonsText}",
             'commons-fileupload': "commons-fileupload:commons-fileupload:${versions.commonsFileupload}",
+            'commons-pool2'     : "org.apache.commons:commons-pool2:${versions.commonsPool}",
             'okhttp'            : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
             'commons-lang3'     : "org.apache.commons:commons-lang3:${versions.commonsLang3}",
             'guava'             : "com.google.guava:guava:${versions.guava}",
-            'thumbnailator'     : "net.coobird:thumbnailator:${versions.thumbnailator}",
             'Excel4J'           : "com.github.crab2died:Excel4J:${versions.Excel4J}",
             'java-jwt'          : "com.auth0:java-jwt:${versions.javaJwt}",
             'jjwt'              : "io.jsonwebtoken:jjwt:${versions.jjwt}",

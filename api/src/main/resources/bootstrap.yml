@@ -1,0 +1,21 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: api
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.100.80:8848
+      config:
+        server-addr: 192.168.100.80:8848
+        file-extension: yaml
+        extension-configs:
+          - data-id: config-${spring.profiles.active}.yaml
+            group: DEFAULT_GROUP
+            refresh: true
+          - data-id: datasource-${spring.profiles.active}.yaml
+            group: DEFAULT_GROUP
+            refresh: true
+  profiles:
+    active: dev

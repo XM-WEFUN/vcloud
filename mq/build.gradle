@@ -3,15 +3,13 @@ plugins {
 }
 
 dependencies {
-    implementation project(":core")
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
 }
 
 bootJar {
     enabled = true
-    mainClassName = 'com.bootvue.AuthApplication'
+    mainClassName = 'com.bootvue.SchedulerApplication'
     destinationDirectory = file(getRootProject().getBuildDir())
-    archiveFileName = 'auth.jar'
+    archiveFileName = 'mq.jar'
 }
