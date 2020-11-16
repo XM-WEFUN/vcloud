@@ -1,0 +1,14 @@
+spring:
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: non_empty
+logging:
+  level:
+    root: info
+
+# 自定义配置
+app-cloud:
+  swagger: true
+  test: ccb
