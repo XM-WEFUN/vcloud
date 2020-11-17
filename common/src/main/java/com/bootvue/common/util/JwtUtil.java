@@ -1,4 +1,4 @@
-package com.bootvue.core.util;
+package com.bootvue.common.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -9,15 +9,8 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.Base64Utils;
 
-import java.security.KeyFactory;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,37 +19,10 @@ import java.util.UUID;
 @Slf4j
 public class JwtUtil {
     private static final String iss = "AppCloud";
-    private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
+    private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
-    // 生成签名是所使用的私钥
-    private static RSAPrivateKey privateKey;
-    private static RSAPublicKey publicKey;
-
-    static {
-        try {
-            String Key = IOUtils.toString(new ClassPathResource("key/pkcs8.pem").getInputStream())
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\r", "")
-                    .replaceAll("\n", "");
-            String publicK = IOUtils.toString(new ClassPathResource("key/public.pem").getInputStream())
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\r", "")
-                    .replaceAll("\n", "");
-            byte[] keyBytes = Base64Utils.decodeFromString(Key);
-            byte[] publicKeyBytes = Base64Utils.decodeFromString(publicK);
-
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            privateKey = (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
-            publicKey = (RSAPublicKey) keyFactory.generatePublic(publicKeySpec);
-        } catch (Exception e) {
-            log.error("pkcs8私钥有问题...", e);
-        }
-    }
+    // 签名密钥
+    private static final String key = "jCN&HE9iz~*Pe!kJDCd?cg*A24npN7E2QrW15G6ZYJrMOOX#E*#Me_U0H@_xbY^0";
 
     /**
      * 生成 JWT Token 字符串
@@ -85,7 +51,7 @@ public class JwtUtil {
                 // 签发人（iss）：payload部分的标准字段之一，代表这个 JWT 的所有者。通常是 username、userid 这样具有用户代表性的内容。
                 .setSubject(iss)
                 // 设置生成签名的算法和秘钥
-                .signWith(signatureAlgorithm, privateKey);
+                .signWith(signatureAlgorithm, key);
 
         if (ttlMillis >= 0) {
             long expMillis = nowMillis + ttlMillis;
@@ -109,7 +75,7 @@ public class JwtUtil {
 
         // 得到 DefaultJwtParser
         return Jwts.parser()
-                .setSigningKey(publicKey)
+                .setSigningKey(key)
                 // 设置需要解析的 jwt
                 .parseClaimsJws(jwtToken)
                 .getBody();
@@ -127,8 +93,8 @@ public class JwtUtil {
         boolean flag = false;
 
         switch (signatureAlgorithm) {
-            case RS256:
-                algorithm = Algorithm.RSA256(publicKey, privateKey);
+            case HS256:
+                algorithm = Algorithm.HMAC256(Base64Utils.decodeFromString(key));
                 break;
             default:
                 throw new RuntimeException("不支持该算法");
@@ -143,5 +109,11 @@ public class JwtUtil {
         }
 
         return flag;
+    }
+
+    public static void main(String[] args) {
+        String encode = JwtUtil.encode(5000000L, null);
+        System.out.println(encode);
+        System.out.println(JwtUtil.decode(encode));
     }
 }

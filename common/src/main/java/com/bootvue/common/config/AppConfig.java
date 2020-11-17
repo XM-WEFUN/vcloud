@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Set;
+
 @RefreshScope
 @Configuration
 @ConfigurationProperties(prefix = "app-cloud")
@@ -16,6 +18,6 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 
     private Boolean swagger;  // 是否允许生成swagger文档
-    private String test;
+    private Set<String> skipUrls; //  白名单 放行uri
 
 }

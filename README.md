@@ -1,10 +1,18 @@
 # app-cloud
 
+## 依赖
+
+[版本依赖](https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E)
+
+|  Spring Cloud   | Spring Cloud Alibaba  | Spring Boot| Nacos | Sentinel| RocketMQ | Seata|
+|  ----  | ----  | ----  | ----  | ----  | ----  | ----  |
+| Hoxton.SR9  | 2.2.3.RELEASE |2.3.2.RELEASE |	1.3.3 |1.8.0 |4.4.0|1.3.0|
+
 ## 模块
 
 - auth: 用户认证
 - gateway: 网关
-- common: vo/appConfig
+- common: 不包含(spring mvc datasource)
 - core: 基础配置+redis/spring data数据源+util等等.....
 - api: api接口
 - xxxService: 子服务

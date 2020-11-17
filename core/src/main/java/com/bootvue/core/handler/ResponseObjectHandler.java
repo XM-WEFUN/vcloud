@@ -1,6 +1,6 @@
 package com.bootvue.core.handler;
 
-import com.bootvue.core.result.R;
+import com.bootvue.common.result.R;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ObjectUtils;
@@ -25,12 +25,12 @@ public class ResponseObjectHandler implements HandlerMethodReturnValueHandler {
     @Override
     public void handleReturnValue(Object returnValue, MethodParameter returnType, ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
         R result = null;
-        if (!R .class.isAssignableFrom(returnType.getParameterType())) {
-            result = R .success(returnValue);
+        if (!R.class.isAssignableFrom(returnType.getParameterType())) {
+            result = R.success(returnValue);
         } else if (ObjectUtils.isEmpty(returnValue)) {
-            result = R .success();
+            result = R.success();
         } else {
-            result = (R ) returnValue;
+            result = (R) returnValue;
         }
         this.requestResponseBodyMethodProcessor.handleReturnValue(result, returnType, mavContainer, webRequest);
     }

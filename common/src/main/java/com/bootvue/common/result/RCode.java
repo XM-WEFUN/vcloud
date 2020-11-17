@@ -1,4 +1,4 @@
-package com.bootvue.core.result;
+package com.bootvue.common.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum RCode {
     SUCCESS(200, "success"),
     PARAM_ERROR(400, "非法参数"),
+    UNAUTHORIZED_ERROR(401, "Unauthorized"),
     ACCESS_DENY(403, "没有权限"),
     DEFAULT(600, "系统异常"),
     LOGIN_ERROR(601, "用户名或密码错误"),

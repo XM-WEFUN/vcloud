@@ -37,7 +37,7 @@ public class SwaggerConfig {
                 .enableUrlTemplating(false)
                 .globalRequestParameters(
                         Collections.singletonList(new RequestParameterBuilder()
-                                .name("Authorization")
+                                .name("token")
                                 .description("token信息")
                                 .in(ParameterType.HEADER)
                                 .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))

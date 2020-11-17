@@ -7,11 +7,8 @@ dependencies {
     api libs['mysql']
     api libs['redisson']
     api libs['commons-pool2']
-    api libs['commons-text']
-    api libs['commons-lang3']
     api libs['guava']
     api libs['Excel4J']
-    api libs['commons-fileupload']
     api libs['mybatis']
     api libs['mybatis-plus']
     api libs['springfox']
@@ -19,8 +16,6 @@ dependencies {
     api libs['fastjson']
     api libs['httpmime']
     api libs['okhttp']
-    api libs['java-jwt']
-    api libs['jjwt']
     api libs['flyway']
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-data-redis'
