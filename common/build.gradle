@@ -1,4 +1,5 @@
 dependencies {
+    api libs['fastjson']
     api libs['java-jwt']
     api libs['jjwt']
     api libs['jaxbApi']

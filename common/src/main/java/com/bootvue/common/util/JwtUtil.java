@@ -10,7 +10,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,16 +25,16 @@ public class JwtUtil {
     private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
     // 签名密钥
-    private static final String key = "jCN&HE9iz~*Pe!kJDCd?cg*A24npN7E2QrW15G6ZYJrMOOX#E*#Me_U0H@_xbY^0";
+    private static final String key = Base64Utils.encodeToString("jCN&HE9iz~*Pe!kJDCd?cg*A24npN7E2QrW15G6ZYJrMOOX#E*#Me_U0H@_xbY^0".getBytes());
 
     /**
      * 生成 JWT Token 字符串
      *
-     * @param ttlMillis jwt 过期时间  毫秒
-     * @param claims    额外添加到payload部分的信息。
-     *                  例如可以添加用户名、用户ID、用户（加密前的）密码等信息
+     * @param ttl    jwt 过期时间
+     * @param claims 额外添加到payload部分的信息。
+     *               例如可以添加用户名、用户ID、用户（加密前的）密码等信息
      */
-    public static String encode(long ttlMillis, Map<String, Object> claims) {
+    public static String encode(LocalDateTime ttl, Map<String, Object> claims) {
         if (claims == null) {
             claims = new HashMap<>();
         }
@@ -51,14 +54,10 @@ public class JwtUtil {
                 // 签发人（iss）：payload部分的标准字段之一，代表这个 JWT 的所有者。通常是 username、userid 这样具有用户代表性的内容。
                 .setSubject(iss)
                 // 设置生成签名的算法和秘钥
-                .signWith(signatureAlgorithm, key);
-
-        if (ttlMillis >= 0) {
-            long expMillis = nowMillis + ttlMillis;
-            Date exp = new Date(expMillis);
-            // 过期时间（exp）：payload部分的标准字段之一，代表这个 JWT 的有效期。
-            builder.setExpiration(exp);
-        }
+                .signWith(signatureAlgorithm, key)
+                // 过期时间
+                .setExpiration(Date.from(ObjectUtils.isEmpty(ttl) ? LocalDateTime.now().atOffset(ZoneOffset.of("+8")).toInstant()
+                        : ttl.atOffset(ZoneOffset.of("+8")).toInstant()));
 
         return builder.compact();
     }
@@ -72,13 +71,18 @@ public class JwtUtil {
      * @return claims 返回payload的键值对
      */
     public static Claims decode(String jwtToken) {
+        try {
 
-        // 得到 DefaultJwtParser
-        return Jwts.parser()
-                .setSigningKey(key)
-                // 设置需要解析的 jwt
-                .parseClaimsJws(jwtToken)
-                .getBody();
+            // 得到 DefaultJwtParser
+            return Jwts.parser()
+                    .setSigningKey(key)
+                    // 设置需要解析的 jwt
+                    .parseClaimsJws(jwtToken)
+                    .getBody();
+        } catch (Exception e) {
+            log.error("jwt解析失败");
+        }
+        return null;
     }
 
     /**
@@ -111,9 +115,4 @@ public class JwtUtil {
         return flag;
     }
 
-    public static void main(String[] args) {
-        String encode = JwtUtil.encode(5000000L, null);
-        System.out.println(encode);
-        System.out.println(JwtUtil.decode(encode));
-    }
 }

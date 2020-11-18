@@ -34,10 +34,7 @@ CREATE TABLE `user`
 -- Records of user
 -- ----------------------------
 INSERT INTO `user`
-VALUES (1, 'test1', '12345678900', '827ccb0eea8a706c4c34a16891f84e7b', NULL, 0, '2020-06-17 17:10:24', NULL, NULL);
-INSERT INTO `user`
-VALUES (2, 'test2', '12345678901', '827ccb0eea8a706c4c34a16891f84e7b', 'ROLE_admin', 0, '2020-06-17 17:10:45', NULL, NULL);
-INSERT INTO `user`
-VALUES (3, 'test3', '12345678902', '827ccb0eea8a706c4c34a16891f84e7b', 'ROLE_user', 0, '2020-06-17 17:11:06', NULL, NULL);
+VALUES (1, 'test1', '12345678900', md5('123456'), 'admin', 0, now(), NULL, NULL);
+
 
 SET FOREIGN_KEY_CHECKS = 1;

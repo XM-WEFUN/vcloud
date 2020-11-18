@@ -17,8 +17,13 @@
 - api: api接口
 - xxxService: 子服务
 
+## 请求方式
 
-## swagger
+所有请求<code>Content-Type: application/json</code>  
+
+文件上传的:  <code>Content-Type: multipart/form-data</code>  
+
+## api文档
 
 [publicApi-开放接口](http://localhost/auth/swagger-ui/?urls.primaryName=publicApi)
 

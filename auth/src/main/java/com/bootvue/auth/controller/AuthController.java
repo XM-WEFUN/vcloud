@@ -1,43 +1,71 @@
 package com.bootvue.auth.controller;
 
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.core.util.RandomUtil;
+import com.bootvue.auth.vo.CaptchaResponse;
 import com.bootvue.auth.vo.Credentials;
 import com.bootvue.common.config.AppConfig;
-import com.bootvue.common.util.JwtUtil;
-import io.jsonwebtoken.Claims;
+import com.bootvue.common.constant.AppConst;
+import com.bootvue.common.result.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.validation.Valid;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户登录  注册  验证码  刷新token等
  */
 @Api(tags = "用户认证")
 @RestController
-@RequestMapping("/oauth")
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthController {
-    @Autowired
-    private AppConfig appConfig;
+
+    private static final LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100);
+    private final AppConfig appConfig;
+    private final RedissonClient redissonClient;
 
     @ApiOperation("登录获取token")
     @PostMapping("/token")
-    public String login(@RequestBody Credentials credentials) {
-        Map<String, Object> mapper = new HashMap<>();
-        mapper.put("xx", "嘿嘿");
-        String encode = JwtUtil.encode(300000L, mapper);
-        log.info("{}", encode);
+    public String token(@RequestBody @Valid Credentials credentials, BindingResult result) {
+        R.handleErr(result);
 
-        Claims decode = JwtUtil.decode(encode);
-        log.info("{}", decode);
+        // todo 用户token
+
+
         return "xxx";
     }
 
+    @ApiOperation("获取图形验证码")
+    @GetMapping("/captcha")
+    public CaptchaResponse captcha() {
+
+        lineCaptcha.createCode();
+        String code = lineCaptcha.getCode();
+        String key = RandomStringUtils.randomAlphanumeric(10);
+        String image = "data:image/png;base64," + lineCaptcha.getImageBase64();
+        RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.CAPTCHA_KEY, key));
+        bucket.set(code, 10, TimeUnit.MINUTES);
+
+        return new CaptchaResponse(key, image);
+    }
+
+    @ApiOperation("获取短信验证码")
+    @GetMapping("/sms")
+    public void smsCode(@RequestParam("phone") String phone) {
+        String code = RandomUtil.randomNumbers(6);
+        RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phone));
+        bucket.set(code, 15L, TimeUnit.MINUTES);
+        log.info("短信验证码 : {}", code);
+    }
 }

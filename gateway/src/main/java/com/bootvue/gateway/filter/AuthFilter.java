@@ -5,14 +5,16 @@ import com.bootvue.common.result.AppException;
 import com.bootvue.common.result.R;
 import com.bootvue.common.result.RCode;
 import com.bootvue.common.util.JwtUtil;
+import com.bootvue.gateway.util.XssStringJsonSerializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.jsonwebtoken.Claims;
 import io.netty.buffer.ByteBufAllocator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -34,6 +36,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -45,6 +48,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
     static {
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.registerModule(new SimpleModule("XssStringJsonSerializer").addSerializer(new XssStringJsonSerializer()));
     }
 
     private final AppConfig appConfig;
@@ -65,43 +69,53 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         ServerHttpResponse resp = exchange.getResponse();
         String token = exchange.getRequest().getHeaders().getFirst("token");
+        Claims claims = null;
 
-        if (StringUtils.isEmpty(token) || !JwtUtil.isVerify(token) || ObjectUtils.isEmpty(JwtUtil.decode(token))) {
+        if (StringUtils.isEmpty(token) || !JwtUtil.isVerify(token) || ObjectUtils.isEmpty(claims = JwtUtil.decode(token))) {
             return unAuth(resp, R.error(new AppException(RCode.UNAUTHORIZED_ERROR)));
         }
+
+        // todo uri 权限控制
 
         // request header添加用户信息 & Xss 过滤
         String method = request.getMethodValue();
         HttpHeaders headers = new HttpHeaders();
-        // todo request header添加上用户信息
         headers.putAll(request.getHeaders());
 
+        // todo request header添加上用户信息
         headers.add("xxxx", "李四");
 
         // Xss过滤只处理 post put请求 & 不处理文件上传类型的
         if ((HttpMethod.POST.name().equals(method) || HttpMethod.PUT.name().equals(method)) &&
-                request.getHeaders().getContentType().equalsTypeAndSubtype(MediaType.APPLICATION_JSON)) {
-            return DataBufferUtils.join(request.getBody())
-                    .flatMap(dataBuffer -> {
-                        byte[] oldBytes = new byte[dataBuffer.readableByteCount()];
-                        dataBuffer.read(oldBytes);
-                        String bodyString = new String(oldBytes, StandardCharsets.UTF_8);
-                        log.info("原请求参数为：{}", bodyString);
-                        bodyString = StringEscapeUtils.escapeHtml4(bodyString);
-                        log.info("修改后参数为：{}", bodyString);
+                !MediaType.MULTIPART_FORM_DATA.isCompatibleWith(request.getHeaders().getContentType())) {
+            return DataBufferUtils.join(request.getBody()).flatMap(d -> Mono.just(Optional.of(d))).defaultIfEmpty(Optional.empty())
+                    .flatMap(optional -> {
+                        // 取出body中的参数
+                        String bodyString = "";
+                        if (optional.isPresent()) {
+                            byte[] oldBytes = new byte[optional.get().readableByteCount()];
+                            optional.get().read(oldBytes);
+                            bodyString = new String(oldBytes, StandardCharsets.UTF_8);
+                        }
+                        try {
+                            bodyString = StringUtils.isEmpty(bodyString) ? "" : objectMapper.writeValueAsString(objectMapper.readValue(bodyString, Object.class));
+                        } catch (JsonProcessingException e) {
+                            log.error("xss过滤异常", e);
+                        }
 
+                        ServerHttpRequest newRequest = request.mutate().uri(request.getURI()).build();
+
+                        // 重新构造body
                         byte[] newBytes = bodyString.getBytes(StandardCharsets.UTF_8);
                         DataBuffer bodyDataBuffer = toDataBuffer(newBytes);
                         Flux<DataBuffer> bodyFlux = Flux.just(bodyDataBuffer);
 
-
+                        // 由于修改了传递参数，需要重新设置CONTENT_LENGTH，长度是字节长度，不是字符串长度
                         int length = newBytes.length;
+                        headers.setContentType(MediaType.APPLICATION_JSON);
                         headers.remove(HttpHeaders.CONTENT_LENGTH);
                         headers.setContentLength(length);
-                        headers.setContentType(MediaType.APPLICATION_JSON);
-
-                        ServerHttpRequest newRequest = request.mutate().build();
-
+                        // 重写ServerHttpRequestDecorator，修改了body和header，重写getBody和getHeaders方法
                         newRequest = new ServerHttpRequestDecorator(newRequest) {
                             @Override
                             public Flux<DataBuffer> getBody() {

@@ -1,6 +1,9 @@
 package com.bootvue.common.result;
 
 import lombok.*;
+import org.springframework.validation.BindingResult;
+
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -22,5 +25,12 @@ public class R<T> {
 
     public static <T> R<T> error(AppException e) {
         return new R<>(e.getCode(), e.getMsg(), null);
+    }
+
+    public static void handleErr(BindingResult result) {
+        if (result.hasErrors()) {
+            String msg = Objects.requireNonNull(result.getFieldError()).getDefaultMessage();
+            throw new AppException(RCode.PARAM_ERROR.getCode(), msg);
+        }
     }
 }
