@@ -3,9 +3,10 @@ package com.bootvue.auth.controller;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.util.RandomUtil;
+import com.bootvue.auth.service.AuthService;
+import com.bootvue.auth.vo.AuthResponse;
 import com.bootvue.auth.vo.CaptchaResponse;
 import com.bootvue.auth.vo.Credentials;
-import com.bootvue.common.config.AppConfig;
 import com.bootvue.common.constant.AppConst;
 import com.bootvue.common.result.R;
 import io.swagger.annotations.Api;
@@ -32,18 +33,14 @@ import java.util.concurrent.TimeUnit;
 public class AuthController {
 
     private static final LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100);
-    private final AppConfig appConfig;
     private final RedissonClient redissonClient;
+    private final AuthService authService;
 
     @ApiOperation("登录获取token")
     @PostMapping("/token")
-    public String token(@RequestBody @Valid Credentials credentials, BindingResult result) {
+    public AuthResponse token(@RequestBody @Valid Credentials credentials, BindingResult result) {
         R.handleErr(result);
-
-        // todo 用户token
-
-
-        return "xxx";
+        return authService.authentication(credentials);
     }
 
     @ApiOperation("获取图形验证码")

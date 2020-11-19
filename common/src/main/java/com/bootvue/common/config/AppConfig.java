@@ -19,5 +19,5 @@ public class AppConfig {
 
     private Boolean swagger;  // 是否允许生成swagger文档
     private Set<String> skipUrls; //  白名单 放行uri
-
+    private Set<Keys> authKey;   // 客户端认证凭证
 }

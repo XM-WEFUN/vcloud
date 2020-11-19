@@ -14,6 +14,7 @@
 - gateway: 网关
 - common: 不包含(spring mvc datasource)
 - core: 基础配置+redis/spring data数据源+util等等.....
+- generator: mybatis-plus 代码生成器
 - api: api接口
 - xxxService: 子服务
 

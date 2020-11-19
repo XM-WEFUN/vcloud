@@ -1,16 +1,5 @@
-plugins {
-    id 'org.springframework.boot'
-}
-
 dependencies {
     api libs['xxl-job']
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
-}
-
-bootJar {
-    enabled = true
-    mainClassName = 'com.bootvue.SchedulerApplication'
-    destinationDirectory = file(getRootProject().getBuildDir())
-    archiveFileName = 'scheduler.jar'
 }

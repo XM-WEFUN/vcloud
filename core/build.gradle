@@ -1,7 +1,3 @@
-plugins {
-    id "org.flywaydb.flyway" version "${FlywayPluginVersion}"
-}
-
 dependencies {
     api project(":common")
     api libs['mysql']

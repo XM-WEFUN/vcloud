@@ -12,6 +12,7 @@ import lombok.*;
 public class AuthResponse {
 
     private Long userId;    // 用户id
+    private String tenantCode; // 租户编号
     private String username;
     private String phone;
     private String roles;

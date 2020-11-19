@@ -1,17 +1,6 @@
-plugins {
-    id 'org.springframework.boot'
-}
-
 dependencies {
     implementation project(":common")
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
-}
-
-bootJar {
-    enabled = true
-    mainClassName = 'com.bootvue.GatewayApplication'
-    destinationDirectory = file(getRootProject().getBuildDir())
-    archiveFileName = 'gateway.jar'
 }

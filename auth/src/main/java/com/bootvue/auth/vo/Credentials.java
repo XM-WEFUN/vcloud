@@ -12,18 +12,25 @@ import javax.validation.constraints.NotEmpty;
 @ApiModel(description = "用户认证凭证")
 public class Credentials {
 
+    @ApiModelProperty(notes = "租户编号")
+    @NotEmpty(message = "租户编号不能为空")
+    private String tenantCode;
+
     @ApiModelProperty(notes = "用户名")
     private String username;
 
     @ApiModelProperty(notes = "密码")
     private String password;
 
-    @ApiModelProperty(notes = "类型 0:普通用户名密码  1:短信登录  2: refresh_token获取新token")
+    @ApiModelProperty(notes = "类型 0:用户名密码登录  1:短信登录  2: refresh_token获取新token")
     @NotEmpty(message = "认证类型不能为空")
     private Integer type;
 
     @ApiModelProperty(notes = "图形验证码或短信验证码")
     private String code;
+
+    @ApiModelProperty(notes = "图形验证码key")
+    private String key;
 
     @ApiModelProperty(notes = "手机号")
     private String phone;
