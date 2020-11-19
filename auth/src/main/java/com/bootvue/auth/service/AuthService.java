@@ -1,2 +1,8 @@
-package com.bootvue.auth.service;public interface AuthService {
+package com.bootvue.auth.service;
+
+import com.bootvue.auth.vo.AuthResponse;
+import com.bootvue.auth.vo.Credentials;
+
+public interface AuthService {
+    AuthResponse authentication(Credentials credentials);
 }

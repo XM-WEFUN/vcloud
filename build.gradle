@@ -65,7 +65,7 @@ subprojects {
         useJUnitPlatform()
     }
 
-    if (project.name != 'core' && project.name != 'common' && project.name != 'generator') {
+    if (project.name != 'core' && project.name != 'common') {
 
         apply plugin: 'org.springframework.boot'
 

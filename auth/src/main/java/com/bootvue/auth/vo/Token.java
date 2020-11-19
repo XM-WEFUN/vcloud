@@ -1,2 +1,4 @@
-package com.bootvue.auth.vo;public class Token {
+package com.bootvue.auth.vo;
+
+public class Token {
 }
