@@ -12,27 +12,35 @@
 
 - auth: 用户认证
 - gateway: 网关
-- common: 不包含(spring mvc datasource)
-- core: 基础配置+redis/spring data数据源+util等等.....
+- core: 基础配置+redis/spring data数据源等等.....
+- web: spring-boot-web相关config
 - api: api接口
 - xxxService: 子服务
 
 ## 请求方式
 
-所有请求<code>Content-Type: application/json</code>  
+1. 所有请求<code>Content-Type: application/json</code>  
 
-文件上传的:  <code>Content-Type: multipart/form-data</code>  
+2. 文件上传的:  <code>Content-Type: multipart/form-data</code>  
 
-## api文档
+3. 客户端/auth/oauth/**下所有接口queryString需要携带对应的<code>appid</code> <code>secret</code>
 
-[publicApi-开放接口](http://localhost/auth/swagger-ui/?urls.primaryName=publicApi)
+4. access_token: 7200s  refresh_token: 7d
 
-[privateApi-需要认证访问的接口](http://localhost/auth/swagger-ui/?urls.primaryName=publicApi)
-
+```yaml
+- appid: sysWeb
+      secret: 6842224b-7ddb-4c63-af62-1db58d77b2a5
+    - appid: app
+      secret: a135ec07-6eb2-4300-840a-9977dd8c813c  
 ```
-整合gateway后  swagger 接口请求path老是有问题  暂时先这样分开处理吧
 
-http://localhost/auth/swagger-ui/?urls.primaryName=publicApi
+# 状态码
 
-http://localhost/api/swagger-ui/?urls.primaryName=privateApi
+```bash
+200: success
+400: 无效参数(包含各种参数错误)
+401: Unauthorized(token无效或refresh token无效)
+403: 没有权限
+
+600: 系统异常
 ```

@@ -1,6 +1,7 @@
 package com.bootvue.gateway.config;
 
-import com.bootvue.common.result.RCode;
+import com.bootvue.core.result.AppException;
+import com.bootvue.core.result.RCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
@@ -9,6 +10,7 @@ import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.reactive.function.server.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,10 +34,23 @@ public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
 
     @Override
     protected Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
-        log.error("gateway系统异常: {}", getError(request).getMessage());
+        Throwable error = getError(request);
         response.clear();
-        response.put("code", RCode.DEFAULT.getCode());
-        response.put("msg", RCode.DEFAULT.getMsg());
+        if (error instanceof AppException) {
+            AppException exception = (AppException) error;
+            response.put("code", exception.getCode());
+            response.put("msg", exception.getMsg());
+            log.error("gateway系统异常: {} , path: {}", exception.getMsg(), request.path());
+        } else if (error instanceof ResponseStatusException) {
+            ResponseStatusException ex = (ResponseStatusException) error;
+            response.put("code", 404);
+            response.put("msg", "Service Not Found");
+            log.error("gateway系统异常: {} , path: {}", ex.getStatus(), request.path());
+        } else {
+            response.put("code", RCode.DEFAULT.getCode());
+            response.put("msg", RCode.DEFAULT.getMsg());
+            log.error("gateway系统异常: {} , path: {}", error.getMessage(), request.path());
+        }
         return response;
     }
 

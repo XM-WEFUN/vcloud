@@ -41,7 +41,7 @@ subprojects {
     jar {
         enabled = true
     }
-    
+
     bootJar {
         enabled = false
     }
@@ -65,7 +65,8 @@ subprojects {
         useJUnitPlatform()
     }
 
-    if (project.name != 'core' && project.name != 'common') {
+    // 模块自定义配置
+    if (project.name != 'core' && project.name != 'web') {
 
         apply plugin: 'org.springframework.boot'
 
@@ -76,11 +77,26 @@ subprojects {
             archiveFileName = project.name + '.jar'
         }
 
+        dependencies {
+            implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
+            implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+        }
+
+        if (project.name == 'gateway') {
+            dependencies {
+                implementation project(":core")
+                implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+            }
+        } else {
+            dependencies {
+                implementation project(":web")
+            }
+        }
 
         task copyResources(type: Copy) {
-            from "${project(':common').projectDir}/src/main/resources"
+            from "${project(':core').projectDir}/src/main/resources"
             if (project.name != 'gateway') {
-                from "${project(':core').projectDir}/src/main/resources"
+                from "${project(':web').projectDir}/src/main/resources"
             }
             into "${project.buildDir}/resources/main"
             exclude '**/rebel.xml'

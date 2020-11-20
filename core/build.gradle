@@ -1,17 +1,24 @@
 dependencies {
-    api project(":common")
     api libs['mysql']
-    api libs['redisson']
-    api libs['commons-pool2']
     api libs['guava']
     api libs['Excel4J']
     api libs['mybatis']
     api libs['mybatis-plus']
-    api libs['springfox']
     api libs['hutool']
     api libs['httpmime']
     api libs['okhttp']
     api libs['flyway']
+    api libs['fastjson']
+    api libs['java-jwt']
+    api libs['jjwt']
+    api libs['jaxbApi']
+    api libs['jaxbImpl']
+    api libs['jaxbCore']
+    api libs['activation']
+    api libs['commons-text']
+    api libs['commons-lang3']
+    api libs['commons-fileupload']
+    api libs['commons-pool2']
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-data-redis'
     api 'org.springframework.boot:spring-boot-starter-validation'

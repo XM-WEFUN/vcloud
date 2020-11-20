@@ -1,0 +1,5 @@
+dependencies {
+    api project(":core")
+    api libs['redisson']
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+}
