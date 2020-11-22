@@ -54,7 +54,6 @@ sentinel-dashboard image:  registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:la
 ```yaml
 # 自定义配置
 app-cloud:
-  swagger: true
   skip-urls:
     - /auth/oauth/**
   auth-key:
