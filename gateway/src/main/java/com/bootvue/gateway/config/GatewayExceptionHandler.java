@@ -40,16 +40,16 @@ public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
             AppException exception = (AppException) error;
             response.put("code", exception.getCode());
             response.put("msg", exception.getMsg());
-            log.error("gateway系统异常: {} , path: {}", exception.getMsg(), request.path());
+            log.error("gateway拦截到异常: {} , path: {}", exception.getMsg(), request.path());
         } else if (error instanceof ResponseStatusException) {
             ResponseStatusException ex = (ResponseStatusException) error;
             response.put("code", 404);
             response.put("msg", "Service Not Found");
-            log.error("gateway系统异常: {} , path: {}", ex.getStatus(), request.path());
+            log.error("gateway拦截到异常: {} , path: {}", ex.getStatus(), request.path());
         } else {
             response.put("code", RCode.DEFAULT.getCode());
             response.put("msg", RCode.DEFAULT.getMsg());
-            log.error("gateway系统异常: {} , path: {}", error.getMessage(), request.path());
+            log.error("gateway拦截到异常: {} , path: {}", error.getMessage(), request.path());
         }
         return response;
     }
@@ -61,7 +61,7 @@ public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
 
     @Override
     protected int getHttpStatus(Map<String, Object> errorAttributes) {
-        return 503;
+        return 200;
     }
 
 }

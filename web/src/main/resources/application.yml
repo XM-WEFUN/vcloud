@@ -4,3 +4,6 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: non_empty
+feign:
+  sentinel:
+    enabled: true

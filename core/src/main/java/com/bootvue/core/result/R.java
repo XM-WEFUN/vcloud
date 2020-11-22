@@ -1,5 +1,6 @@
 package com.bootvue.core.result;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.validation.BindingResult;
 
@@ -10,6 +11,7 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class R<T> {
     private Integer code;
     private String msg;

@@ -3,16 +3,14 @@ package com.bootvue.auth.controller;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.util.RandomUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bootvue.auth.service.AuthService;
 import com.bootvue.auth.vo.AuthResponse;
 import com.bootvue.auth.vo.CaptchaResponse;
 import com.bootvue.auth.vo.Credentials;
-import com.bootvue.auth.vo.RegisterRequest;
 import com.bootvue.core.constant.AppConst;
-import com.bootvue.core.entity.User;
-import com.bootvue.core.mapper.UserMapper;
+import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.R;
+import com.bootvue.core.result.RCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 用户登录  注册  验证码  刷新token等
@@ -35,9 +35,11 @@ import java.util.concurrent.TimeUnit;
 public class AuthController {
 
     private static final LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100);
+    private static final Pattern phonePattern = Pattern.compile(AppConst.PHONE_REGEX);
+
+
     private final RedissonClient redissonClient;
     private final AuthService authService;
-    private final UserMapper userMapper;
 
     // 用户认证
     @PostMapping("/token")
@@ -49,11 +51,6 @@ public class AuthController {
     // 图形验证码
     @GetMapping("/captcha")
     public CaptchaResponse captcha() {
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
-        wrapper.eq("id", 1L);
-        User user = userMapper.selectOne(wrapper);
-        log.info("{}", user);
-
         lineCaptcha.createCode();
         String code = lineCaptcha.getCode();
         String key = RandomStringUtils.randomAlphanumeric(12);
@@ -67,15 +64,14 @@ public class AuthController {
     // 短信验证码
     @GetMapping("/sms")
     public void smsCode(@RequestParam("phone") String phone) {
+        Matcher matcher = phonePattern.matcher(phone);
+        if (!matcher.find()) {
+            throw new AppException(RCode.PARAM_ERROR.getCode(), "手机号错误");
+        }
         String code = RandomUtil.randomNumbers(6);
         RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phone));
         bucket.set(code, 15L, TimeUnit.MINUTES);
         log.info("短信验证码 : {}", code);
     }
 
-    // 用户注册
-    @PostMapping("/register")
-    public void register(@RequestBody @Valid RegisterRequest registerRequest, BindingResult result) {
-        R.handleErr(result);
-    }
 }

@@ -7,12 +7,10 @@ import lombok.Getter;
 @Getter
 public enum RCode {
     SUCCESS(200, "success"),
-    PARAM_ERROR(400, "无效参数"),
+    PARAM_ERROR(400, "Bad Request"),
     UNAUTHORIZED_ERROR(401, "Unauthorized"),
-    ACCESS_DENY(403, "没有权限"),
+    ACCESS_DENY(403, "Forbidden"),
     DEFAULT(600, "系统异常"),
-    LOGIN_ERROR(601, "用户名或密码错误"),
-    REFRESH_TOKEN_ERROR(602, "refresh token无效"),
     ;
 
     private final Integer code;

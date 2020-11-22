@@ -2,29 +2,6 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for authorization
--- ----------------------------
-DROP TABLE IF EXISTS `authorization`;
-CREATE TABLE `authorization`
-(
-    `id`          bigint                                                        NOT NULL AUTO_INCREMENT,
-    `tenant_code` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT '租户编号',
-    `role`        varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '角色',
-    `uri`         varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '需要限制的uri',
-    PRIMARY KEY (`id`) USING BTREE,
-    INDEX `aurhorization_index` (`tenant_code`, `role`, `uri`) USING BTREE
-) ENGINE = InnoDB
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci
-  ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of authorization
--- ----------------------------
-INSERT INTO `authorization`
-VALUES (1, '000000', 'admin', '/api/admin/**');
-
--- ----------------------------
 -- Table structure for tenant
 -- ----------------------------
 DROP TABLE IF EXISTS `tenant`;
@@ -58,7 +35,7 @@ CREATE TABLE `user`
     `id`          bigint                                                        NOT NULL AUTO_INCREMENT,
     `tenant_code` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT '租户编号',
     `username`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名',
-    `phone`       varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '手机号',
+    `phone`       varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '手机号, 不同租户下手机号可以重复',
     `password`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '密码',
     `avatar`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '头像',
     `roles`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '角色 逗号分隔',
@@ -68,7 +45,7 @@ CREATE TABLE `user`
     `delete_time` datetime(0)                                                   NULL     DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `username_index` (`username`) USING BTREE,
-    UNIQUE INDEX `phone_index` (`phone`) USING BTREE
+    UNIQUE INDEX `phone_index` (`phone`, `tenant_code`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 4
   CHARACTER SET = utf8mb4
@@ -79,6 +56,9 @@ CREATE TABLE `user`
 -- Records of user
 -- ----------------------------
 INSERT INTO `user`
-VALUES (1, '000000', 'test1', '12345678900', md5('123456'), '', 'admin', 0, now(), NULL, NULL);
+VALUES (1, '000000', 'test1', '17705927850', md5('123456'), '', 'admin', 0, now(), NULL, NULL);
+
+INSERT INTO `user`
+VALUES (2, '000000', 'test2', '17705927851', md5('123456'), '', 'user', 0, now(), NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -2,14 +2,11 @@ package com.bootvue.gateway.filter;
 
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Keys;
+import com.bootvue.core.entity.User;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
+import com.bootvue.core.service.UserMapperService;
 import com.bootvue.core.util.JwtUtil;
-import com.bootvue.gateway.util.XssStringJsonSerializer;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,15 +28,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthFilter implements GlobalFilter, Ordered {
     private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    static {
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.registerModule(new SimpleModule("XssStringJsonSerializer").addSerializer(new XssStringJsonSerializer()));
-    }
 
     private final AppConfig appConfig;
+    private final UserMapperService userMapperService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -77,15 +68,25 @@ public class AuthFilter implements GlobalFilter, Ordered {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 
-        // todo uri 权限控制
+        // 数据库再次校验用户信息
+        User user = userMapperService.findByIdAndDeleteTimeIsNull(claims.get("user_id", Long.class));
+
+        if (ObjectUtils.isEmpty(user)) {
+            throw new AppException(RCode.UNAUTHORIZED_ERROR);
+        }
 
         // request header添加用户信息 & Xss 过滤
         String method = request.getMethodValue();
         HttpHeaders headers = new HttpHeaders();
         headers.putAll(request.getHeaders());
 
-        // todo request header添加上用户信息
-        headers.add("xxxx", "李四");
+        // request header添加上用户信息  中文需要uriencode
+        headers.add("id", String.valueOf(user.getId()));
+        headers.add("username", user.getUsername());
+        headers.add("roles", user.getRoles());
+        headers.add("phone", user.getPhone());
+        headers.add("avatar", user.getAvatar());
+        headers.add("tenant_code", user.getTenantCode());
 
         ServerHttpRequest newRequest = request.mutate().build();
         newRequest = new ServerHttpRequestDecorator(newRequest) {

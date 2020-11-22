@@ -19,7 +19,5 @@ public class Token implements Serializable {
     private Long userId;
     private String tenantCode;
     private String username;
-    private String phone;
-    private String roles;
     private String type; //access_token | refresh_token
 }
