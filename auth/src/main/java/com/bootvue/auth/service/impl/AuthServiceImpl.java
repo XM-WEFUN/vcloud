@@ -65,6 +65,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         Claims claims = JwtUtil.decode(credentials.getRefreshToken());
+        String type = claims.get("type", String.class);
+        if (StringUtils.isEmpty(type) || !AppConst.REFRESH_TOKEN.equalsIgnoreCase(type)) {
+            throw new AppException(RCode.PARAM_ERROR.getCode(), "refresh_token无效");
+        }
+
         // 用户信息
         User user = userMapperService.findByIdAndDeleteTimeIsNull(claims.get("user_id", Long.class));
 
@@ -75,6 +80,7 @@ public class AuthServiceImpl implements AuthService {
         Token accessToken = new Token();
         BeanUtils.copyProperties(user, accessToken);
         accessToken.setUserId(user.getId());
+        accessToken.setType(AppConst.ACCESS_TOKEN);
 
         String accessTokenStr = JwtUtil.encode(LocalDateTime.now().plusSeconds(7200L), BeanUtil.beanToMap(accessToken, true, true));
 

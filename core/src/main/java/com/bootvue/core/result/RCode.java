@@ -10,6 +10,8 @@ public enum RCode {
     PARAM_ERROR(400, "Bad Request"),
     UNAUTHORIZED_ERROR(401, "Unauthorized"),
     ACCESS_DENY(403, "Forbidden"),
+    NOT_FOUND(404, "Not Found"),
+    GATEWAY_ERROR(503, "gateway error"),
     DEFAULT(600, "系统异常"),
     ;
 

@@ -3,7 +3,15 @@ spring:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
     property-naming-strategy: SNAKE_CASE
-    default-property-inclusion: non_empty
+    default-property-inclusion: NON_EMPTY
 feign:
   sentinel:
     enabled: true
+  httpclient:
+    enabled: true
+    max-connections: 200
+    max-connections-per-route: 50
+  client:
+    config:
+      default:
+        loggerLevel: NONE

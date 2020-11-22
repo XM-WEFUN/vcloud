@@ -1,8 +1,9 @@
 package com.bootvue.web.config.http;
 
+import com.alibaba.cloud.sentinel.annotation.SentinelRestTemplate;
+import com.bootvue.web.sentinel.SentinelHandler;
 import okhttp3.OkHttpClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
@@ -13,7 +14,7 @@ import java.time.Duration;
 @Configuration
 public class RestTemplateConfig {
 
-    @Bean
+    @SentinelRestTemplate(blockHandlerClass = SentinelHandler.class, fallbackClass = SentinelHandler.class)
     @LoadBalanced
     public RestTemplate restTemplate() {
         //需要其它额外的功能可以再这里配置

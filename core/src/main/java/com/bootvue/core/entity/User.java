@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 @TableName(value = "`user`")
 public class User implements Serializable {
     private static final long serialVersionUID = 6626060686389782519L;
-
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
@@ -35,7 +34,7 @@ public class User implements Serializable {
     private String username;
 
     /**
-     * 手机号
+     * 手机号, 不同租户下手机号可以重复
      */
     @TableField(value = "phone")
     private String phone;

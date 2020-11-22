@@ -56,9 +56,9 @@ CREATE TABLE `user`
 -- Records of user
 -- ----------------------------
 INSERT INTO `user`
-VALUES (1, '000000', 'test1', '17705927850', md5('123456'), '', 'admin', 0, now(), NULL, NULL);
+VALUES (1, '000000', 'test1', '17705920000', md5('123456'), '', 'admin', 0, now(), NULL, NULL);
 
 INSERT INTO `user`
-VALUES (2, '000000', 'test2', '17705927851', md5('123456'), '', 'user', 0, now(), NULL, NULL);
+VALUES (2, '000000', 'test2', '17705920001', md5('123456'), '', 'user', 0, now(), NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

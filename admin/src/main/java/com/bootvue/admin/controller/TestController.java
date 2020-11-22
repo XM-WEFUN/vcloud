@@ -1,4 +1,4 @@
-package com.bootvue.api.controller;
+package com.bootvue.admin.controller;
 
 import com.bootvue.core.constant.Roles;
 import com.bootvue.web.annotation.PreAuth;
@@ -19,12 +19,12 @@ public class TestController {
 
     @PostMapping("/test")
     public Demo test(@RequestBody Demo demo, HttpServletRequest request) {
-        log.info("{}  {}", request.getHeader("xxxx"), demo);
+        log.info("{}  {}", request.getHeader("username"), demo);
         return new Demo(null, LocalDateTime.now());
     }
 
     @PostMapping("/upload")
     public void upload(@RequestParam MultipartFile file, HttpServletRequest request) {
-        log.info("文件上传: {}  {} {}", file.getContentType(), file.getOriginalFilename(), request.getHeader("xxxx"));
+        log.info("文件上传: {}  {} {}", file.getContentType(), file.getOriginalFilename(), request.getHeader("username"));
     }
 }

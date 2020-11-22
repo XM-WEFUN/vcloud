@@ -1,4 +1,4 @@
-package com.bootvue.api.controller;
+package com.bootvue.admin.controller;
 
 import lombok.*;
 

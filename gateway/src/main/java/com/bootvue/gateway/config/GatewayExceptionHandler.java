@@ -1,5 +1,6 @@
 package com.bootvue.gateway.config;
 
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * gateway网关异常拦截处理
+ */
 @Slf4j
 public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
     private Map<String, Object> response = new HashMap<>();
@@ -40,12 +44,15 @@ public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
             AppException exception = (AppException) error;
             response.put("code", exception.getCode());
             response.put("msg", exception.getMsg());
-            log.error("gateway拦截到异常: {} , path: {}", exception.getMsg(), request.path());
         } else if (error instanceof ResponseStatusException) {
             ResponseStatusException ex = (ResponseStatusException) error;
-            response.put("code", 404);
+            response.put("code", RCode.NOT_FOUND.getCode());
             response.put("msg", "Service Not Found");
-            log.error("gateway拦截到异常: {} , path: {}", ex.getStatus(), request.path());
+        } else if (BlockException.isBlockException(error)) {
+            BlockException exception = (BlockException) error;
+            // sentinel 拦截
+            response.put("code", RCode.GATEWAY_ERROR.getCode());
+            response.put("msg", "当前请求受限");
         } else {
             response.put("code", RCode.DEFAULT.getCode());
             response.put("msg", RCode.DEFAULT.getMsg());

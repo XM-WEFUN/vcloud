@@ -18,6 +18,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -42,7 +45,8 @@ public class AuthAspect {
             preAuth = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), PreAuth.class);
         }
 
-        if (!ObjectUtils.isEmpty(preAuth) && !StringUtils.isEmpty(preAuth.value()) && !preAuth.value().equals(roles)) {
+        if (!ObjectUtils.isEmpty(preAuth) && !StringUtils.isEmpty(preAuth.value())
+                && !hasAuthorization(roles, preAuth.value())) {
             log.error("用户: {} id: {} , roles: {}, 请求资源: {} -- {}  权限不足",
                     request.getHeader("username"),
                     request.getHeader("user_id"),
@@ -53,6 +57,33 @@ public class AuthAspect {
         }
 
         return point.proceed();
+    }
+
+    /**
+     * 检查用户是否有需要的权限
+     *
+     * @param roles  用户权限
+     * @param values 需要的权限
+     * @return boolean
+     */
+    private boolean hasAuthorization(String roles, String values) {
+        boolean flag = false;
+        if (!StringUtils.isEmpty(roles)) {
+            if (org.apache.commons.lang3.StringUtils.equalsIgnoreCase(roles, values)) { // 正好相等
+                flag = true;
+            } else {
+                // 逗号分割比较
+                // 目标需要的权限集合
+                Set<String> vs = Arrays.stream(values.split(",")).map(String::trim).collect(Collectors.toSet());
+
+                // 已有的权限集合
+                Set<String> rs = Arrays.stream(roles.split(",")).map(String::trim).collect(Collectors.toSet());
+                if (rs.containsAll(vs)) {
+                    flag = true;
+                }
+            }
+        }
+        return flag;
     }
 
 }

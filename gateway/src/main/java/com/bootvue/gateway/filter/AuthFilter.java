@@ -2,6 +2,7 @@ package com.bootvue.gateway.filter;
 
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Keys;
+import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.entity.User;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
@@ -58,13 +59,14 @@ public class AuthFilter implements GlobalFilter, Ordered {
             }
         }
 
-        // token校验
+        // access_token校验
 
         ServerHttpResponse resp = exchange.getResponse();
         String token = exchange.getRequest().getHeaders().getFirst("token");
         Claims claims = null;
 
-        if (StringUtils.isEmpty(token) || !JwtUtil.isVerify(token) || ObjectUtils.isEmpty(claims = JwtUtil.decode(token))) {
+        if (StringUtils.isEmpty(token) || !JwtUtil.isVerify(token) || ObjectUtils.isEmpty(claims = JwtUtil.decode(token))
+                || !org.apache.commons.lang3.StringUtils.equalsIgnoreCase(AppConst.ACCESS_TOKEN, claims.get("type", String.class))) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 
@@ -81,7 +83,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         headers.putAll(request.getHeaders());
 
         // request header添加上用户信息  中文需要uriencode
-        headers.add("id", String.valueOf(user.getId()));
+        headers.add("user_id", String.valueOf(user.getId()));
         headers.add("username", user.getUsername());
         headers.add("roles", user.getRoles());
         headers.add("phone", user.getPhone());
