@@ -32,7 +32,7 @@ sentinel-dashboard image:  registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:la
 
 ## FAQ
 
-- 所有请求<code>Content-Type: application/json</code>  
+- 所有post请求<code>Content-Type: application/json</code>  
 
 - 文件上传的:  <code>Content-Type: multipart/form-data</code>  
 
