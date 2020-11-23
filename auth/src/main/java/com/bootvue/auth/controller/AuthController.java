@@ -7,10 +7,9 @@ import com.bootvue.auth.service.AuthService;
 import com.bootvue.auth.vo.AuthResponse;
 import com.bootvue.auth.vo.CaptchaResponse;
 import com.bootvue.auth.vo.Credentials;
+import com.bootvue.auth.vo.PhoneParam;
 import com.bootvue.core.constant.AppConst;
-import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.R;
-import com.bootvue.core.result.RCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -22,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 用户登录  注册  验证码  刷新token等
@@ -35,8 +32,6 @@ import java.util.regex.Pattern;
 public class AuthController {
 
     private static final LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100);
-    private static final Pattern phonePattern = Pattern.compile(AppConst.PHONE_REGEX);
-
 
     private final RedissonClient redissonClient;
     private final AuthService authService;
@@ -62,14 +57,11 @@ public class AuthController {
     }
 
     // 短信验证码
-    @GetMapping("/sms")
-    public void smsCode(@RequestParam("phone") String phone) {
-        Matcher matcher = phonePattern.matcher(phone);
-        if (!matcher.find()) {
-            throw new AppException(RCode.PARAM_ERROR.getCode(), "手机号错误");
-        }
+    @PostMapping("/sms")
+    public void smsCode(@RequestBody @Valid PhoneParam phoneParam, BindingResult result) {
+        R.handleErr(result);
         String code = RandomUtil.randomNumbers(6);
-        RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phone));
+        RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phoneParam.getPhone()));
         bucket.set(code, 15L, TimeUnit.MINUTES);
         log.info("短信验证码 : {}", code);
     }

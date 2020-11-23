@@ -51,6 +51,8 @@ sentinel-dashboard image:  registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:la
 
 - 轻量级权限控制<code> @PreAuth Roles </code>
 
+- 图形验证码无法生成的 系统需要安装字体库
+
 ```yaml
 # 自定义配置
 app-cloud:
