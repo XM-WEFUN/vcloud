@@ -166,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
     private AuthResponse getAuthResponse(User user) {
         AuthResponse response = new AuthResponse();
         if (ObjectUtils.isEmpty(user)) {
-            throw new AppException(RCode.PARAM_ERROR.getCode(), "用户信息错误或已被禁");
+            throw new AppException(RCode.PARAM_ERROR.getCode(), "用户信息错误");
         }
 
         // 响应token信息
