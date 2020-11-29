@@ -21,7 +21,7 @@
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="com.zaxxer.hikari.pool.HikariPool" level="debug" additivity="false">
+    <logger name="com.zaxxer.hikari.pool.HikariPool" level="info" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 </configuration>

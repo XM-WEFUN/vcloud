@@ -70,8 +70,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 
-        // 数据库再次校验用户信息
-        User user = userMapperService.findByIdAndDeleteTimeIsNull(claims.get("user_id", Long.class));
+        // 数据库再次校验用户信息 (cache)
+        User user = userMapperService.findByIdAndValid(claims.get("user_id", Long.class));
 
         if (ObjectUtils.isEmpty(user)) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);

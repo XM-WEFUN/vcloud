@@ -1,7 +1,9 @@
+plugins {
+    id "org.flywaydb.flyway" version "${FlywayPluginVersion}"
+}
 dependencies {
     api libs['mysql']
     api libs['guava']
-    api libs['Excel4J']
     api libs['mybatis']
     api libs['mybatis-plus']
     api libs['hutool']

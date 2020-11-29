@@ -58,7 +58,7 @@ public class User implements Serializable {
     private String roles;
 
     /**
-     * 0:正常 1:禁用
+     * 0:禁用 1:正常
      */
     @TableField(value = "`status`")
     private Boolean status;

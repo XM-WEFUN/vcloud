@@ -39,7 +39,7 @@ CREATE TABLE `user`
     `password`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '密码',
     `avatar`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '头像',
     `roles`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '角色 逗号分隔',
-    `status`      tinyint(1)                                                    NOT NULL DEFAULT 0 COMMENT '0:正常 1:禁用',
+    `status`      tinyint(1)                                                    NOT NULL DEFAULT 0 COMMENT '0:禁用 1:正常',
     `create_time` datetime(0)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `update_time` datetime(0)                                                   NULL     DEFAULT NULL,
     `delete_time` datetime(0)                                                   NULL     DEFAULT NULL,
@@ -56,9 +56,9 @@ CREATE TABLE `user`
 -- Records of user
 -- ----------------------------
 INSERT INTO `user`
-VALUES (1, '000000', 'test1', '17705920000', md5('123456'), '', 'admin', 0, now(), NULL, NULL);
+VALUES (1, '000000', 'test1', '17705920000', md5('123456'), '', 'admin', 1, now(), NULL, NULL);
 
 INSERT INTO `user`
-VALUES (2, '000000', 'test2', '17705920001', md5('123456'), '', 'user', 0, now(), NULL, NULL);
+VALUES (2, '000000', 'test2', '17705920001', md5('123456'), '', 'user', 1, now(), NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

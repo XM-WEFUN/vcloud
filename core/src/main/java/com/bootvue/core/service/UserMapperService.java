@@ -14,7 +14,9 @@ public class UserMapperService {
     private final UserMapper userMapper;
 
     @Cacheable(cacheNames = "cache:user", key = "#id", unless = "#result == null")
-    public User findByIdAndDeleteTimeIsNull(Long id) {
-        return userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getId, id).isNull(User::getDeleteTime));
+    public User findByIdAndValid(Long id) {
+        return userMapper.selectOne(new QueryWrapper<User>().lambda()
+                .eq(User::getId, id).eq(User::getStatus, true)
+                .isNull(User::getDeleteTime));
     }
 }
