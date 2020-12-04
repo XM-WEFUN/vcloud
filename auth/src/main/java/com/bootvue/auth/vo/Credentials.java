@@ -1,5 +1,7 @@
 package com.bootvue.auth.vo;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,24 +10,33 @@ import javax.validation.constraints.NotNull;
 
 @Setter
 @Getter
+@ApiModel(description = "登录相关凭证")
 public class Credentials {
 
+    @ApiModelProperty(notes = "租户编号,默认000000", required = true)
     @NotEmpty(message = "租户编号不能为空")
     private String tenantCode;
 
+    @ApiModelProperty(notes = "用户名")
     private String username;
 
+    @ApiModelProperty(notes = "密码")
     private String password;
 
+    @ApiModelProperty(notes = "认证类型  0:用户名密码登录  1:短信验证码登录  2:refresh_token换取新token", required = true)
     @NotNull(message = "认证类型不能为空")
     private Integer type;
 
-    private String code; // 图形验证码或短信验证码
+    @ApiModelProperty(notes = "图形验证码或短信验证码")
+    private String code;
 
-    private String key;  // 图形验证码的key
+    @ApiModelProperty(notes = "图形验证码的key")
+    private String key;
 
-    private String phone;  // 手机号
+    @ApiModelProperty(notes = "手机号")
+    private String phone;
 
+    @ApiModelProperty(notes = "refresh_token")
     private String refreshToken;
 
 }

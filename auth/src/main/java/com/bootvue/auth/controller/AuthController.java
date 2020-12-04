@@ -10,6 +10,8 @@ import com.bootvue.auth.vo.Credentials;
 import com.bootvue.auth.vo.PhoneParam;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.result.R;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 用户登录  注册  验证码  刷新token等
  */
+@Api(tags = "用户认证相关接口")
 @RestController
 @RequestMapping("/oauth")
 @Slf4j
@@ -36,14 +39,14 @@ public class AuthController {
     private final RedissonClient redissonClient;
     private final AuthService authService;
 
-    // 用户认证
+    @ApiOperation("获取token")
     @PostMapping("/token")
     public AuthResponse token(@RequestBody @Valid Credentials credentials, BindingResult result) {
         R.handleErr(result);
         return authService.authentication(credentials);
     }
 
-    // 图形验证码
+    @ApiOperation("获取图形验证码")
     @GetMapping("/captcha")
     public CaptchaResponse captcha() {
         lineCaptcha.createCode();
@@ -56,7 +59,7 @@ public class AuthController {
         return new CaptchaResponse(key, image);
     }
 
-    // 短信验证码
+    @ApiOperation("获取短信验证码")
     @PostMapping("/sms")
     public void smsCode(@RequestBody @Valid PhoneParam phoneParam, BindingResult result) {
         R.handleErr(result);
@@ -66,4 +69,9 @@ public class AuthController {
         log.info("短信验证码 : {}", code);
     }
 
+    @ApiOperation("用户注册")
+    @PostMapping("/register")
+    public void register() {
+        log.info("用户注册.....");
+    }
 }
