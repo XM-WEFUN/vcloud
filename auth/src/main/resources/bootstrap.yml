@@ -9,6 +9,7 @@ spring:
         server-addr: 192.168.100.80:8848
       config:
         server-addr: 192.168.100.80:8848
+        namespace: 0f917dda-fffd-4b58-be0f-6172819a0a89
         file-extension: yaml
         extension-configs:
           - data-id: config-${spring.profiles.active}.yaml

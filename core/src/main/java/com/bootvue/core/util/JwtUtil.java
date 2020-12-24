@@ -109,7 +109,7 @@ public class JwtUtil {
             verifier.verify(jwtToken);
             flag = true;
         } catch (JWTVerificationException e) {
-            flag = false;
+            log.error("jwt验证异常", e);
         }
 
         return flag;

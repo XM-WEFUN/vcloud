@@ -22,7 +22,9 @@
 ## docker
 
 ```bash
-sentinel-dashboard image:  registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
+# sentinel-dashboard image:  registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
+
+docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/localtime registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
 ```
 
 ## postman api
@@ -37,30 +39,34 @@ sentinel-dashboard image:  registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:la
 
 ## FAQ
 
-- 所有post请求<code>Content-Type: application/json</code>
+- 所有post请求 `Content-Type: application/json`
 
-- 文件上传的:  <code>Content-Type: multipart/form-data</code>
+- 文件上传的:  `Content-Type: multipart/form-data`
 
-- 客户端/auth/oauth/**下所有接口queryString需要携带对应的<code>appid</code> <code>secret</code>
+- nacos namespace id, JwtUtil key, appconfig appid secret需要修改
 
-- 除了skip-urls 其它接口请求头都要携带token:<code>access_token</code>
+- 客户端/auth/oauth/**下所有接口queryString需要携带对应的`appid` `secret`
+
+- 除了skip-urls 其它接口请求头都要携带token:`access_token`
 
 - access_token: 7200s refresh_token: 7d
 
-- gateway向服务请求时 header添加了<code>user_id</code> <code>username</code> <code>roles</code>
-  <code>phone</code> <code>avatar</code> <code>tenant_code</code>
+- gateway向服务请求时 header添加了`user_id` `username` `roles`  `phone` `avatar` `tenant_code`
 
-- 所有用到的cache缓存都要在config.yaml自定义配置中指定 包括 <code>ttl</code> <code>maxIdleTime</code> 如果没有配置.默认缓存不过期
+- 所有用到的cache缓存都要在config.yaml自定义配置中指定 包括 `ttl` `maxIdleTime` 如果没有配置.默认缓存不过期
 
 - nacos config.yml定义了mysql redis sentinel等等配置
 
-- 轻量级权限控制<code> @PreAuth Roles </code>
+- 轻量级权限控制`@PreAuth`
 
 - 图形验证码无法生成的 系统需要安装字体库
+
+- 数据库已有表, flyway sql要从>1的version开始 例如:V2
 
 ```yaml
 # 自定义配置
 app-cloud:
+  swagger: true
   skip-urls:
     - /auth/oauth/**
   auth-key:

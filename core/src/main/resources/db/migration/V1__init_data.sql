@@ -10,9 +10,9 @@ CREATE TABLE `tenant`
     `id`          bigint                                                       NOT NULL AUTO_INCREMENT,
     `code`        varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '租户编号',
     `name`        varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '租户名称',
-    `create_time` datetime(0)                                                  NOT NULL,
-    `update_time` datetime(0)                                                  NULL DEFAULT NULL,
-    `delete_time` datetime(0)                                                  NULL DEFAULT NULL COMMENT '删除时需要同步删除租户下的用户',
+    `create_time` datetime(3)                                                  NOT NULL DEFAULT current_timestamp(3),
+    `update_time` datetime(3)                                                  NULL     DEFAULT NULL,
+    `delete_time` datetime(3)                                                  NULL     DEFAULT NULL COMMENT '删除时需要同步删除租户下的用户',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `code_index` (`code`) USING BTREE
 ) ENGINE = InnoDB
@@ -40,9 +40,9 @@ CREATE TABLE `user`
     `avatar`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '头像',
     `roles`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '角色 逗号分隔',
     `status`      tinyint(1)                                                    NOT NULL DEFAULT 0 COMMENT '0:禁用 1:正常',
-    `create_time` datetime(0)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-    `update_time` datetime(0)                                                   NULL     DEFAULT NULL,
-    `delete_time` datetime(0)                                                   NULL     DEFAULT NULL,
+    `create_time` datetime(3)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `update_time` datetime(3)                                                   NULL     DEFAULT NULL,
+    `delete_time` datetime(3)                                                   NULL     DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `username_index` (`username`) USING BTREE,
     UNIQUE INDEX `phone_index` (`phone`, `tenant_code`) USING BTREE
