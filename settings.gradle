@@ -1,4 +1,4 @@
-rootProject.name = 'app-cloud'
+rootProject.name = 'vcloud'
 include 'gateway'
 include 'auth'
 include 'admin'
