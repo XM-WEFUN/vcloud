@@ -1,4 +1,4 @@
-# app-cloud
+# vcloud
 
 ## 依赖
 
@@ -65,7 +65,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 ```yaml
 # 自定义配置
-app-cloud:
+vcloud:
   swagger: true
   skip-urls:
     - /auth/oauth/**
