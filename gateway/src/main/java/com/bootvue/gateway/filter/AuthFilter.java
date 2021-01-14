@@ -82,7 +82,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         HttpHeaders headers = new HttpHeaders();
         headers.putAll(request.getHeaders());
 
-        // request header添加上用户信息  中文需要uriencode
+        // request header添加上用户信息  中文需要URIEncode
         headers.add("user_id", String.valueOf(user.getId()));
         headers.add("username", user.getUsername());
         headers.add("roles", user.getRoles());

@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
-@ConditionalOnProperty(value = {"app-cloud.swagger"}, havingValue = "true")
+@ConditionalOnProperty(value = {"vcloud.swagger"}, havingValue = "true")
 public class SwaggerConfig {
 
     @Bean(value = "privateApi")

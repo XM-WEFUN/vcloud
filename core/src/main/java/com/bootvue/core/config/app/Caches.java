@@ -1,12 +1,8 @@
 package com.bootvue.core.config.app;
 
-import lombok.*;
+import lombok.Data;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@Data
 public class Caches {
     private String cacheName;
     private Long ttl;

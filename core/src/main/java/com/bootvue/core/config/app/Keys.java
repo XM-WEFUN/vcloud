@@ -1,12 +1,8 @@
 package com.bootvue.core.config.app;
 
-import lombok.*;
+import lombok.Data;
 
-@Setter
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@Data
 public class Keys {
     private String appid;
     private String secret;

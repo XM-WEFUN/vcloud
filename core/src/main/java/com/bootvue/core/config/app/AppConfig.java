@@ -11,7 +11,7 @@ import java.util.Set;
 
 @RefreshScope
 @Configuration
-@ConfigurationProperties(prefix = "app-cloud")
+@ConfigurationProperties(prefix = "vcloud")
 @Getter
 @Setter
 @Slf4j
