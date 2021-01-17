@@ -21,7 +21,7 @@ public class GlobalExceptionHandle {
     @ResponseBody
     public <T> R<T> handleException(Exception e) {
         log.error("拦截到未知异常: ", e);
-        return new R<>(RCode.DEFAULT.getCode(), RCode.DEFAULT.getMsg(), null);
+        return R.error(new AppException(RCode.DEFAULT.getCode(), RCode.DEFAULT.getMsg()));
     }
 
 }

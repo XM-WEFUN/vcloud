@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,11 +16,11 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @TableName(value = "`user`")
 public class User implements Serializable {
-    private static final long serialVersionUID = 6626060686389782519L;
+    
+    private static final long serialVersionUID = 1335947452185951815L;
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
@@ -40,10 +43,22 @@ public class User implements Serializable {
     private String phone;
 
     /**
+     * 微信openid
+     */
+    @TableField(value = "openid")
+    private String openid;
+
+    /**
      * 密码
      */
     @TableField(value = "`password`")
     private String password;
+
+    /**
+     * 昵称
+     */
+    @TableField(value = "nickname")
+    private String nickname;
 
     /**
      * 头像

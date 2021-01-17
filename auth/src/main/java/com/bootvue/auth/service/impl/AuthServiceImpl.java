@@ -1,10 +1,12 @@
 package com.bootvue.auth.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bootvue.auth.service.AuthService;
 import com.bootvue.auth.vo.AuthResponse;
 import com.bootvue.auth.vo.Credentials;
+import com.bootvue.auth.vo.PhoneParam;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.entity.User;
 import com.bootvue.core.mapper.UserMapper;
@@ -51,6 +53,19 @@ public class AuthServiceImpl implements AuthService {
             default:
                 throw new AppException(RCode.PARAM_ERROR.getCode(), "未知认证类型");
         }
+    }
+
+    @Override
+    public void handleSmsCode(PhoneParam phoneParam) {
+        // 校验手机号是否存在
+        User user = userMapperService.findByPhone(phoneParam.getPhone(), phoneParam.getTenantCode());
+        if (ObjectUtils.isEmpty(user)) {
+            throw new AppException(RCode.PARAM_ERROR.getCode(), "手机号错误");
+        }
+        String code = RandomUtil.randomNumbers(6);
+        RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phoneParam.getPhone()));
+        bucket.set(code, 15L, TimeUnit.MINUTES);
+        log.info("短信验证码 : {}", code);
     }
 
     /**
@@ -116,14 +131,7 @@ public class AuthServiceImpl implements AuthService {
         // 验证通过删除code
         bucket.delete();
 
-        User user = userMapper.selectOne(new QueryWrapper<User>()
-                .lambda()
-                .eq(User::getPhone, credentials.getPhone())
-                .eq(User::getTenantCode, credentials.getTenantCode())
-                .isNull(User::getDeleteTime)
-        );
-
-        return getAuthResponse(user);
+        return getAuthResponse(userMapperService.findByPhone(credentials.getPhone(), credentials.getPhone()));
     }
 
     /**

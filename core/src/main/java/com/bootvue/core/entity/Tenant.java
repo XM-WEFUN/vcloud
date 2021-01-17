@@ -5,10 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -16,8 +14,6 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @TableName(value = "tenant")
 public class Tenant {
     @TableId(value = "id", type = IdType.AUTO)

@@ -10,9 +10,9 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-/**
- * access token 或 refresh token
- */
+/*
+  access token 或 refresh token
+*/
 @Slf4j
 public class Token implements Serializable {
     private static final long serialVersionUID = -1962424963088919992L;

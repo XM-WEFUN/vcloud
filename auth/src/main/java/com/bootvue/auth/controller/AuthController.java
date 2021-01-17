@@ -2,7 +2,6 @@ package com.bootvue.auth.controller;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
-import cn.hutool.core.util.RandomUtil;
 import com.bootvue.auth.service.AuthService;
 import com.bootvue.auth.vo.AuthResponse;
 import com.bootvue.auth.vo.CaptchaResponse;
@@ -63,10 +62,7 @@ public class AuthController {
     @PostMapping("/sms")
     public void smsCode(@RequestBody @Valid PhoneParam phoneParam, BindingResult result) {
         R.handleErr(result);
-        String code = RandomUtil.randomNumbers(6);
-        RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phoneParam.getPhone()));
-        bucket.set(code, 15L, TimeUnit.MINUTES);
-        log.info("短信验证码 : {}", code);
+        authService.handleSmsCode(phoneParam);
     }
 
     @ApiOperation("用户注册")

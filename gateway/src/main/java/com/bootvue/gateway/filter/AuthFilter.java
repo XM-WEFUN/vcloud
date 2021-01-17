@@ -3,7 +3,6 @@ package com.bootvue.gateway.filter;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Keys;
 import com.bootvue.core.constant.AppConst;
-import com.bootvue.core.entity.User;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.UserMapperService;
