@@ -20,6 +20,7 @@ public class TestController {
     @PostMapping("/test")
     public Demo test(@RequestBody Demo demo, HttpServletRequest request) {
         log.info("{}  {}", request.getHeader("username"), demo);
+   
         return new Demo(null, LocalDateTime.now());
     }
 

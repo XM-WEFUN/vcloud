@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
         // 校验手机号是否存在
         User user = userMapperService.findByPhone(phoneParam.getPhone(), phoneParam.getTenantCode());
         if (ObjectUtils.isEmpty(user)) {
-            throw new AppException(RCode.PARAM_ERROR.getCode(), "手机号错误");
+            throw new AppException(RCode.PARAM_ERROR);
         }
         String code = RandomUtil.randomNumbers(6);
         RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phoneParam.getPhone()));
@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapperService.findByIdAndValid(claims.get("user_id", Long.class));
 
         if (ObjectUtils.isEmpty(user)) {
-            throw new AppException(RCode.PARAM_ERROR.getCode(), "用户已被禁");
+            throw new AppException(RCode.PARAM_ERROR.getCode(), "账号已被禁用");
         }
         // 生成新的access_token
         Token accessToken = new Token();
@@ -131,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
         // 验证通过删除code
         bucket.delete();
 
-        return getAuthResponse(userMapperService.findByPhone(credentials.getPhone(), credentials.getPhone()));
+        return getAuthResponse(userMapperService.findByPhone(credentials.getPhone(), credentials.getTenantCode()));
     }
 
     /**

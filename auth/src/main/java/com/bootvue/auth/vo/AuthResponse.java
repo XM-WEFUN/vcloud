@@ -18,6 +18,8 @@ public class AuthResponse {
     private String tenantCode;
     @ApiModelProperty("用户名")
     private String username;
+    @ApiModelProperty("昵称")
+    private String nickname;
     @ApiModelProperty("手机号")
     private String phone;
     @ApiModelProperty("头像")

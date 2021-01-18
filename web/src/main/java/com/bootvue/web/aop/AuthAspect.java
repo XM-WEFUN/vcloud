@@ -47,7 +47,7 @@ public class AuthAspect {
 
         if (!ObjectUtils.isEmpty(preAuth) && !StringUtils.isEmpty(preAuth.value())
                 && !hasAuthorization(roles, preAuth.value())) {
-            log.error("用户: {} id: {} , roles: {}, 请求资源: {} -- {}  权限不足",
+            log.warn("用户: {} id: {} , roles: {}, 请求资源: {} -- {}  权限不足",
                     request.getHeader("username"),
                     request.getHeader("user_id"),
                     request.getHeader("roles"),

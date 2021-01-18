@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @Slf4j
 public class JwtUtil {
-    private static final String iss = "AppCloud";
+    private static final String iss = "vcloud";
     private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
     // 签名密钥

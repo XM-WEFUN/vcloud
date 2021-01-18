@@ -1,8 +1,10 @@
 package com.bootvue.gateway.filter;
 
+import cn.hutool.core.net.URLEncoder;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Keys;
 import com.bootvue.core.constant.AppConst;
+import com.bootvue.core.entity.User;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.UserMapperService;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
@@ -84,6 +88,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
         // request header添加上用户信息  中文需要URIEncode
         headers.add("user_id", String.valueOf(user.getId()));
         headers.add("username", user.getUsername());
+        headers.add("nickname", URLEncoder.createDefault().encode(user.getNickname(), StandardCharsets.UTF_8));
+        headers.add("openid", user.getOpenid());
         headers.add("roles", user.getRoles());
         headers.add("phone", user.getPhone());
         headers.add("avatar", user.getAvatar());

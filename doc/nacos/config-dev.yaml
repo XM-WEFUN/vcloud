@@ -22,6 +22,11 @@ spring:
       pool:
         min-idle: 5
         max-active: 8
+  cloud:
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: 192.168.100.80:8080
 
 logging:
   config: classpath:logback.xml

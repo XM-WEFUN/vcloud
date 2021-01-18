@@ -6,7 +6,7 @@
 
 |  Spring Cloud   | Spring Cloud Alibaba  | Spring Boot| Nacos | Sentinel| RocketMQ | Seata|
 |  ----  | ----  | ----  | ----  | ----  | ----  | ----  |
-| Hoxton.SR9  | 2.2.3.RELEASE |2.3.2.RELEASE |    1.3.3 |1.8.0 |4.4.0|1.3.0|
+| Hoxton.SR9  | 2.2.4.RELEASE |2.3.2.RELEASE |    1.4.1 |1.8.0 |4.4.0|1.3.0|
 
 ## 模块
 
@@ -27,15 +27,100 @@
 docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/localtime registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
 ```
 
-## postman api
-
-[不定期更新](https://documenter.getpostman.com/view/3480351/TVetcmKg)
-
 ## spring-fox api
 
 [认证相关 /auth/oauth](http://localhost:8080/auth/swagger-ui/index.html?urls.primaryName=publicApi)
 
 [后端接口 /admin](http://localhost:8080/admin/swagger-ui/index.html?urls.primaryName=privateApi)
+
+## 状态码
+
+```bash
+200: success
+400: Bad Request(包含各种参数错误)
+401: Unauthorized(token无效或refresh token无效)
+403: Forbidden没有权限
+404: 请求的微服务未找到(nacos服务注册好慢)
+503: gateway网关异常(sentinel拦截等等)
+
+600: 系统异常 其它杂七杂八异常......
+```
+
+## 认证
+
+`type` : 0: 用户名密码登录 1: 短信登录 2: 换取新的access_token
+
+- 用户名密码登录
+
+  ```json
+  {
+    "tenant_code": "000000",
+    "username": "test",
+    "password": "123456",
+    "key": "HQQks32jqgvY",
+    "code": "218176",
+    "type": 0
+  }
+  ```
+- 短信登录
+
+  ```json
+  {
+    "tenant_code": "000000",
+    "code": "218176",
+    "phone": "17705920001",
+    "type": 1
+  }
+  ```
+
+- 换取新的access_token
+
+  ```json
+  {
+    "type": 2,
+    "refresh_token": "xxxxxx"
+  }
+  ```
+
+- 认证接口响应数据
+
+  ```json
+  {
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "user_id": 1,
+        "tenant_code": "000000",
+        "username": "admin",
+        "nickname": "",
+        "phone": "17705920000",
+        "avatar": "",
+        "roles": "admin",
+        "access_token": "xxoo",
+        "refresh_token": "ooxx",
+        "expires": 7200
+    }
+  }
+  ```
+
+- token结构
+
+  `access_token`: `7200s` `refresh_token`: `7d`
+
+  ```json
+  {
+  "user_id": 1,
+  "tenant_code": "000000",
+  "username": "admin",
+  "type": "access_token",
+  "jti": "xxxxx",
+  "iat": 1610961974,
+  "sub": "vcloud",
+  "exp": 1610969174
+
+}
+
+  ```
 
 ## FAQ
 
@@ -51,7 +136,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - access_token: 7200s refresh_token: 7d
 
-- gateway向服务请求时 header添加了`user_id` `username` `roles`  `phone` `avatar` `tenant_code`
+- gateway向服务请求时 header添加了`user_id` `username` `nickname` `openid` `roles`  `phone` `avatar` `tenant_code`
 
 - 所有用到的cache缓存都要在config.yaml自定义配置中指定 包括 `ttl` `maxIdleTime` 如果没有配置.默认缓存不过期
 
@@ -78,17 +163,4 @@ vcloud:
     - cache-name: xxx  # 实际存储为cache:xxx
       ttl: 1800000      #  毫秒
       max-idle-time: 1200000  #毫秒
-```
-
-# 状态码
-
-```bash
-200: success
-400: Bad Request(包含各种参数错误)
-401: Unauthorized(token无效或refresh token无效)
-403: Forbidden没有权限
-404: 请求的微服务未找到(nacos服务注册好慢)
-503: gateway网关异常(sentinel拦截等等)
-
-600: 系统异常 其它杂七杂八异常......
 ```
