@@ -74,7 +74,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
 
         // 数据库再次校验用户信息 (cache)
-        User user = userMapperService.findByIdAndValid(claims.get("user_id", Long.class));
+        User user = userMapperService.findById(claims.get("user_id", Long.class));
 
         if (ObjectUtils.isEmpty(user)) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);

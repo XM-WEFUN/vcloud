@@ -86,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 用户信息
-        User user = userMapperService.findByIdAndValid(claims.get("user_id", Long.class));
+        User user = userMapperService.findById(claims.get("user_id", Long.class));
 
         if (ObjectUtils.isEmpty(user)) {
             throw new AppException(RCode.PARAM_ERROR.getCode(), "账号已被禁用");
