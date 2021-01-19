@@ -1,5 +1,4 @@
 /*
- Source Server         : vmware
  Source Server Type    : MySQL
  Source Server Version : 80022
  Source Host           : 192.168.100.80:3306
