@@ -117,9 +117,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
   "iat": 1610961974,
   "sub": "vcloud",
   "exp": 1610969174
-
-}
-
+  }
   ```
 
 ## FAQ
