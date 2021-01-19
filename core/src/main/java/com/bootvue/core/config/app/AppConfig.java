@@ -18,7 +18,6 @@ import java.util.Set;
 public class AppConfig {
 
     private Boolean swagger;  // 是否允许生成swagger文档
-    private String jwtKey;  // 生成jwt token用的密钥
     private Set<String> skipUrls; //  白名单 放行uri
     private Set<Keys> authKey;   // 客户端认证凭证
     private Set<Caches> cache;  // spring cache
