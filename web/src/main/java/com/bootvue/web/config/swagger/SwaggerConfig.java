@@ -45,7 +45,7 @@ public class SwaggerConfig {
                                 .required(true)
                                 .build()))
                 .apiInfo(new ApiInfoBuilder()
-                        .title("App Cloud 接口文档")
+                        .title("VCloud 接口文档")
                         .version("1.0.0")
                         .build())
                 ;
@@ -73,7 +73,7 @@ public class SwaggerConfig {
                                 .required(true)
                                 .build()))
                 .apiInfo(new ApiInfoBuilder()
-                        .title("App Cloud 接口文档")
+                        .title("VCloud 接口文档")
                         .version("1.0.0")
                         .build())
                 ;
