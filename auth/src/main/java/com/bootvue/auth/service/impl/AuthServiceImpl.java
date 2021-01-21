@@ -191,7 +191,7 @@ public class AuthServiceImpl implements AuthService {
         response.setUserId(user.getId());
 
         String accessTokenStr = JwtUtil.encode(LocalDateTime.now().plusSeconds(7200L), BeanUtil.beanToMap(accessToken, true, true));
-        String refreshTokenStr = JwtUtil.encode(LocalDateTime.now().plusDays(7), BeanUtil.beanToMap(refreshToken, true, true));
+        String refreshTokenStr = JwtUtil.encode(LocalDateTime.now().plusDays(2L), BeanUtil.beanToMap(refreshToken, true, true));
 
         response.setAccessToken(accessTokenStr);
         response.setRefreshToken(refreshTokenStr);
@@ -201,7 +201,7 @@ public class AuthServiceImpl implements AuthService {
         RSetCache<String> aSetCache = redissonClient.getSetCache(String.format(AppConst.ACCESS_TOKEN_KEY, user.getId()));
         RSetCache<String> rSetCache = redissonClient.getSetCache(String.format(AppConst.REFRESH_TOKEN_KEY, user.getId()));
         aSetCache.add(accessTokenStr, 7200L, TimeUnit.SECONDS);
-        rSetCache.add(accessTokenStr, 7L, TimeUnit.DAYS);
+        rSetCache.add(accessTokenStr, 2L, TimeUnit.DAYS);
 
         return response;
     }

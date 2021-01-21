@@ -105,7 +105,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - token结构
 
-  `access_token`: `7200s` `refresh_token`: `7d`
+  `access_token`: `7200s` `refresh_token`: `2d`
 
   ```json
   {
@@ -132,7 +132,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - 除了skip-urls 其它接口请求头都要携带token:`access_token`
 
-- access_token: 7200s refresh_token: 7d
+- access_token: 7200s refresh_token: 2d
 
 - gateway向服务请求时 header添加了`user_id` `username` `nickname` `openid` `roles`  `phone` `avatar` `tenant_code`
 
