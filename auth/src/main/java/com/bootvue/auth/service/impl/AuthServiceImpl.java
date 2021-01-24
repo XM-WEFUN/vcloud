@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.redisson.api.RBucket;
-import org.redisson.api.RSetCache;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,9 +104,6 @@ public class AuthServiceImpl implements AuthService {
         response.setRefreshToken(credentials.getRefreshToken());
         response.setExpires(7200L);
         response.setAccessToken(accessTokenStr);
-
-        RSetCache<Object> aSetCache = redissonClient.getSetCache(String.format(AppConst.ACCESS_TOKEN_KEY, user.getId()));
-        aSetCache.add(accessTokenStr, 7200L, TimeUnit.SECONDS);
 
         return response;
     }
@@ -196,12 +192,6 @@ public class AuthServiceImpl implements AuthService {
         response.setAccessToken(accessTokenStr);
         response.setRefreshToken(refreshTokenStr);
         response.setExpires(7200L);
-
-        // redis 保存token信息 (可能用不到  看实时控制要求高不高)
-        RSetCache<String> aSetCache = redissonClient.getSetCache(String.format(AppConst.ACCESS_TOKEN_KEY, user.getId()));
-        RSetCache<String> rSetCache = redissonClient.getSetCache(String.format(AppConst.REFRESH_TOKEN_KEY, user.getId()));
-        aSetCache.add(accessTokenStr, 7200L, TimeUnit.SECONDS);
-        rSetCache.add(accessTokenStr, 2L, TimeUnit.DAYS);
 
         return response;
     }
