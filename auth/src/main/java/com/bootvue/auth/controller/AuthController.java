@@ -70,4 +70,5 @@ public class AuthController {
     public void register() {
         log.info("用户注册.....");
     }
+
 }

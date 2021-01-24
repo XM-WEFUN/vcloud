@@ -48,7 +48,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 ## 认证
 
-`type` : 0: 用户名密码登录 1: 短信登录 2: 换取新的access_token
+`type` : 0: 用户名密码登录 1: 短信登录 2: 换取新的access_token与refresh_token
 
 - 用户名密码登录
 
@@ -105,7 +105,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - token结构
 
-  `access_token`: `7200s` `refresh_token`: `2d`
+  `access_token`: `7200s` `refresh_token`: `20d`
 
   ```json
   {
@@ -134,7 +134,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - access_token: `7200s`
 
-- refresh_token(小程序 app不需要): `2d`
+- refresh_token: `20d` 每次与access_token同步刷新
 
 - gateway向服务请求时 header添加了`user_id` `username` `nickname` `openid` `roles`  `phone` `avatar` `tenant_code`
 

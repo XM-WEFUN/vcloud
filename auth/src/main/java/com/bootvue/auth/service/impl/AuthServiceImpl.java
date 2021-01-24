@@ -28,6 +28,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -69,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * 换取新的access_token
+     * refresh_token也一并更新
      *
      * @param credentials refresh_token等
      * @return AuthResponse
@@ -87,25 +89,7 @@ public class AuthServiceImpl implements AuthService {
         // 用户信息
         User user = userMapperService.findById(claims.get("user_id", Long.class));
 
-        if (ObjectUtils.isEmpty(user)) {
-            throw new AppException(RCode.PARAM_ERROR.getCode(), "账号已被禁用");
-        }
-        // 生成新的access_token
-        Token accessToken = new Token();
-        BeanUtils.copyProperties(user, accessToken);
-        accessToken.setUserId(user.getId());
-        accessToken.setType(AppConst.ACCESS_TOKEN);
-
-        String accessTokenStr = JwtUtil.encode(LocalDateTime.now().plusSeconds(7200L), BeanUtil.beanToMap(accessToken, true, true));
-
-        AuthResponse response = new AuthResponse();
-        BeanUtils.copyProperties(user, response);
-        response.setUserId(user.getId());
-        response.setRefreshToken(credentials.getRefreshToken());
-        response.setExpires(7200L);
-        response.setAccessToken(accessTokenStr);
-
-        return response;
+        return getAuthResponse(user);
     }
 
     /**
@@ -164,7 +148,7 @@ public class AuthServiceImpl implements AuthService {
     /**
      * 用户信息&token
      *
-     * @param user user数据
+     * @param user user对象
      * @return AuthResponse
      */
     private AuthResponse getAuthResponse(User user) {
@@ -186,12 +170,17 @@ public class AuthServiceImpl implements AuthService {
         BeanUtils.copyProperties(user, response);
         response.setUserId(user.getId());
 
-        String accessTokenStr = JwtUtil.encode(LocalDateTime.now().plusSeconds(7200L), BeanUtil.beanToMap(accessToken, true, true));
-        String refreshTokenStr = JwtUtil.encode(LocalDateTime.now().plusDays(2L), BeanUtil.beanToMap(refreshToken, true, true));
+        //  access_token 7200s
+        LocalDateTime accessTokenExpire = LocalDateTime.now().plusSeconds(7200L);
+        // refresh_token 20d
+        LocalDateTime refreshTokenExpire = LocalDateTime.now().plusDays(20L);
+
+        String accessTokenStr = JwtUtil.encode(accessTokenExpire, BeanUtil.beanToMap(accessToken, true, true));
+        String refreshTokenStr = JwtUtil.encode(refreshTokenExpire, BeanUtil.beanToMap(refreshToken, true, true));
 
         response.setAccessToken(accessTokenStr);
         response.setRefreshToken(refreshTokenStr);
-        response.setExpires(7200L);
+        response.setExpires(accessTokenExpire.atZone(ZoneId.of("+8")).toEpochSecond());
 
         return response;
     }

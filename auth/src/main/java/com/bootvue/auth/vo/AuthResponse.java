@@ -28,8 +28,8 @@ public class AuthResponse {
     private String roles;
     @ApiModelProperty("access_token")
     private String accessToken;
-    @ApiModelProperty("refresh_token 有效时间7d")
+    @ApiModelProperty("refresh_token 有效时间20d")
     private String refreshToken;
-    @ApiModelProperty("access_token过期时间  7200s")
+    @ApiModelProperty("access_token过期时间 7200s")
     private Long expires;
 }

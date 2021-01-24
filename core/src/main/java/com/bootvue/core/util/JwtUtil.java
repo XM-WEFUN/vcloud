@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Verification;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -93,8 +94,21 @@ public class JwtUtil {
      * @param jwtToken 被校验的 jwt Token
      */
     public static boolean isVerify(String jwtToken) {
-        Algorithm algorithm = null;
         boolean flag = false;
+        JWTVerifier verifier = verification().build();
+
+        try {
+            verifier.verify(jwtToken);
+            flag = true;
+        } catch (JWTVerificationException e) {
+            log.error("jwt过期或其它异常: {}", jwtToken);
+        }
+
+        return flag;
+    }
+
+    private static Verification verification() {
+        Algorithm algorithm = null;
 
         switch (signatureAlgorithm) {
             case HS256:
@@ -104,15 +118,7 @@ public class JwtUtil {
                 throw new RuntimeException("不支持该算法");
         }
 
-        JWTVerifier verifier = JWT.require(algorithm).build();
-        try {
-            verifier.verify(jwtToken);
-            flag = true;
-        } catch (JWTVerificationException e) {
-            log.error("jwt验证异常", e);
-        }
-
-        return flag;
+        return JWT.require(algorithm);
     }
 
 }
