@@ -80,8 +80,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 
-        // request header添加用户信息 & Xss 过滤
-        String method = request.getMethodValue();
+        // request header添加用户信息
         HttpHeaders headers = new HttpHeaders();
         headers.putAll(request.getHeaders());
 
