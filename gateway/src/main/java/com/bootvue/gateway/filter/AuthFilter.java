@@ -68,7 +68,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         String token = exchange.getRequest().getHeaders().getFirst("token");
         Claims claims = null;
 
-        if (StringUtils.isEmpty(token) || !JwtUtil.isVerify(token) || ObjectUtils.isEmpty(claims = JwtUtil.decode(token))
+        if (!StringUtils.hasText(token) || !JwtUtil.isVerify(token) || ObjectUtils.isEmpty(claims = JwtUtil.decode(token))
                 || !org.apache.commons.lang3.StringUtils.equalsIgnoreCase(AppConst.ACCESS_TOKEN, claims.get("type", String.class))) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }

@@ -82,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
 
         Claims claims = JwtUtil.decode(credentials.getRefreshToken());
         String type = claims.get("type", String.class);
-        if (StringUtils.isEmpty(type) || !AppConst.REFRESH_TOKEN.equalsIgnoreCase(type)) {
+        if (!StringUtils.hasText(type) || !AppConst.REFRESH_TOKEN.equalsIgnoreCase(type)) {
             throw new AppException(RCode.PARAM_ERROR.getCode(), "refresh_token无效");
         }
 
@@ -100,12 +100,12 @@ public class AuthServiceImpl implements AuthService {
      */
     private AuthResponse handleSmsLogin(Credentials credentials) {
         // 验证手机验证码 与 手机号
-        if (StringUtils.isEmpty(credentials.getCode()) || StringUtils.isEmpty(credentials.getTenantCode())) {
+        if (!StringUtils.hasText(credentials.getCode()) || !StringUtils.hasText(credentials.getTenantCode())) {
             throw new AppException(RCode.PARAM_ERROR);
         }
         RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, credentials.getPhone()));
         String code = bucket.get();
-        if (StringUtils.isEmpty(code) || !credentials.getCode().equals(code)) {
+        if (!StringUtils.hasText(code) || !credentials.getCode().equals(code)) {
             throw new AppException(RCode.PARAM_ERROR.getCode(), "验证码错误");
         }
         // 验证通过删除code
@@ -122,15 +122,15 @@ public class AuthServiceImpl implements AuthService {
      */
     private AuthResponse handleCommonLogin(Credentials credentials) {
 
-        if (StringUtils.isEmpty(credentials.getKey()) || StringUtils.isEmpty(credentials.getUsername()) ||
-                StringUtils.isEmpty(credentials.getPassword()) || StringUtils.isEmpty(credentials.getCode())) {
+        if (!StringUtils.hasText(credentials.getKey()) || !StringUtils.hasText(credentials.getUsername()) ||
+                !StringUtils.hasText(credentials.getPassword()) || !StringUtils.hasText(credentials.getCode())) {
             throw new AppException(RCode.PARAM_ERROR);
         }
 
         // 校验验证码
         RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.CAPTCHA_KEY, credentials.getKey()));
         String storedCode = bucket.getAndDelete();
-        if (StringUtils.isEmpty(storedCode) || !credentials.getCode().equalsIgnoreCase(storedCode)) {
+        if (!StringUtils.hasText(storedCode) || !credentials.getCode().equalsIgnoreCase(storedCode)) {
             throw new AppException(RCode.PARAM_ERROR.getCode(), "验证码无效");
         }
 

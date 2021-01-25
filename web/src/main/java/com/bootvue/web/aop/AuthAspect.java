@@ -45,7 +45,7 @@ public class AuthAspect {
             preAuth = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), PreAuth.class);
         }
 
-        if (!ObjectUtils.isEmpty(preAuth) && !StringUtils.isEmpty(preAuth.value())
+        if (!ObjectUtils.isEmpty(preAuth) && StringUtils.hasText(preAuth.value())
                 && !hasAuthorization(roles, preAuth.value())) {
             log.warn("用户: {} id: {} , roles: {}, 请求资源: {} -- {}  权限不足",
                     request.getHeader("username"),
@@ -68,7 +68,7 @@ public class AuthAspect {
      */
     private boolean hasAuthorization(String roles, String values) {
         boolean flag = false;
-        if (!StringUtils.isEmpty(roles)) {
+        if (StringUtils.hasText(roles)) {
             if (org.apache.commons.lang3.StringUtils.equalsIgnoreCase(roles, values)) { // 正好相等
                 flag = true;
             } else {
