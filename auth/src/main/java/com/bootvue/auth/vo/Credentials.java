@@ -13,8 +13,7 @@ import javax.validation.constraints.NotNull;
 @ApiModel(description = "登录相关凭证")
 public class Credentials {
 
-    @ApiModelProperty(notes = "租户编号,默认000000", required = true)
-    @NotEmpty(message = "租户编号不能为空")
+    @ApiModelProperty(notes = "租户编号,默认000000")
     private String tenantCode;
 
     @ApiModelProperty(notes = "用户名")
