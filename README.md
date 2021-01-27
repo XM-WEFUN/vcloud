@@ -169,4 +169,6 @@ vcloud:
 
 - [x] 日常升级 
 
+- [ ] 增加微信小程序openid/session_key支持
+
 - [ ] 试试go
