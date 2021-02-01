@@ -6,4 +6,9 @@ import lombok.Data;
 public class Keys {
     private String appid;
     private String secret;
+    private Integer platform;
+    private String publicKey;
+    private String privateKey;
+    private String wechatAppid;
+    private String wechatSecret;
 }

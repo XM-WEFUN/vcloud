@@ -48,7 +48,9 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 ## 认证
 
-`type` : 0: 用户名密码登录 1: 短信登录 2: 换取新的access_token与refresh_token
+`type` : 0: 换取新的access_token与refresh_token 1: 用户名密码登录 2: 短信登录 3: 微信小程序认证
+
+`platform` : 客户端平台类型 0:web 1:微信小程序 2:android 3:ios
 
 - 用户名密码登录
 
@@ -59,7 +61,8 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
     "password": "123456",
     "key": "HQQks32jqgvY",
     "code": "218176",
-    "type": 0
+    "type": 1,
+    "platform": 0
   }
   ```
 - 短信登录
@@ -69,7 +72,8 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
     "tenant_code": "000000",
     "code": "218176",
     "phone": "17705920001",
-    "type": 1
+    "type": 2,
+    "platform": 0
   }
   ```
 
@@ -77,8 +81,32 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
   ```json
   {
-    "type": 2,
+    "type": 0,
+    "platform": 0,
     "refresh_token": "xxxxxx"
+  }
+  ```
+
+- 微信小程序
+
+  ```json
+  {
+    "tenant_code": "000000",
+    "type": 3,
+    "platform": 1,
+    "wechat": {
+        "code": "xxx",
+        "nick_name": "",
+        "gender": 1,
+        "avatar_url": "",
+        "province": "",
+        "country": "",
+        "city": "",
+        "iv": "",
+        "encrypted_data": "",
+        "raw_data": "",
+        "signature": ""
+     }
   }
   ```
 
@@ -128,6 +156,12 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - nacos namespace id, JwtUtil key, appconfig appid secret需要修改
 
+- RSA公钥私钥对, 小程序appid secret要改
+
+- RSA密钥位数: `2048` 密钥格式: `PKCS8`  文本格式: `PEM/Baws64` 填充模式: `pkcs1` 证书密码: `空`
+
+- 前后端 `password` `其它敏感数据...`等信息RSA公钥加密传输
+
 - 客户端/auth/oauth/**下所有接口queryString需要携带对应的`appid` `secret`
 
 - 除了skip-urls 其它接口请求头都要携带token:`access_token`
@@ -157,8 +191,16 @@ vcloud:
   auth-key:
     - appid: sysWeb
       secret: 6842224b-7ddb-4c63-af62-1db58d77b2a5
+      platform: 1
+      public-key: "ooo"
+      private-key: "xxxx"
     - appid: app
       secret: a135ec07-6eb2-4300-840a-9977dd8c813c
+      platform: 2
+      public-key: "oooooooo"
+      private-key: "xxxx"
+      wechat-appid: "ccc"
+      wechat-secret: "dddd"
   cache:
     - cache-name: xxx  # 实际存储为cache:xxx
       ttl: 1800000      #  毫秒
@@ -167,8 +209,6 @@ vcloud:
 
 ## todo
 
-- [x] 日常升级 
-
-- [ ] 增加微信小程序openid/session_key支持
+- [x] 日常升级
 
 - [ ] 试试go

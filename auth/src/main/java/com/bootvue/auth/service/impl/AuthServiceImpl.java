@@ -6,7 +6,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bootvue.auth.service.AuthService;
 import com.bootvue.auth.vo.AuthResponse;
 import com.bootvue.auth.vo.Credentials;
-import com.bootvue.auth.vo.PhoneParam;
+import com.bootvue.auth.vo.PhoneParams;
+import com.bootvue.auth.vo.WechatParams;
+import com.bootvue.core.config.app.AppConfig;
+import com.bootvue.core.config.app.Keys;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.entity.User;
 import com.bootvue.core.mapper.UserMapper;
@@ -15,6 +18,10 @@ import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.UserMapperService;
 import com.bootvue.core.util.JwtUtil;
+import com.bootvue.core.util.RsaUtil;
+import com.bootvue.core.wechat.WechatApi;
+import com.bootvue.core.wechat.WechatUtil;
+import com.bootvue.core.wechat.vo.WechatSession;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,32 +45,84 @@ public class AuthServiceImpl implements AuthService {
     private final RedissonClient redissonClient;
     private final UserMapper userMapper;
     private final UserMapperService userMapperService;
+    private final AppConfig appConfig;
 
     @Override
     public AuthResponse authentication(Credentials credentials) {
 
-        // 0:普通用户名 密码  1:短信登录  2: refresh_token获取新token
         switch (credentials.getType()) {
-            case 0:
+            case USERNAME_PASSWORD_LOGIN:
                 return handleCommonLogin(credentials);
-            case 1:
+            case SMS_LOGIN:
                 return handleSmsLogin(credentials);
-            case 2:
+            case REFRESH_TOKEN:
                 return handleRefreshToken(credentials);
+            case WECHAT:
+                return handleWechatLogin(credentials);
             default:
-                throw new AppException(RCode.PARAM_ERROR.getCode(), "未知认证类型");
+                throw new AppException(RCode.PARAM_ERROR.getCode(), "认证方式错误");
         }
     }
 
+    /**
+     * 微信小程序认证
+     *
+     * @param credentials 小程序相关参数
+     * @return AuthResponse
+     */
+    private AuthResponse handleWechatLogin(Credentials credentials) {
+        try {
+            // 1. 获取openid与session_key
+            Keys keys = AppConfig.getKeys(appConfig, credentials.getPlatform());
+            WechatParams wechat = credentials.getWechat();
+
+            WechatSession wechatSession = WechatApi.code2Session(wechat.getCode(), keys.getWechatAppid(), keys.getWechatSecret());
+            if (ObjectUtils.isEmpty(wechatSession) || !StringUtils.hasText(wechatSession.getOpenid()) || !StringUtils.hasText(wechatSession.getSessionKey())) {
+                throw new AppException(RCode.PARAM_ERROR);
+            }
+
+            // 2. 校验数据签名
+            if (!DigestUtils.sha1Hex(wechat.getRawData() + wechatSession.getSessionKey()).equalsIgnoreCase(wechat.getSignature())) {
+                log.error("微信小程序加密参数校验失败");
+                throw new AppException(RCode.PARAM_ERROR);
+            }
+
+            // 3. 敏感数据暂不处理
+            log.info("加密数据: {}", WechatUtil.decrypt(wechatSession.getSessionKey(), wechat.getEncryptedData(), wechat.getIv()));
+
+            // 4. 用户是否存在  新增/更新用户
+            User user = userMapperService.findByOpenid(wechatSession.getOpenid(), credentials.getTenantCode());
+
+            if (ObjectUtils.isEmpty(user)) {
+                user = new User(null, credentials.getTenantCode(), "wx_" + RandomUtil.randomString(5) + wechat.getNickName().substring(0, 2).trim(),
+                        "", wechatSession.getOpenid(), RandomUtil.randomString(32), wechat.getNickName(),
+                        wechat.getAvatarUrl(), "", true, LocalDateTime.now(), null, null);
+                userMapper.insert(user);
+            } else {
+                user.setAvatar(wechat.getAvatarUrl());
+                user.setNickname(wechat.getNickName());
+                user.setUpdateTime(LocalDateTime.now());
+                userMapper.updateById(user);
+            }
+
+            return getAuthResponse(userMapperService.findByOpenid(wechatSession.getOpenid(), credentials.getTenantCode()));
+
+        } catch (Exception e) {
+            log.error("微信小程序用户认证失败: 参数: {}", credentials);
+            throw new AppException(RCode.PARAM_ERROR);
+        }
+
+    }
+
     @Override
-    public void handleSmsCode(PhoneParam phoneParam) {
+    public void handleSmsCode(PhoneParams phoneParams) {
         // 校验手机号是否存在
-        User user = userMapperService.findByPhone(phoneParam.getPhone(), phoneParam.getTenantCode());
+        User user = userMapperService.findByPhone(phoneParams.getPhone(), phoneParams.getTenantCode());
         if (ObjectUtils.isEmpty(user)) {
             throw new AppException(RCode.PARAM_ERROR);
         }
         String code = RandomUtil.randomNumbers(6);
-        RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phoneParam.getPhone()));
+        RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, phoneParams.getPhone()));
         bucket.set(code, 15L, TimeUnit.MINUTES);
         log.info("短信验证码 : {}", code);
     }
@@ -134,11 +193,20 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(RCode.PARAM_ERROR.getCode(), "验证码无效");
         }
 
+        String password = null;
+        try {
+            Keys keys = AppConfig.getKeys(appConfig, credentials.getPlatform());
+            assert keys != null;
+            password = DigestUtils.md5Hex(RsaUtil.decrypt(keys.getPrivateKey(), credentials.getPassword()));
+        } catch (Exception e) {
+            throw new AppException(RCode.PARAM_ERROR);
+        }
+
         // 验证 用户名 密码
         User user = userMapper.selectOne(new QueryWrapper<User>()
                 .lambda()
                 .eq(User::getUsername, credentials.getUsername()).eq(User::getTenantCode, credentials.getTenantCode())
-                .eq(User::getPassword, DigestUtils.md5Hex(credentials.getPassword()))
+                .eq(User::getPassword, password)
                 .isNull(User::getDeleteTime)
         );
 

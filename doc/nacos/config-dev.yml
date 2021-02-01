@@ -48,8 +48,90 @@ vcloud:
   auth-key:
     - appid: sysWeb
       secret: 6842224b-7ddb-4c63-af62-1db58d77b2a5
-    - appid: app
+      platform: 0
+      public-key: |-
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyE3OrBvgaytNQmjD1BV
+        eRjaPwOBsbEv/ETvmg7PN563aVQ7yuScz+2MdEvvs8SMyOX5jnrejTdZwHPnEINE
+        2zq0PwncU7p5Ik17kI3VpBZFPwUsdiVKWCMgqxeJIwF6Pq55chWxOhT8NP78EeLY
+        RivMQUHID1zklvXLfiDYw/27JZ3yf/WlezqJa1DHcyYA9s4JlgYYMEynpiDZR8kM
+        hBUdjNdBKR7oudYmn9OYcUYMlqR6SGY/oi40RBZHBw4Drbg/vTrO1GdOIiOHNNlc
+        N5EyRM8UtbIdSVhVJlHSHo/4Z4cs6YrvCljtNcpfpvTl7GTrKDHssX5Ug6gnJPRe
+        AwIDAQAB
+        -----END PUBLIC KEY-----
+      private-key: |-
+        -----BEGIN PRIVATE KEY-----
+        MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCbITc6sG+BrK01
+        CaMPUFV5GNo/A4GxsS/8RO+aDs83nrdpVDvK5JzP7Yx0S++zxIzI5fmOet6NN1nA
+        c+cQg0TbOrQ/CdxTunkiTXuQjdWkFkU/BSx2JUpYIyCrF4kjAXo+rnlyFbE6FPw0
+        /vwR4thGK8xBQcgPXOSW9ct+INjD/bslnfJ/9aV7OolrUMdzJgD2zgmWBhgwTKem
+        INlHyQyEFR2M10EpHui51iaf05hxRgyWpHpIZj+iLjREFkcHDgOtuD+9Os7UZ04i
+        I4c02Vw3kTJEzxS1sh1JWFUmUdIej/hnhyzpiu8KWO01yl+m9OXsZOsoMeyxflSD
+        qCck9F4DAgMBAAECggEAclHACZgMFFvUKMm5SIfC9ULDUryazv/shNOoXrebLTnh
+        n9VbWuGuTeyZHPr44lluBn6zsbQKXbb0hUbkeN7D12sjeXEi1PEOY6EF9jkPv6RJ
+        029UnJxOdTUt1ee6P/nOxHJ/PPuPZ2Yflk5yJBwvlUahd1WqwOeL7VOlaoV6OLOV
+        bakdS39oKnR56cceW4TJpXNMuMzka666EqL1lTQMVb/9RfjoY8sLdLxYOLT1zebU
+        jliubYa99+Rmaogq9bzs4TTZvVnltbgQ+q9f63792vHRv6zKbRb4QeD9iUf6zYpc
+        7YpqjqofbH4pCCDaG8Z0UzIDw2rOmAVZ7Ez951tmQQKBgQDMj4o9BlicSsjWoHJ1
+        r4uTze/HtjOkRsVN9Ex8jkdtHkt9uNPcHnEtorA3bFt9XA7SmEci7EuVhGyGAw+E
+        bGZjHv3horZ9RRd2D41QqFYDtbWgzsvMQMmOo5ZQn8BlDLGLI8HydA2sqrx6VlGK
+        dyeWwW5tFILsTtkqkfo9Fdm+DQKBgQDCI5c76tpKvN2N0wwS59fNPOZNg5UQmKU3
+        K2u/W7KM0Ip3jdekKHikvnrjV94j+Qi8yT7eeN6vYbgw3hpHo+ZUnqnFhKNCFX5e
+        kTTr/EGnKJi2eQgFclB2xNWRzsE8yJC6OwnW4sj2buPJjuRnHuv3uDkor74AlRYe
+        884sRdeYTwKBgGN2n+bQQSGtkz4Ywc7LTnjNt3tJ8o48Aw/Ga7JclApQorA8wHbV
+        Ln7cDgbE3y9zJZnshRpL/uxyeTooHtFqy9YCabvenBEJGUFEipffYgNnxSqtopZs
+        IhUDIcGOC8SWiXV4K4OyPjvowMBTXE6RZWR+JS1QveAc7qcuV5iAGWG5AoGBAKBP
+        TWG/09PlUzn6rTyrT6r9f9tALYZP1hXReB7C9JSM29pPOWMnvD+lvsoeU6P2z308
+        3PpOauv90GAh9ydzMw5rGhutJDa8kuY6F65KVlhXEIuVM8dzlvgMH6NQTIcJw2DU
+        wZI9IN9FwDk/EmIIyad7608ql8XZVjPm9Tff0GDHAoGABtzyOd8AfCgy2b9oEbcr
+        C6jvNjMAiDB91R2LflesdmishW9Bogg9e6COtsIsHFl84nq+VDzLKJC/jCbkWyvt
+        uVSvPA/tQGjCSADV4ZFo8gvbc95c+Iz1CLxe5m5TJP9M5V1cW4Of+SbK0H+3J2fw
+        pNnSKztSsag8PNrELf7fMRg=
+        -----END PRIVATE KEY-----
+    - appid: wechat
       secret: a135ec07-6eb2-4300-840a-9977dd8c813c
+      platform: 1
+      public-key: |-
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtgSoN4NOMNbgNnxfIh0M
+        R9pwOhnJbA4a1vnVPx+CMknQzK9qMcNQEaMeZUvMZh/Zo/eOcqEytAX6Sp/qFK+I
+        578ZfhktMDRGVImiqzbauOuofDQ5c1SxHKkpfZwuhzvYraLhatQOtOxo5KmcKUT8
+        tzWDCE+PS+Dzj3YX7fMiDJkcOjQDYBBQDKcx9OXQ/7TpyXXyGKoVvAkcQKvMCCM4
+        OgNuIhBElOnXM/p7keAIFJbG6VxFsdMXPKPv2TfZ0ElIGSZAvJvfsoGti5y2BMh9
+        XUP1DNxjmIxw6A0Vnf7ZDI1/ppry8n/TZh+70UmT3Yt5BBR6y3zYZ+5tjm466Vko
+        vwIDAQAB
+        -----END PUBLIC KEY-----
+      private-key: |-
+        -----BEGIN PRIVATE KEY-----
+        MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC2BKg3g04w1uA2
+        fF8iHQxH2nA6GclsDhrW+dU/H4IySdDMr2oxw1ARox5lS8xmH9mj945yoTK0BfpK
+        n+oUr4jnvxl+GS0wNEZUiaKrNtq466h8NDlzVLEcqSl9nC6HO9itouFq1A607Gjk
+        qZwpRPy3NYMIT49L4POPdhft8yIMmRw6NANgEFAMpzH05dD/tOnJdfIYqhW8CRxA
+        q8wIIzg6A24iEESU6dcz+nuR4AgUlsbpXEWx0xc8o+/ZN9nQSUgZJkC8m9+yga2L
+        nLYEyH1dQ/UM3GOYjHDoDRWd/tkMjX+mmvLyf9NmH7vRSZPdi3kEFHrLfNhn7m2O
+        bjrpWSi/AgMBAAECggEAa/DtFSawKvRyuL0e6asSSlY3Ma1zLrpanlxAYxO7cTkn
+        Mwtfza0HAb6bWvUNfQ6sUbmQZ1hDKlFVMgYNmkDSzqQcaRRjIPAPOTj6F9EK+pj+
+        LNIHs+Zothd3fH8vdJFAGRC7309sfUypk9klu6+msrtwPnB4CUaZCd29qSYDbjYp
+        BuQzxDBDzqvfxB4phXz/KypnGHx1FZVkpSmryV0kS9c8oSBo8qQ0c1+ZiQCJ2sKn
+        4wlaiTb6fB4z2C2gXvAbRtnCiGj8oaPA102yPQnm3tOczWREpwItkrYtwiJftZLS
+        RWnaM6txlZmR7FLs79oDoOD6p2RWPtpN8BdJmfmAeQKBgQDvgbD0V+RX5bi4pBw+
+        ccsY3rhh1NLUis115aE2hdMS0I/0DiY5R0/sq2ldGf+bBG5ZQ/3nKah3SaFFvi+/
+        mz63a3VmGbfU3TTGYze5rX08SHszw5/vgNI+gu+kn5k/JGuhEXQCEQ+rajxGPgY3
+        DoS/9foJw2k5wsh6NkraeNlT2wKBgQDCjX3KnHZmwNEeqPrbqilBvjIyNGrROlU9
+        CmHz+mmdBFu9vG7th61NAP0Bqpa4Mq0wjfGrHTR5ZT4XfeXhOgz+iq5jVUssVi8N
+        9fs6ujBVirniXZAX/Hca/GDXkcw4N3zhuRiVgp85enzfFBB/Kt4mphDT5gW8pa9L
+        o520QY3F7QKBgGjs0UAKbT/QpP9G7hSxN3+auv4pBYAVmvNGeTzwncrFUftiY35+
+        blZJtewSorcf1tQGhGpMBsDTofJy4mo3sd8bFaB4Ld/0VNWAy/3tMktBma/QyPVc
+        4z59kEz3mmReKUSz57WsEchPzz4amBBwrNmIAlVapXOnkLpxpJNXlCY3AoGAARt3
+        DNEpJ1qPliIWE2v7giFH/dsohHpVg9xsREw3j6o3r3PEGdv804Re7ESBSRkYvT8B
+        khy/cLVvzghsZ4TCECzP40bX/6+Z4vV0cZgfsEzy0+P+bvSD5QZssq1kwSknr80y
+        457zswsMbOSbV23yB7xIOjyD6dfzkHWk7yK0YN0CgYAMLo2RVJ5VF/CRzqYMYSsb
+        VA7ZJYy5r+h0npCGUwflUWXADuap2p/cAR4OT4uIsdmrKuZP7F8FSPm0F56YmFSf
+        4e86Yfbccd99kWg8lnDHLfac3zwcEj+JRNDgpsXMhRAGZkDlh0nmRhb8D4OxG46j
+        HsaeH/eQmq1PZ8lEcaul3A==
+        -----END PRIVATE KEY-----
+      wechat-appid: "xxxx"
+      wechat-secret: "xxxx"
   cache:
     - cache-name: user
       ttl: 1800000

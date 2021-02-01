@@ -12,7 +12,7 @@ import javax.validation.constraints.Pattern;
 @Setter
 @Getter
 @ApiModel(description = "获取短信验证码参数")
-public class PhoneParam {
+public class PhoneParams {
     @ApiModelProperty(notes = "手机号", required = true)
     @Pattern(regexp = AppConst.PHONE_REGEX, message = "手机号错误")
     private String phone;

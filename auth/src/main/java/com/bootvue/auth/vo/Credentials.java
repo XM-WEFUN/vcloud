@@ -1,15 +1,18 @@
 package com.bootvue.auth.vo;
 
+import com.bootvue.core.constant.AuthType;
+import com.bootvue.core.constant.PlatformType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Setter
 @Getter
+@ToString
 @ApiModel(description = "登录相关凭证")
 public class Credentials {
 
@@ -19,12 +22,16 @@ public class Credentials {
     @ApiModelProperty(notes = "用户名")
     private String username;
 
-    @ApiModelProperty(notes = "密码")
+    @ApiModelProperty(notes = "密码 RSA公钥加密")
     private String password;
 
-    @ApiModelProperty(notes = "认证类型  0:用户名密码登录  1:短信验证码登录  2:refresh_token换取新token", required = true)
-    @NotNull(message = "认证类型不能为空")
-    private Integer type;
+    @ApiModelProperty(notes = "认证方式 0:refresh_token换取新token 1:用户名密码登录  2:短信验证码登录 3:小程序", required = true)
+    @NotNull(message = "认证方式不能为空")
+    private AuthType type;
+
+    @ApiModelProperty(notes = "客户端平台类型 1:web 2:微信小程序 3:android 4:ios ", required = true)
+    @NotNull(message = "客户端类型不能为空")
+    private PlatformType platform;
 
     @ApiModelProperty(notes = "图形验证码或短信验证码")
     private String code;
@@ -38,4 +45,6 @@ public class Credentials {
     @ApiModelProperty(notes = "refresh_token")
     private String refreshToken;
 
+    @ApiModelProperty(notes = "微信小程序相关参数")
+    private WechatParams wechat;
 }

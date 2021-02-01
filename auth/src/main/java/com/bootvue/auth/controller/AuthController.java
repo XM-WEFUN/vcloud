@@ -6,7 +6,7 @@ import com.bootvue.auth.service.AuthService;
 import com.bootvue.auth.vo.AuthResponse;
 import com.bootvue.auth.vo.CaptchaResponse;
 import com.bootvue.auth.vo.Credentials;
-import com.bootvue.auth.vo.PhoneParam;
+import com.bootvue.auth.vo.PhoneParams;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.result.R;
 import io.swagger.annotations.Api;
@@ -60,9 +60,9 @@ public class AuthController {
 
     @ApiOperation("获取短信验证码")
     @PostMapping("/sms")
-    public void smsCode(@RequestBody @Valid PhoneParam phoneParam, BindingResult result) {
+    public void smsCode(@RequestBody @Valid PhoneParams phoneParams, BindingResult result) {
         R.handleErr(result);
-        authService.handleSmsCode(phoneParam);
+        authService.handleSmsCode(phoneParams);
     }
 
     @ApiOperation("用户注册")
