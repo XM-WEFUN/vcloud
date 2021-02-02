@@ -22,7 +22,7 @@ public class WechatApi {
      */
     public static WechatSession code2Session(String code, String appid, String secret) {
         if (!StringUtils.hasText(code) || !StringUtils.hasText(appid) || !StringUtils.hasText(secret)) {
-            throw new AppException(RCode.DEFAULT);
+            throw new AppException(RCode.PARAM_ERROR);
         }
         String res = HttpUtil.get(String.format(AppConst.WECHAT_CODE2SESSION, appid, secret, code));
         log.info("微信小程序 code2Session接口 code: {} 响应: {}", code, res);

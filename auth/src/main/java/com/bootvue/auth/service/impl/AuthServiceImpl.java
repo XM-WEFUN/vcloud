@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
                 userMapper.updateById(user);
             }
 
-            return getAuthResponse(userMapperService.findByOpenid(wechatSession.getOpenid(), credentials.getTenantCode()));
+            return getAuthResponse(user);
 
         } catch (Exception e) {
             log.error("微信小程序用户认证失败: 参数: {}", credentials);
