@@ -20,44 +20,13 @@ import java.util.Collections;
 @ConditionalOnProperty(value = {"vcloud.swagger"}, havingValue = "true")
 public class SwaggerConfig {
 
-    @Bean(value = "privateApi")
-    public Docket privateApi() {
-        return new Docket(DocumentationType.OAS_30)
-                .select()
-                .apis(
-                        RequestHandlerSelectors.basePackage("com.bootvue.auth").negate()
-                                .and(RequestHandlerSelectors.basePackage("com.bootvue.mq")).negate()
-                                .and(RequestHandlerSelectors.basePackage("com.bootvue.scheduler")).negate()
-                                .and(RequestHandlerSelectors.basePackage("com.bootvue"))
-                )
-                .paths(PathSelectors.any())
-                .build().groupName("privateApi")
-                .pathMapping("/admin")
-                .genericModelSubstitutes(ResponseEntity.class)
-                .useDefaultResponseMessages(false)
-                .enableUrlTemplating(false)
-                .globalRequestParameters(
-                        Collections.singletonList(new RequestParameterBuilder()
-                                .name("token")
-                                .description("token信息")
-                                .in(ParameterType.HEADER)
-                                .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))
-                                .required(true)
-                                .build()))
-                .apiInfo(new ApiInfoBuilder()
-                        .title("VCloud 接口文档")
-                        .version("1.0.0")
-                        .build())
-                ;
-    }
-
-    @Bean(value = "publicApi")
-    public Docket publicApi() {
+    @Bean(value = "auth")
+    public Docket auth() {
         return new Docket(DocumentationType.OAS_30)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.bootvue.auth"))
                 .paths(PathSelectors.any())
-                .build().groupName("publicApi")
+                .build().groupName("auth")
                 .pathMapping("/auth")
                 .genericModelSubstitutes(ResponseEntity.class)
                 .useDefaultResponseMessages(false)
@@ -78,5 +47,37 @@ public class SwaggerConfig {
                         .build())
                 ;
     }
+
+    @Bean(value = "admin")
+    public Docket admin() {
+        return new Docket(DocumentationType.OAS_30)
+                .select()
+                .apis(
+                        RequestHandlerSelectors.basePackage("com.bootvue.auth").negate()
+                                .and(RequestHandlerSelectors.basePackage("com.bootvue.mq")).negate()
+                                .and(RequestHandlerSelectors.basePackage("com.bootvue.scheduler")).negate()
+                                .and(RequestHandlerSelectors.basePackage("com.bootvue"))
+                )
+                .paths(PathSelectors.any())
+                .build().groupName("admin")
+                .pathMapping("/admin")
+                .genericModelSubstitutes(ResponseEntity.class)
+                .useDefaultResponseMessages(false)
+                .enableUrlTemplating(false)
+                .globalRequestParameters(
+                        Collections.singletonList(new RequestParameterBuilder()
+                                .name("token")
+                                .description("token信息")
+                                .in(ParameterType.HEADER)
+                                .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))
+                                .required(true)
+                                .build()))
+                .apiInfo(new ApiInfoBuilder()
+                        .title("VCloud 接口文档")
+                        .version("1.0.0")
+                        .build())
+                ;
+    }
+
 }
 
