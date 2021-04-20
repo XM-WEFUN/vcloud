@@ -21,7 +21,7 @@ import java.util.Collections;
 public class SwaggerConfig {
 
     @Bean(value = "auth")
-    public Docket auth() {
+    public Docket publicApi() {
         return new Docket(DocumentationType.OAS_30)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.bootvue.auth"))
@@ -52,12 +52,7 @@ public class SwaggerConfig {
     public Docket admin() {
         return new Docket(DocumentationType.OAS_30)
                 .select()
-                .apis(
-                        RequestHandlerSelectors.basePackage("com.bootvue.auth").negate()
-                                .and(RequestHandlerSelectors.basePackage("com.bootvue.mq")).negate()
-                                .and(RequestHandlerSelectors.basePackage("com.bootvue.scheduler")).negate()
-                                .and(RequestHandlerSelectors.basePackage("com.bootvue"))
-                )
+                .apis(RequestHandlerSelectors.basePackage("com.bootvue.admin"))
                 .paths(PathSelectors.any())
                 .build().groupName("admin")
                 .pathMapping("/admin")

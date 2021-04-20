@@ -6,7 +6,7 @@
 
 |  Spring Cloud   | Spring Cloud Alibaba  | Spring Boot| Nacos | Sentinel| RocketMQ | Seata|
 |  ----  | ----  | ----  | ----  | ----  | ----  | ----  |
-| Hoxton.SR9  | 2.2.4.RELEASE |2.3.2.RELEASE |    1.4.1 |1.8.0 |4.4.0|1.3.0|
+| 2020.0.2  | 2021.1 |2.4.2 |    1.4.1 |1.8.0 |4.4.0|1.3.0|
 
 ## 模块
 
@@ -29,9 +29,9 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 ## spring-fox api
 
-[认证相关 /auth/oauth](http://localhost:8080/auth/swagger-ui/index.html?urls.primaryName=publicApi)
+[认证相关 /auth/oauth](http://localhost:8080/auth/swagger-ui/index.html?urls.primaryName=auth)
 
-[后端接口 /admin](http://localhost:8080/admin/swagger-ui/index.html?urls.primaryName=privateApi)
+[后端接口 /admin](http://localhost:8080/admin/swagger-ui/index.html?urls.primaryName=admin)
 
 ## 状态码
 
@@ -210,5 +210,16 @@ vcloud:
 ## todo
 
 - [x] 日常升级
+
+- [ ] 已知bug
+
+      ```
+        spring cloud gateway : io.netty.util.ResourceLeakDetector       : LEAK: ByteBuf.release() was not called before it's garbage-collected.
+        压力测试下出现频率比较高, jvm没有崩溃, http响应无异常, 后续限制内存试一下会不会崩掉  
+        
+        已排除gateway nacos sentinel等的问题, 推测可能是gateway依赖core模块, 引入了config.yml的配置, 加载了redis相关组件导致
+        见: https://github.com/redisson/redisson/issues/3502 , 不知道是不是redis序列化/反序列化引起的
+        
+      ```
 
 - [ ] 试试go

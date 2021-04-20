@@ -9,6 +9,6 @@ spring:
         cors-configurations:
           '[/**]':
             allow-credentials: true
-            allowed-origins: "*"
+            allowed-origin-patterns: "*"
             allowed-headers: "*"
             allowed-methods: "*"

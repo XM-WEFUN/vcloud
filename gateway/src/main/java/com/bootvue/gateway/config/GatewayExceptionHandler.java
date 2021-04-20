@@ -21,7 +21,7 @@ import java.util.Map;
  */
 @Slf4j
 public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
-    private Map<String, Object> response = new HashMap<>();
+    private final Map<String, Object> response = new HashMap<>(2);
 
     /**
      * Create a new {@code DefaultErrorWebExceptionHandler} instance.
@@ -39,6 +39,7 @@ public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
     @Override
     protected Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
         Throwable error = getError(request);
+        log.error("{}", error);
         response.clear();
         if (error instanceof AppException) {
             AppException exception = (AppException) error;

@@ -1,29 +1,24 @@
 ext {
     versions = [
-            fastjson         : '1.2.75',
+            fastjson         : '1.2.76',
             commonsText      : '1.9',
             mysql            : '8.0.23',
-            xxlJob           : '2.2.0',
+            xxlJob           : '2.3.0',
             mybatis          : '2.1.4',
             mybatisPlus      : '3.4.2',
             httpmime         : '4.5.13',
-            hutool           : '5.5.7',
+            hutool           : '5.6.3',
             commonsFileupload: '1.4',
             commonsPool      : '2.9.0',
             commonsIo        : '2.8.0',
-            okhttp           : '4.9.0',
-            guava            : '30.1-jre',
+            okhttp           : '4.9.1',
+            guava            : '30.1.1-jre',
             springFox        : '3.0.0',
-            myexcel          : '3.10.0',
-            javaJwt          : '3.12.0',
+            myexcel          : '3.11.3',
+            javaJwt          : '3.15.0',
             jjwt             : '0.9.1',
             jjwtImpl         : '0.11.2',
-            flyway           : '7.5.0',
-            jaxbApi          : '2.3.1',
-            jaxbImpl         : '3.0.0',
-            jaxbCore         : '3.0.0',
-            activation       : '1.1.1',
-
+            flyway           : '7.7.3',
     ]
 
     libs = [
@@ -46,9 +41,5 @@ ext {
             'jjwt'              : "io.jsonwebtoken:jjwt:${versions.jjwt}",
             'jjwt-impl'         : "io.jsonwebtoken:jjwt-impl:${versions.jjwtImpl}",
             'flyway'            : "org.flywaydb:flyway-core:${versions.flyway}",
-            'jaxbApi'           : "javax.xml.bind:jaxb-api:${versions.jaxbApi}",
-            'jaxbImpl'          : "com.sun.xml.bind:jaxb-impl:${versions.jaxbImpl}",
-            'jaxbCore'          : "com.sun.xml.bind:jaxb-core:${versions.jaxbCore}",
-            'activation'        : "javax.activation:activation:${versions.activation}"
     ]
 }

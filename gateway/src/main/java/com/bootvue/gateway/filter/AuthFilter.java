@@ -16,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.*;
 import org.springframework.web.server.ServerWebExchange;
@@ -64,7 +61,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         // access_token校验
 
-        ServerHttpResponse resp = exchange.getResponse();
+//        ServerHttpResponse resp = exchange.getResponse();
         String token = exchange.getRequest().getHeaders().getFirst("token");
         Claims claims = null;
 
@@ -81,29 +78,21 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
 
         // request header添加用户信息
-        HttpHeaders headers = new HttpHeaders();
-        headers.putAll(request.getHeaders());
-
         // request header添加上用户信息  中文需要URIEncode
-        headers.add("user_id", String.valueOf(user.getId()));
-        headers.add("username", user.getUsername());
-        headers.add("nickname", URLEncoder.createDefault().encode(user.getNickname(), StandardCharsets.UTF_8));
-        headers.add("openid", user.getOpenid());
-        headers.add("roles", user.getRoles());
-        headers.add("phone", user.getPhone());
-        headers.add("avatar", user.getAvatar());
-        headers.add("tenant_code", user.getTenantCode());
 
-        ServerHttpRequest newRequest = request.mutate().build();
-        newRequest = new ServerHttpRequestDecorator(newRequest) {
-            @Override
-            public HttpHeaders getHeaders() {
-                return headers;
-            }
-        };
-        return chain.filter(exchange.mutate().
-                request(newRequest).
-                build());
+        ServerHttpRequest newRequest = request.mutate().headers((headers) -> {
+            headers.putAll(request.getHeaders());
+            headers.add("user_id", String.valueOf(user.getId()));
+            headers.add("username", user.getUsername());
+            headers.add("nickname", URLEncoder.createDefault().encode(user.getNickname(), StandardCharsets.UTF_8));
+            headers.add("openid", user.getOpenid());
+            headers.add("roles", user.getRoles());
+            headers.add("phone", user.getPhone());
+            headers.add("avatar", user.getAvatar());
+            headers.add("tenant_code", user.getTenantCode());
+        }).build();
+
+        return chain.filter(exchange.mutate().request(newRequest).build());
     }
 
     @Override
