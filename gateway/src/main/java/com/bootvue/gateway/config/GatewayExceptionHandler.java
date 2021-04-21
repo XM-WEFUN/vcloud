@@ -39,7 +39,6 @@ public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
     @Override
     protected Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
         Throwable error = getError(request);
-        log.error("{}", error);
         response.clear();
         if (error instanceof AppException) {
             AppException exception = (AppException) error;
