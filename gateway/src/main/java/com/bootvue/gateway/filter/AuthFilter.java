@@ -37,31 +37,29 @@ public class AuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
-        if (CollectionUtils.isEmpty(appConfig.getSkipUrls())) {
-            return chain.filter(exchange);
-        }
+        if (!CollectionUtils.isEmpty(appConfig.getSkipUrls())) {
+            for (String skipUrl : appConfig.getSkipUrls()) {
+                if (PATH_MATCHER.match(skipUrl, path)) {
+                    // /auth/oauth/**下的所有接口需要验证客户端key
+                    if (path.startsWith("/auth/oauth")) {
+                        // 检查客户端Key
+                        Keys keys = appConfig.getAuthKey().stream()
+                                .filter(it -> it.getAppid().equals(request.getQueryParams().getFirst("appid"))
+                                        && it.getSecret().equals(request.getQueryParams().getFirst("secret")))
+                                .findAny().orElse(null);
 
-        for (String skipUrl : appConfig.getSkipUrls()) {
-            if (PATH_MATCHER.match(skipUrl, path)) {
-                // /auth/oauth/**下的所有接口需要验证客户端key
-                if (path.startsWith("/auth/oauth")) {
-                    // 检查客户端Key
-                    Keys keys = appConfig.getAuthKey().stream()
-                            .filter(it -> it.getAppid().equals(request.getQueryParams().getFirst("appid"))
-                                    && it.getSecret().equals(request.getQueryParams().getFirst("secret")))
-                            .findAny().orElse(null);
-
-                    if (ObjectUtils.isEmpty(keys)) {
-                        throw new AppException(RCode.PARAM_ERROR.getCode(), "客户端参数无效");
+                        if (ObjectUtils.isEmpty(keys)) {
+                            throw new AppException(RCode.PARAM_ERROR.getCode(), "客户端参数无效");
+                        }
                     }
+                    return chain.filter(exchange);
                 }
-                return chain.filter(exchange);
             }
         }
 
         // access_token校验
 
-//        ServerHttpResponse resp = exchange.getResponse();
+        // ServerHttpResponse resp = exchange.getResponse();
         String token = exchange.getRequest().getHeaders().getFirst("token");
         Claims claims = null;
 
