@@ -13,21 +13,13 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @TableName(value = "`user`")
 public class User implements Serializable {
-
-    private static final long serialVersionUID = 1335947452185951815L;
-
+    private static final long serialVersionUID = -5027036893653430126L;
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    /**
-     * 租户编号
-     */
-    @TableField(value = "tenant_code")
-    private String tenantCode;
 
     /**
      * 用户名
@@ -36,22 +28,34 @@ public class User implements Serializable {
     private String username;
 
     /**
-     * 手机号, 不同租户下手机号可以重复
+     * 密码
+     */
+    @TableField(value = "`password`")
+    private String password;
+
+    /**
+     * 租户id
+     */
+    @TableField(value = "tenant_id")
+    private Long tenantId;
+
+    /**
+     * 角色id
+     */
+    @TableField(value = "role_id")
+    private Long roleId;
+
+    /**
+     * 手机号
      */
     @TableField(value = "phone")
     private String phone;
 
     /**
-     * 微信openid
+     * 小程序openid
      */
     @TableField(value = "openid")
     private String openid;
-
-    /**
-     * 密码
-     */
-    @TableField(value = "`password`")
-    private String password;
 
     /**
      * 昵称
@@ -66,13 +70,7 @@ public class User implements Serializable {
     private String avatar;
 
     /**
-     * 角色 逗号分隔
-     */
-    @TableField(value = "roles")
-    private String roles;
-
-    /**
-     * 0:禁用 1:正常
+     * 账号状态 0:禁用  1:正常
      */
     @TableField(value = "`status`")
     private Boolean status;
@@ -85,4 +83,5 @@ public class User implements Serializable {
 
     @TableField(value = "delete_time")
     private LocalDateTime deleteTime;
+
 }

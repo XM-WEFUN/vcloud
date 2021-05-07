@@ -29,6 +29,10 @@ public class R<T> {
         return new R<>(e.getCode(), e.getMsg(), null);
     }
 
+    public static <T> R<T> error(Integer code, String msg) {
+        return new R<>(code, msg, null);
+    }
+
     public static void handleErr(BindingResult result) {
         if (result.hasErrors()) {
             String msg = Objects.requireNonNull(result.getFieldError()).getDefaultMessage();

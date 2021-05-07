@@ -17,7 +17,7 @@ public class GlobalExceptionHandle {
         return new R<>(e.getCode(), e.getMsg(), null);
     }
 
-    @ExceptionHandler(value = {RuntimeException.class})
+    @ExceptionHandler(value = {Exception.class})
     @ResponseBody
     public <T> R<T> handleException(Exception e) {
         log.error("拦截到未知异常: ", e);

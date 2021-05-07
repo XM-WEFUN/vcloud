@@ -4,11 +4,16 @@ import cn.hutool.core.net.URLEncoder;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Keys;
 import com.bootvue.core.constant.AppConst;
+import com.bootvue.core.entity.Action;
+import com.bootvue.core.entity.RoleMenuAction;
 import com.bootvue.core.entity.User;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
+import com.bootvue.core.service.ActionMapperService;
+import com.bootvue.core.service.RoleMenuActionMapperService;
 import com.bootvue.core.service.UserMapperService;
 import com.bootvue.core.util.JwtUtil;
+import com.google.common.base.Splitter;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +28,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -32,6 +39,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
     private final AppConfig appConfig;
     private final UserMapperService userMapperService;
+    private final ActionMapperService actionMapperService;
+    private final RoleMenuActionMapperService roleMenuActionMapperService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -64,7 +73,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         Claims claims = null;
 
         if (!StringUtils.hasText(token) || !JwtUtil.isVerify(token) || ObjectUtils.isEmpty(claims = JwtUtil.decode(token))
-                || !org.apache.commons.lang3.StringUtils.equalsIgnoreCase(AppConst.ACCESS_TOKEN, claims.get("type", String.class))) {
+                || !AppConst.ACCESS_TOKEN.equalsIgnoreCase(claims.get("type", String.class))) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 
@@ -73,6 +82,15 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         if (ObjectUtils.isEmpty(user)) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
+        }
+
+        // api接口权限校验 /admin /xxx的需要权限校验
+        try {
+            handleRequestAuthorization(path, user);
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            throw new AppException(RCode.DEFAULT.getCode(), RCode.DEFAULT.getMsg());
         }
 
         // request header添加用户信息
@@ -84,10 +102,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
             headers.add("username", user.getUsername());
             headers.add("nickname", URLEncoder.createDefault().encode(user.getNickname(), StandardCharsets.UTF_8));
             headers.add("openid", user.getOpenid());
-            headers.add("roles", user.getRoles());
+            headers.add("role_id", String.valueOf(user.getRoleId()));
             headers.add("phone", user.getPhone());
             headers.add("avatar", user.getAvatar());
-            headers.add("tenant_code", user.getTenantCode());
+            headers.add("tenant_id", String.valueOf(user.getTenantId()));
         }).build();
 
         return chain.filter(exchange.mutate().request(newRequest).build());
@@ -96,5 +114,36 @@ public class AuthFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         return Integer.MIN_VALUE;
+    }
+
+    // 权限验证
+    private void handleRequestAuthorization(String path, User user) {
+        if (CollectionUtils.isEmpty(appConfig.getAuthorizationUrls())) {
+            return;
+        }
+
+        boolean flag = false;
+        for (String authorizationUrl : appConfig.getAuthorizationUrls()) {
+            if (PATH_MATCHER.match(authorizationUrl, path)) {
+                Action action = actionMapperService.getAction(path);
+                // 用户角色对应的action权限
+                List<RoleMenuAction> actions = roleMenuActionMapperService.getRoleMenuActions(user.getRoleId());
+
+                if (ObjectUtils.isEmpty(action) || CollectionUtils.isEmpty(actions)) {
+                    break;
+                }
+                List<String> ids = actions.stream().flatMap(e ->
+                        Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(e.getActionIds()))
+                        .collect(Collectors.toList());
+                if (ids.contains(action.getId())) {
+                    flag = true;
+                }
+                break;
+            }
+        }
+        if (!flag) {
+            log.warn("用户: {} id: {} 角色id: {} 访问资源: {} 没有权限 ", user.getUsername(), user.getId(), user.getRoleId(), path);
+            throw new AppException(RCode.ACCESS_DENY);
+        }
     }
 }

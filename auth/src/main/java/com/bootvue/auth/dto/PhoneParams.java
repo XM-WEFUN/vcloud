@@ -1,4 +1,4 @@
-package com.bootvue.auth.vo;
+package com.bootvue.auth.dto;
 
 import com.bootvue.core.constant.AppConst;
 import io.swagger.annotations.ApiModel;
@@ -9,8 +9,8 @@ import lombok.Setter;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
-@Setter
 @Getter
+@Setter
 @ApiModel(description = "获取短信验证码参数")
 public class PhoneParams {
     @ApiModelProperty(notes = "手机号", required = true)

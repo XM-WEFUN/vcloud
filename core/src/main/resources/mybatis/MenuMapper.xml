@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bootvue.core.mapper.MenuMapper">
+    <select id="getMenuList" resultType="com.bootvue.core.ddo.MenuDo">
+        SELECT m.*,
+               rma.action_ids
+        FROM `user` u,
+             role_menu_action rma,
+             menu m
+        WHERE u.id = #{user_id}
+          AND rma.role_id = #{role_id}
+          AND m.id = rma.menu_id
+          AND m.p_id = #{p_id}
+        ORDER BY m.sort ASC
+    </select>
+</mapper>
