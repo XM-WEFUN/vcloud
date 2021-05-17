@@ -9,7 +9,7 @@ import com.bootvue.auth.service.AuthService;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Keys;
 import com.bootvue.core.constant.AppConst;
-import com.bootvue.core.ddo.MenuDo;
+import com.bootvue.core.ddo.menu.MenuDo;
 import com.bootvue.core.entity.Action;
 import com.bootvue.core.entity.Tenant;
 import com.bootvue.core.entity.User;

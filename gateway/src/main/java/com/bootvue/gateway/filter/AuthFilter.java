@@ -1,6 +1,5 @@
 package com.bootvue.gateway.filter;
 
-import cn.hutool.core.net.URLEncoder;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Keys;
 import com.bootvue.core.constant.AppConst;
@@ -27,7 +26,6 @@ import org.springframework.util.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,19 +94,15 @@ public class AuthFilter implements GlobalFilter, Ordered {
         // request header添加用户信息
         // request header添加上用户信息  中文需要URIEncode
 
-        ServerHttpRequest newRequest = request.mutate().headers((headers) -> {
-            headers.putAll(request.getHeaders());
+        request.mutate().headers((headers) -> {
             headers.add("user_id", String.valueOf(user.getId()));
             headers.add("username", user.getUsername());
-            headers.add("nickname", URLEncoder.createDefault().encode(user.getNickname(), StandardCharsets.UTF_8));
             headers.add("openid", user.getOpenid());
             headers.add("role_id", String.valueOf(user.getRoleId()));
-            headers.add("phone", user.getPhone());
-            headers.add("avatar", user.getAvatar());
             headers.add("tenant_id", String.valueOf(user.getTenantId()));
         }).build();
 
-        return chain.filter(exchange.mutate().request(newRequest).build());
+        return chain.filter(exchange.mutate().request(request).build());
     }
 
     @Override
@@ -122,7 +116,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
             return;
         }
 
-        boolean flag = false;
+        boolean flag = true;
         for (String authorizationUrl : appConfig.getAuthorizationUrls()) {
             if (PATH_MATCHER.match(authorizationUrl, path)) {
                 Action action = actionMapperService.getAction(path);
@@ -130,13 +124,14 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 List<RoleMenuAction> actions = roleMenuActionMapperService.getRoleMenuActions(user.getRoleId());
 
                 if (ObjectUtils.isEmpty(action) || CollectionUtils.isEmpty(actions)) {
+                    flag = false;
                     break;
                 }
                 List<String> ids = actions.stream().flatMap(e ->
                         Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(e.getActionIds()))
                         .collect(Collectors.toList());
-                if (ids.contains(action.getId())) {
-                    flag = true;
+                if (!ids.contains(String.valueOf(action.getId()))) {
+                    flag = false;
                 }
                 break;
             }

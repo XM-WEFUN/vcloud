@@ -1,5 +1,8 @@
 # vcloud
 
+Sponsor [![paypal.me/bootvue](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/icon/paypal.svg)](https://www.paypal.me/bootvue)
+☕☕☕
+
 ## 依赖
 
 [版本依赖](https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E)
@@ -167,14 +170,16 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
       "icon": "HomeOutlined",
       "title": "首页",
       "default_select": true,
+      "default_open": false,
       "permissions": [
         "index:list"
       ]
     },
     {
-      "key": "system",
-      "icon": "MailOutlined",
+      "key": "setting",
+      "icon": "SettingOutlined",
       "title": "系统设置",
+      "default_select": false,
       "default_open": true,
       "permissions": [
         "list"
@@ -183,17 +188,21 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
         {
           "key": "user",
           "title": "用户管理",
+          "default_select": false,
+          "default_open": false,
           "permissions": [
-            "user:list,update,add,delete",
-            "role:list,update,add,delete"
+            "role:update,list",
+            "user:add,update,list,delete"
           ]
         },
         {
           "key": "role",
           "title": "角色管理",
+          "default_select": false,
+          "default_open": false,
           "permissions": [
-            "role:list,update,add,delete",
-            "action:list,update,add,delete"
+            "action:update,list",
+            "role:add,update,list,delete"
           ]
         }
       ]
@@ -222,7 +231,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - access_token: `7200s` refresh_token: `20d` 每次与access_token同步刷新
 
-- gateway向后端服务服务转发请求时 header添加了`user_id` `username` `nickname` `openid` `role_id`  `phone` `avatar` `tenant_id`
+- gateway向后端服务服务转发请求时 header添加了`user_id` `username` `role_id` `openid` `tenant_id`
 
 - 所有用到的cache缓存都要在config.yaml自定义配置中指定 包括 `ttl` `maxIdleTime` 如果没有配置.默认缓存不过期
 

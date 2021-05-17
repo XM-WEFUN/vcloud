@@ -1,5 +1,6 @@
 package com.bootvue.web.filter;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ public class XssFilter implements Filter {
         SimpleModule xssModule = new SimpleModule("XssStringJsonSerializer");
         xssModule.addSerializer(String.class, new XssStringJsonSerializer());
         objectMapper.registerModule(xssModule);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return objectMapper;
     }
 }

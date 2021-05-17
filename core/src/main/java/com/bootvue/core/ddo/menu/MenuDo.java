@@ -1,4 +1,4 @@
-package com.bootvue.core.ddo;
+package com.bootvue.core.ddo.menu;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,7 +1,7 @@
 package com.bootvue.core.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.bootvue.core.ddo.MenuDo;
+import com.bootvue.core.ddo.menu.MenuDo;
 import com.bootvue.core.entity.Menu;
 import org.apache.ibatis.annotations.Param;
 

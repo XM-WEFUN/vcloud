@@ -1,6 +1,9 @@
 package com.bootvue.core.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bootvue.core.ddo.user.UserDo;
 import com.bootvue.core.entity.User;
 import com.bootvue.core.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -52,4 +55,9 @@ public class UserMapperService {
     public User findByOpenid(String openid, String tenantCode) {
         return userMapper.findByOpenid(openid, tenantCode);
     }
+
+    public IPage<UserDo> listUsers(Page<User> page, Long tenantId, String username) {
+        return userMapper.listUsers(page, username, tenantId);
+    }
+
 }

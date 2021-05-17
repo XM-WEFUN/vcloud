@@ -1,6 +1,6 @@
 package com.bootvue.core.service;
 
-import com.bootvue.core.ddo.MenuDo;
+import com.bootvue.core.ddo.menu.MenuDo;
 import com.bootvue.core.mapper.MenuMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
