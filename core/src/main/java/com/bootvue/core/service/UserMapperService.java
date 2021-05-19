@@ -60,4 +60,8 @@ public class UserMapperService {
         return userMapper.listUsers(page, username, tenantId);
     }
 
+    // 管理员用户 role_id置为 0
+    public void removeUserRoleId(Long roleId, Long tenantId) {
+        userMapper.removeRoleId(roleId, tenantId);
+    }
 }

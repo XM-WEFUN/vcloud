@@ -38,19 +38,21 @@ VALUES (3, '/admin/user/list', 'user:list');
 INSERT INTO `action`
 VALUES (4, '/admin/user/update', 'user:update');
 INSERT INTO `action`
-VALUES (5, '/admin/user/delete', 'user:delete');
+VALUES (5, '/admin/user/updateStatus', 'user:update');
 INSERT INTO `action`
-VALUES (6, '/admin/role/add', 'role:add');
+VALUES (6, '/admin/user/delete', 'user:delete');
 INSERT INTO `action`
-VALUES (7, '/admin/role/list', 'role:list');
+VALUES (7, '/admin/role/add', 'role:add');
 INSERT INTO `action`
-VALUES (8, '/admin/role/update', 'role:update');
+VALUES (8, '/admin/role/list', 'role:list');
 INSERT INTO `action`
-VALUES (9, '/admin/role/delete', 'role:delete');
+VALUES (9, '/admin/role/update', 'role:update');
 INSERT INTO `action`
-VALUES (10, '/admin/action/list', 'action:list');
+VALUES (10, '/admin/role/delete', 'role:delete');
 INSERT INTO `action`
-VALUES (11, '/admin/action/update', 'action:update');
+VALUES (11, '/admin/action/list', 'action:list');
+INSERT INTO `action`
+VALUES (12, '/admin/action/update', 'action:update');
 
 -- ----------------------------
 -- Table structure for menu
@@ -133,9 +135,9 @@ VALUES (1, 1, 1, '1');
 INSERT INTO `role_menu_action`
 VALUES (2, 1, 2, '0');
 INSERT INTO `role_menu_action`
-VALUES (3, 1, 3, '2,3,4,5,7,8');
+VALUES (3, 1, 3, '2,3,4,5,8,9');
 INSERT INTO `role_menu_action`
-VALUES (4, 1, 4, '6,7,8,9,10,11');
+VALUES (4, 1, 4, '3,4,7,8,9,10,11,12');
 
 -- ----------------------------
 -- Table structure for tenant

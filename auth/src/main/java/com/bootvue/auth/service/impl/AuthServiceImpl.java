@@ -111,7 +111,7 @@ public class AuthServiceImpl implements AuthService {
             if (ObjectUtils.isEmpty(user)) {
                 Tenant tenant = tenantMapperService.findByTenantCode(credentials.getTenantCode());
                 user = new User(null, "wx_" + RandomUtil.randomString(5) + wechat.getNickName().substring(0, 2).trim(),
-                        RandomUtil.randomString(32), tenant.getId(), 0L, "", wechatSession.getOpenid(), wechat.getNickName(),
+                        RandomUtil.randomString(32), tenant.getId(), -1L, "", wechatSession.getOpenid(), wechat.getNickName(),
                         wechat.getAvatarUrl(), true, LocalDateTime.now(), null, null);
                 userMapper.insert(user);
             } else {
@@ -174,8 +174,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 用户信息
-        User user = userMapperService.findById(claims.get("user_id", Long.class));
-
+        Long userId = claims.get("user_id", Long.class);
+        User user = userMapperService.findById(userId);
+        if (ObjectUtils.isEmpty(user)) {
+            user = userMapper.selectById(userId);
+        }
         return getAuthResponse(user);
     }
 
@@ -221,15 +224,7 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(RCode.PARAM_ERROR.getCode(), "验证码无效");
         }
 
-        String password = null;
-        try {
-            Keys keys = AppConfig.getKeys(appConfig, credentials.getPlatform());
-            assert keys != null;
-            password = DigestUtils.md5Hex(RsaUtil.decrypt(keys.getPrivateKey(), credentials.getPassword()));
-        } catch (Exception e) {
-            throw new AppException(RCode.PARAM_ERROR);
-        }
-
+        String password = RsaUtil.getPassword(appConfig, credentials.getPlatform(), credentials.getPassword());
         // 验证 用户名 密码
         User user = userMapperService.findByUsernameAndPassword(credentials.getUsername(),
                 password,

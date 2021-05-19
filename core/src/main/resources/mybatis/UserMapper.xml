@@ -7,9 +7,10 @@
                r.`name`      role,
                u.`status`    status,
                u.create_time create_time
-                FROM `user` u
-                LEFT JOIN role r ON u.tenant_id = #{tenantId}
-                AND u.role_id = r.id
+        FROM `user` u
+                     LEFT JOIN role r ON (u.tenant_id = #{tenantId} and u.role_id = r.id)
+                where u.role_id != -1
+                  and u.delete_time is null
         <if test="username != null and username != ''">
             and u.username = #{username}
         </if>

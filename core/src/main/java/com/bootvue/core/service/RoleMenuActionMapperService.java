@@ -22,4 +22,9 @@ public class RoleMenuActionMapperService {
                         .eq(RoleMenuAction::getRoleId, roleId)
         );
     }
+
+    // 删除某个role_id对应的所有记录
+    public void delByRoleId(Long id) {
+        roleMenuActionMapper.delByRoleId(id);
+    }
 }

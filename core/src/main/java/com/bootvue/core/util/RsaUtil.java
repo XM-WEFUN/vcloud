@@ -1,6 +1,13 @@
 package com.bootvue.core.util;
 
+import com.bootvue.core.config.app.AppConfig;
+import com.bootvue.core.config.app.Keys;
+import com.bootvue.core.constant.PlatformType;
+import com.bootvue.core.result.AppException;
+import com.bootvue.core.result.RCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.Cipher;
 import java.security.*;
@@ -182,4 +189,22 @@ public class RsaUtil {
         return null;
     }
 
+
+    // 获取密码
+    public static String getPassword(AppConfig appConfig, PlatformType platformType, String encryptedData) {
+        if (!StringUtils.hasText(encryptedData)) {
+            throw new AppException(RCode.PARAM_ERROR);
+        }
+        try {
+            Keys keys = AppConfig.getKeys(appConfig, platformType);
+            assert keys != null;
+            String password = RsaUtil.decrypt(keys.getPrivateKey(), encryptedData);
+            if (!StringUtils.hasText(password)) {
+                throw new AppException(RCode.PARAM_ERROR);
+            }
+            return DigestUtils.md5Hex(password);
+        } catch (Exception e) {
+            throw new AppException(RCode.PARAM_ERROR);
+        }
+    }
 }

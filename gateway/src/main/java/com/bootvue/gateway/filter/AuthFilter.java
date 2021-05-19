@@ -112,7 +112,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
     // 权限验证
     private void handleRequestAuthorization(String path, User user) {
-        if (CollectionUtils.isEmpty(appConfig.getAuthorizationUrls())) {
+        if (CollectionUtils.isEmpty(appConfig.getAuthorizationUrls()) || PATH_MATCHER.match("/admin/user/updateSelf", path)) {
             return;
         }
 

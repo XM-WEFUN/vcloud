@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserOut {
+public class UserQueryOut {
     private Long id;
     private String username;
     private String roleName;

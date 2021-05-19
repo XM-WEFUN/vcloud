@@ -1,19 +1,33 @@
 package com.bootvue.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bootvue.admin.dto.UserIn;
-import com.bootvue.admin.dto.UserOut;
+import com.bootvue.admin.dto.UserQueryIn;
+import com.bootvue.admin.dto.UserQueryOut;
 import com.bootvue.admin.service.UserService;
+import com.bootvue.core.config.app.AppConfig;
+import com.bootvue.core.constant.PlatformType;
 import com.bootvue.core.ddo.user.UserDo;
+import com.bootvue.core.entity.Role;
 import com.bootvue.core.entity.User;
+import com.bootvue.core.mapper.UserMapper;
+import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.PageOut;
+import com.bootvue.core.result.RCode;
+import com.bootvue.core.service.RoleMapperService;
 import com.bootvue.core.service.UserMapperService;
+import com.bootvue.core.util.RsaUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,18 +35,97 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserServiceImpl implements UserService {
     private final UserMapperService userMapperService;
+    private final RoleMapperService roleMapperService;
     private final HttpServletRequest request;
+    private final UserMapper userMapper;
+    private final AppConfig appConfig;
 
     @Override
-    public PageOut<List<UserOut>> userList(UserIn param) {
+    public PageOut<List<UserQueryOut>> userList(UserQueryIn param) {
         Page<User> page = new Page<>(param.getCurrent(), param.getPageSize());
         IPage<UserDo> users = userMapperService.listUsers(page, Long.valueOf(request.getHeader("tenant_id")), param.getUsername());
-        PageOut<List<UserOut>> out = new PageOut<>();
+        PageOut<List<UserQueryOut>> out = new PageOut<>();
 
         out.setTotal(users.getTotal());
 
-        out.setRows(users.getRecords().stream().map(e -> new UserOut(e.getId(), e.getUsername(),
+        out.setRows(users.getRecords().stream().map(e -> new UserQueryOut(e.getId(), e.getUsername(),
                 e.getRole(), e.getStatus(), e.getCreateTime())).collect(Collectors.toList()));
         return out;
     }
+
+    @Override
+    @CacheEvict(cacheNames = "cache:user", key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    public void addOrUpdateUser(UserIn param) {
+        User user;
+        Long tenantId = Long.valueOf(request.getHeader("tenant_id"));
+
+        if (!ObjectUtils.isEmpty(param.getId()) && !param.getId().equals(0L)) {
+            // update user
+            user = userMapper.selectById(param.getId());
+            if (StringUtils.hasText(param.getPassword())) {
+                user.setPassword(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()));
+            }
+            if (StringUtils.hasText(param.getPhone())) {
+                user.setPhone(param.getPhone());
+            }
+            if (!ObjectUtils.isEmpty(param.getRoleId())) {
+                // 验证是否有这个role
+                Role role = roleMapperService.findRoleByIdAndTenantId(param.getRoleId(), tenantId);
+                if (ObjectUtils.isEmpty(role) || !user.getTenantId().equals(tenantId)) {
+                    throw new AppException(RCode.PARAM_ERROR);
+                }
+                user.setRoleId(role.getId());
+            }
+            user.setUpdateTime(LocalDateTime.now());
+            userMapper.updateById(user);
+        } else {
+            // add
+            if (!StringUtils.hasText(param.getUsername()) || !StringUtils.hasText(param.getPassword())) {
+                throw new AppException(RCode.PARAM_ERROR);
+            }
+
+            // 用户名是否以及存在
+            User existUser = userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getUsername, param.getUsername()));
+            if (!ObjectUtils.isEmpty(existUser)) {
+                throw new AppException(RCode.PARAM_ERROR.getCode(), "用户名已存在");
+            }
+
+            String password = RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword());
+
+            user = new User(null, param.getUsername(), password,
+                    tenantId, 0L, StringUtils.hasText(param.getPhone()) ? param.getPhone() : "",
+                    "", "", "", true, LocalDateTime.now(), null, null
+            );
+            userMapper.insert(user);
+        }
+    }
+
+    @Override
+    @CacheEvict(cacheNames = "cache:user", key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    public void updateUserStatus(UserIn param) {
+        if (ObjectUtils.isEmpty(param.getId())) {
+            throw new AppException(RCode.PARAM_ERROR);
+        }
+
+        User user = userMapper.selectById(param.getId());
+        if (!ObjectUtils.isEmpty(user)) {
+            user.setUpdateTime(LocalDateTime.now());
+            user.setStatus(!user.getStatus());
+            userMapper.updateById(user);
+        }
+    }
+
+    @Override
+    @CacheEvict(cacheNames = "cache:user", key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    public void updateSelfInfo(UserIn param) {
+        User user = userMapper.selectById(param.getId());
+        if (ObjectUtils.isEmpty(user)) {
+            throw new AppException(RCode.PARAM_ERROR);
+        }
+
+        String password = RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword());
+        user.setPassword(password);
+        userMapper.updateById(user);
+    }
+
 }
