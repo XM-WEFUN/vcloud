@@ -18,4 +18,11 @@ public class RoleMapperService {
         );
     }
 
+
+    public Role findRoleByNameAndTenantId(String name, Long tenantId) {
+        return roleMapper.selectOne(new QueryWrapper<Role>().lambda()
+                .eq(Role::getName, name).eq(Role::getTenantId, tenantId)
+        );
+    }
+
 }

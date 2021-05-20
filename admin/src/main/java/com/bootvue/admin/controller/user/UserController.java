@@ -3,19 +3,24 @@ package com.bootvue.admin.controller.user;
 import com.bootvue.admin.dto.UserIn;
 import com.bootvue.admin.dto.UserQueryIn;
 import com.bootvue.admin.dto.UserQueryOut;
+import com.bootvue.admin.dto.UserRoleIn;
 import com.bootvue.admin.service.UserService;
+import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.result.PageOut;
+import com.bootvue.core.result.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -55,8 +60,16 @@ public class UserController {
     @PostMapping("/updateSelf")
     @ApiOperation("更新用户自身信息")
     public void updateSelfInfo(@RequestBody UserIn param) {
-        Long userId = Long.valueOf(request.getHeader("user_id"));
+        Long userId = Long.valueOf(request.getHeader(AppConst.HEADER_USER_ID));
         param.setId(userId);
         userService.updateSelfInfo(param);
     }
+
+    @PostMapping("/updateRole")
+    @ApiOperation("修改用户角色")
+    public void updateRole(@RequestBody @Valid UserRoleIn param, BindingResult result) {
+        R.handleErr(result);
+        userService.updateUserRole(param);
+    }
+
 }

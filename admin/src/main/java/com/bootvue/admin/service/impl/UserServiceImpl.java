@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bootvue.admin.dto.UserIn;
 import com.bootvue.admin.dto.UserQueryIn;
 import com.bootvue.admin.dto.UserQueryOut;
+import com.bootvue.admin.dto.UserRoleIn;
 import com.bootvue.admin.service.UserService;
 import com.bootvue.core.config.app.AppConfig;
+import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.constant.PlatformType;
 import com.bootvue.core.ddo.user.UserDo;
 import com.bootvue.core.entity.Role;
@@ -18,11 +20,14 @@ import com.bootvue.core.result.PageOut;
 import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.RoleMapperService;
 import com.bootvue.core.service.UserMapperService;
+import com.bootvue.core.util.AppUtil;
 import com.bootvue.core.util.RsaUtil;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -43,7 +48,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public PageOut<List<UserQueryOut>> userList(UserQueryIn param) {
         Page<User> page = new Page<>(param.getCurrent(), param.getPageSize());
-        IPage<UserDo> users = userMapperService.listUsers(page, Long.valueOf(request.getHeader("tenant_id")), param.getUsername());
+        IPage<UserDo> users = userMapperService.listUsers(page, Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID)), param.getUsername());
         PageOut<List<UserQueryOut>> out = new PageOut<>();
 
         out.setTotal(users.getTotal());
@@ -54,16 +59,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(cacheNames = "cache:user", key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
     public void addOrUpdateUser(UserIn param) {
         User user;
-        Long tenantId = Long.valueOf(request.getHeader("tenant_id"));
+        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
 
         if (!ObjectUtils.isEmpty(param.getId()) && !param.getId().equals(0L)) {
             // update user
             user = userMapper.selectById(param.getId());
             if (StringUtils.hasText(param.getPassword())) {
-                user.setPassword(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()));
+                String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
+                user.setPassword(DigestUtils.md5Hex(password));
             }
             if (StringUtils.hasText(param.getPhone())) {
                 user.setPhone(param.getPhone());
@@ -80,9 +86,8 @@ public class UserServiceImpl implements UserService {
             userMapper.updateById(user);
         } else {
             // add
-            if (!StringUtils.hasText(param.getUsername()) || !StringUtils.hasText(param.getPassword())) {
-                throw new AppException(RCode.PARAM_ERROR);
-            }
+            Assert.notNull(param.getUsername(), RCode.PARAM_ERROR.getMsg());
+            Assert.notNull(param.getPassword(), RCode.PARAM_ERROR.getMsg());
 
             // 用户名是否以及存在
             User existUser = userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getUsername, param.getUsername()));
@@ -90,9 +95,9 @@ public class UserServiceImpl implements UserService {
                 throw new AppException(RCode.PARAM_ERROR.getCode(), "用户名已存在");
             }
 
-            String password = RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword());
+            String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
 
-            user = new User(null, param.getUsername(), password,
+            user = new User(null, param.getUsername(), DigestUtils.md5Hex(password),
                     tenantId, 0L, StringUtils.hasText(param.getPhone()) ? param.getPhone() : "",
                     "", "", "", true, LocalDateTime.now(), null, null
             );
@@ -101,11 +106,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(cacheNames = "cache:user", key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
     public void updateUserStatus(UserIn param) {
-        if (ObjectUtils.isEmpty(param.getId())) {
-            throw new AppException(RCode.PARAM_ERROR);
-        }
+        Assert.notNull(param.getId(), RCode.PARAM_ERROR.getMsg());
 
         User user = userMapper.selectById(param.getId());
         if (!ObjectUtils.isEmpty(user)) {
@@ -116,16 +119,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(cacheNames = "cache:user", key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
     public void updateSelfInfo(UserIn param) {
         User user = userMapper.selectById(param.getId());
-        if (ObjectUtils.isEmpty(user)) {
-            throw new AppException(RCode.PARAM_ERROR);
-        }
+        Assert.notNull(user, RCode.PARAM_ERROR.getMsg());
 
-        String password = RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword());
-        user.setPassword(password);
+        String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
+        user.setPassword(DigestUtils.md5Hex(password));
         userMapper.updateById(user);
     }
+
+    @Override
+    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#param.userId")
+    public void updateUserRole(UserRoleIn param) {
+        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
+        Role role = roleMapperService.findRoleByNameAndTenantId(param.getRoleName(), tenantId);
+        Assert.notNull(role, RCode.PARAM_ERROR.getMsg());
+
+        User user = userMapper.selectById(param.getUserId());
+        if (user.getRoleId() < 0 || user.getRoleId().equals(role.getId())) {
+            return;
+        }
+        user.setRoleId(role.getId());
+        userMapper.updateById(user);
+    }
+
 
 }

@@ -6,7 +6,7 @@ import com.bootvue.core.constant.PlatformType;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.Cipher;
@@ -190,19 +190,17 @@ public class RsaUtil {
     }
 
 
-    // 获取密码
+    // 获取明文密码
     public static String getPassword(AppConfig appConfig, PlatformType platformType, String encryptedData) {
         if (!StringUtils.hasText(encryptedData)) {
             throw new AppException(RCode.PARAM_ERROR);
         }
         try {
             Keys keys = AppConfig.getKeys(appConfig, platformType);
-            assert keys != null;
+            Assert.notNull(keys, "参数错误");
             String password = RsaUtil.decrypt(keys.getPrivateKey(), encryptedData);
-            if (!StringUtils.hasText(password)) {
-                throw new AppException(RCode.PARAM_ERROR);
-            }
-            return DigestUtils.md5Hex(password);
+            Assert.notNull(password, "密码不能为空");
+            return password;
         } catch (Exception e) {
             throw new AppException(RCode.PARAM_ERROR);
         }

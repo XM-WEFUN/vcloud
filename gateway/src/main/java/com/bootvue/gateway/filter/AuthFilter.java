@@ -119,6 +119,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         boolean flag = true;
         for (String authorizationUrl : appConfig.getAuthorizationUrls()) {
             if (PATH_MATCHER.match(authorizationUrl, path)) {
+                // 请求接口需要的权限
                 Action action = actionMapperService.getAction(path);
                 // 用户角色对应的action权限
                 List<RoleMenuAction> actions = roleMenuActionMapperService.getRoleMenuActions(user.getRoleId());

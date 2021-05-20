@@ -53,6 +53,8 @@ INSERT INTO `action`
 VALUES (11, '/admin/action/list', 'action:list');
 INSERT INTO `action`
 VALUES (12, '/admin/action/update', 'action:update');
+INSERT INTO `action`
+VALUES (13, '/admin/user/updateRole', 'user:update');
 
 -- ----------------------------
 -- Table structure for menu
@@ -135,7 +137,7 @@ VALUES (1, 1, 1, '1');
 INSERT INTO `role_menu_action`
 VALUES (2, 1, 2, '0');
 INSERT INTO `role_menu_action`
-VALUES (3, 1, 3, '2,3,4,5,8,9');
+VALUES (3, 1, 3, '2,3,4,5,8,9,13');
 INSERT INTO `role_menu_action`
 VALUES (4, 1, 4, '3,4,7,8,9,10,11,12');
 

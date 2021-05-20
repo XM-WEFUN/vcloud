@@ -3,6 +3,7 @@ package com.bootvue.core.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.ddo.user.UserDo;
 import com.bootvue.core.entity.User;
 import com.bootvue.core.mapper.UserMapper;
@@ -22,7 +23,7 @@ public class UserMapperService {
      * @param id user id
      * @return user
      */
-    @Cacheable(cacheNames = "cache:user", key = "#id", unless = "#result == null")
+    @Cacheable(cacheNames = AppConst.USER_CACHE, key = "#id", unless = "#result == null")
     public User findById(Long id) {
         return userMapper.selectOne(new QueryWrapper<User>().lambda()
                 .eq(User::getId, id).eq(User::getStatus, true)

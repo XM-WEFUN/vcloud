@@ -17,6 +17,14 @@ public class GlobalExceptionHandle {
         return new R<>(e.getCode(), e.getMsg(), null);
     }
 
+
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    @ResponseBody
+    public <T> R<T> handleException(IllegalArgumentException e) {
+        log.error("拦截到IllegalArgumentException异常: ", e);
+        return R.error(new AppException(RCode.PARAM_ERROR));
+    }
+
     @ExceptionHandler(value = {Exception.class})
     @ResponseBody
     public <T> R<T> handleException(Exception e) {

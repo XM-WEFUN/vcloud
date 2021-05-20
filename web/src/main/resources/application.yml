@@ -1,6 +1,4 @@
 feign:
-  sentinel:
-    enabled: true
   httpclient:
     enabled: true
     max-connections: 200

@@ -227,7 +227,7 @@ public class AuthServiceImpl implements AuthService {
         String password = RsaUtil.getPassword(appConfig, credentials.getPlatform(), credentials.getPassword());
         // 验证 用户名 密码
         User user = userMapperService.findByUsernameAndPassword(credentials.getUsername(),
-                password,
+                DigestUtils.md5Hex(password),
                 credentials.getTenantCode());
 
         return getAuthResponse(user);

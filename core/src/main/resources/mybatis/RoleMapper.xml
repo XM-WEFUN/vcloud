@@ -6,7 +6,7 @@
         from role r
                 where r.tenant_id = #{tenant_id}
         <if test="role_name != null and role_name != ''">
-            and r.`name` = #{role_name}
+            and r.`name` like concat('%', #{role_name}, '%')
         </if>
         order by r.id desc
     </select>
