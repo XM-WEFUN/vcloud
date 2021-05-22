@@ -17,7 +17,7 @@ Sponsor [![paypal.me/bootvue](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/ico
 - gateway: 网关
 - core: 基础配置+redis/spring data数据源等等.....
 - web: webmvc相关config
-- admin: 后台接口服务
+- admin: 后台管理相关接口服务
 - scheduler: 任务调度
 - mq: 消息服务
 - xxx: 其它服务
@@ -45,7 +45,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 400: Bad Request(包含各种参数错误)
 401: Unauthorized(token无效或refresh token无效)
 403: Forbidden没有权限
-404: 请求的微服务未找到(nacos服务注册好慢)
+404: 请求的服务未找到(nacos服务注册好慢)
 503: gateway网关异常(sentinel拦截等等)
 
 600: 系统异常 其它杂七杂八异常......
@@ -53,9 +53,9 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 ## 认证
 
-`type` : 0: 换取新的access_token与refresh_token 1: 用户名密码登录 2: 短信登录 3: 微信小程序认证
+`type` : [必需] 0: 换取新的access_token与refresh_token 1: 用户名密码登录 2: 短信登录 3: 微信小程序认证
 
-`platform` : 客户端平台类型 0:web 1:微信小程序 2:android 3:ios
+`platform` : [必需] 客户端平台类型 0:web 1:微信小程序 2:android 3:ios
 
 - 用户名密码登录
 
@@ -154,7 +154,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 ## 菜单权限
 
-> 一个用户只能属于一个role角色, 我定的, 咋的了
+> 一个用户只能属于一个role, 我定的, 咋的了
 
 > permissions 字段格式 ["按钮:add,list,update,delete"]或["list"] (菜单是否可以查看)
 
@@ -162,7 +162,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - 非后台管理员类型用户 `user role_id`为`-1` , 管理员账号未分配角色的`role_id`为`0`
 
-- 二级菜单父一级 `permissions` ["list"]或者没有, 对应 `role_menu_action actions`字段, 0(有查看权限)/-1(没有查看权限)
+- 二级菜单父一级 `permissions` ["list"]或者没有, 对应 `role_menu_action actions`字段, `0`(有查看权限)/`-1`(没有查看权限)
 
 ```json
 {
@@ -243,7 +243,11 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - 数据库已有表, flyway sql要从>1的version开始 例如:V2
 
-- 数据初始化: 每个租户`role`表至少有一个超级管理员的角色,`menu`表填充所有的菜单信息,
+- 数据初始化: 每个租户`role`表至少有一个超级管理员的角色,
+  `menu`表填充所有的菜单信息,`actions`字段为菜单对应的action权限, 格式json字符串(二级菜单父一级的value为`list`):
+  ```json
+  [{"label":"查看","value":"role:list"},{"label":"修改","value":"role:update"},{"label":"新增","value":"role:add"},{"label":"删除","value":"role:delete"},{"label":"权限","value":"action:list,update"},{"label":"用户","value":"user:list,update"}]
+  ```
   `action`填写所有需要做权限控制的接口信息,`role_menu_action`初始分配租户超级管理员的菜单接口对应关系
 
 ```yaml
@@ -271,8 +275,15 @@ vcloud:
       max-idle-time: 1200000  #毫秒
 ```
 
-## todo
-
-- [ ] 用户角色 菜单权限分配
-
 ## Demo
+
+<table>
+    <tr>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/3.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/4.png"></td>
+    </tr>
+     <tr>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/1.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/2.png"></td>
+    </tr>
+</table>

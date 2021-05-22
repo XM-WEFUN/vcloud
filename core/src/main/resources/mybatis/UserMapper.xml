@@ -8,7 +8,7 @@
                u.`status`    status,
                u.create_time create_time
         FROM `user` u
-                     LEFT JOIN role r ON (u.tenant_id = #{tenantId} and u.role_id = r.id)
+                     LEFT JOIN role r ON (u.tenant_id = #{tenant_id} and u.role_id = r.id)
                 where u.role_id != -1
                   and u.delete_time is null
         <if test="username != null and username != ''">
@@ -16,4 +16,40 @@
         </if>
         order by u.create_time desc
     </select>
+
+    <select id="listUsersByRoleName" resultType="java.lang.Long">
+        SELECT u.id
+        FROM `user` u,
+             role r
+        WHERE u.tenant_id = #{tenant_id}
+          AND u.role_id = r.id
+          AND r.`name` = #{role_name}
+          and u.delete_time is null
+        order by u.create_time asc
+    </select>
+
+    <update id="batchUpdateRole">
+        UPDATE `user` u
+        SET u.role_id    = #{role_id},
+            u.update_time=now(3)
+                WHERE u.id IN
+        <foreach collection="selected_keys" item="key" open="(" close=")" separator=",">
+            #{key}
+        </foreach>
+        AND u.tenant_id = #{tenant_id}
+        and u.delete_time is null
+    </update>
+
+    <update id="batchCancelRole">
+        UPDATE `user` u
+        SET u.role_id    = 0,
+            u.update_time=now(3)
+                WHERE u.id IN
+        <foreach collection="un_selected_keys" item="key" open="(" close=")" separator=",">
+            #{key}
+        </foreach>
+        AND u.tenant_id = #{tenant_id}
+        and u.role_id = #{role_id}
+        and u.delete_time is null
+    </update>
 </mapper>

@@ -1,0 +1,142 @@
+package com.bootvue.admin.service.impl;
+
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.bootvue.admin.dto.*;
+import com.bootvue.admin.service.ActionService;
+import com.bootvue.core.constant.AppConst;
+import com.bootvue.core.entity.Action;
+import com.bootvue.core.entity.Menu;
+import com.bootvue.core.entity.Role;
+import com.bootvue.core.entity.RoleMenuAction;
+import com.bootvue.core.mapper.MenuMapper;
+import com.bootvue.core.mapper.RoleMenuActionMapper;
+import com.bootvue.core.service.ActionMapperService;
+import com.bootvue.core.service.RoleMapperService;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class ActionServiceImpl implements ActionService {
+    private final MenuMapper menuMapper;
+    private final RoleMapperService roleMapperService;
+    private final RoleMenuActionMapper roleMenuActionMapper;
+    private final ActionMapperService actionMapperService;
+    private final HttpServletRequest request;
+
+    @Override
+    public List<ActionItem> actionList(RoleIn param) {
+        Assert.notNull(param.getId(), "参数错误");
+        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
+        Role role = roleMapperService.findRoleByIdAndTenantId(param.getId(), tenantId);
+        Assert.notNull(role, "参数错误");
+
+        // 菜单&action权限信息
+        List<ActionItem> out = new ArrayList<>();
+
+        // 父级菜单
+        List<Menu> menus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, 0L).orderByAsc(Menu::getSort));
+        menus.stream().forEach(e -> {
+            ActionItem item = getAction(param.getId(), e);
+            // 子菜单
+            List<Menu> subMenus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, e.getId()).orderByAsc(Menu::getSort));
+            List<ActionItem> children = new ArrayList<>();
+            subMenus.stream().forEach(i -> children.add(getAction(param.getId(), i)));
+            item.setChildren(children);
+
+            out.add(item);
+        });
+
+        return out;
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = AppConst.ACTION_CACHE, key = "#param.roleId")
+    public void updateRoleService(RoleActionIn param) {
+        log.info("用户: {} 更新了角色: {} 的actions权限: {}", request.getHeader(AppConst.HEADER_USERNAME), param.getRoleName(), param.getChangedItems());
+        Long roleId = param.getRoleId();
+        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
+        Role role = roleMapperService.findRoleByIdAndTenantId(roleId, tenantId);
+        Assert.notNull(role, "参数错误");
+
+        Set<RoleActionItem> changedItems = param.getChangedItems();
+        changedItems.stream().forEach(e -> {
+            String key = e.getKey(); // menu菜单key
+            Set<String> actions = e.getActions(); // [] || ["user:add","user:list"] || ["list"] || ["user:add,user:list"]
+            String ids = "";
+            if (actions.size() == 0) {
+                ids = "-1";
+            } else if (actions.size() == 1 && "list".equals(actions.iterator().next())) {
+                ids = "0";
+            } else {
+                Set<String> actiosFields = actions.stream().flatMap(i -> Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(i)).distinct().collect(Collectors.toSet());
+                List<Action> acs = actionMapperService.getActionsByNames(actiosFields);
+                ids = Joiner.on(",").skipNulls().join(acs.stream().map(o -> o.getId()).collect(Collectors.toSet()));
+            }
+
+            // 更新 或 新增 role_menu_actions
+            RoleMenuAction rmaItem = roleMenuActionMapper.findByRoleIdAndMenuKey(roleId, key);
+            if (ObjectUtils.isEmpty(rmaItem)) {
+                roleMenuActionMapper.addRoleMenuActionItem(roleId, key, ids);
+            } else {
+                rmaItem.setActionIds(ids);
+                roleMenuActionMapper.updateById(rmaItem);
+            }
+        });
+    }
+
+    private ActionItem getAction(Long roleId, Menu menu) {
+        ActionItem item = new ActionItem();
+        item.setTitle(menu.getTitle());
+        item.setKey(menu.getKey());
+        List<OptionItem> options;
+
+        // actions权限
+        String actions = menu.getActions();
+        options = JSON.parseArray(actions, OptionItem.class);
+
+        item.setOptions(options);
+
+        // 此角色 当前menu拥有的action权限
+        RoleMenuAction action = roleMenuActionMapper.selectOne(new QueryWrapper<RoleMenuAction>().lambda().eq(RoleMenuAction::getRoleId, roleId).eq(RoleMenuAction::getMenuId, menu.getId()));
+        if (!ObjectUtils.isEmpty(action)) {
+            if ("0".equals(action.getActionIds())) {
+                item.setChecked(Collections.singleton("list"));
+            } else if (!"-1".equals(action.getActionIds())) {
+                List<Action> actionList = actionMapperService.getActions(Splitter.on(",").trimResults().omitEmptyStrings()
+                        .splitToStream(action.getActionIds()).mapToLong(Long::parseLong).boxed().collect(Collectors.toSet()));
+                // 当前角色--菜单下实际拥有的action 字段集合
+                Set<String> roleAcs = actionList.stream().map(e -> e.getAction()).collect(Collectors.toSet());
+                Set<String> checked = new HashSet<>();
+
+                options.stream().forEach(e -> {
+                    // 当前菜单具有的所有action 字段名
+                    Set<String> acs = Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(e.getValue()).collect(Collectors.toSet());
+                    // 当前角色有的 ['user:add','user:update'] --- ['user:add']
+                    if (roleAcs.containsAll(acs)) {
+                        checked.add(e.getValue());
+                    }
+                });
+                item.setChecked(checked);
+            }
+        }
+
+        return item;
+    }
+
+}

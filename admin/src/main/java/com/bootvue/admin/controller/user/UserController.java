@@ -1,9 +1,6 @@
 package com.bootvue.admin.controller.user;
 
-import com.bootvue.admin.dto.UserIn;
-import com.bootvue.admin.dto.UserQueryIn;
-import com.bootvue.admin.dto.UserQueryOut;
-import com.bootvue.admin.dto.UserRoleIn;
+import com.bootvue.admin.dto.*;
 import com.bootvue.admin.service.UserService;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.result.PageOut;
@@ -38,6 +35,11 @@ public class UserController {
         return userService.userList(param);
     }
 
+    @PostMapping("/listByRole")
+    @ApiOperation("查询-某个角色下包含的用户列表")
+    public RoleUserPageOut<List<RoleUserQueryOut>> roleUserList(@RequestBody RoleUserQueryIn param) {
+        return userService.roleUserList(param);
+    }
 
     @PostMapping("/add")
     @ApiOperation("新增管理员用户")
@@ -72,4 +74,10 @@ public class UserController {
         userService.updateUserRole(param);
     }
 
+    @PostMapping("/updateRoles")
+    @ApiOperation("批量修改用户角色")
+    public void updateRoles(@RequestBody @Valid UserRolesIn param, BindingResult result) {
+        R.handleErr(result);
+        userService.updateUserRoles(param);
+    }
 }

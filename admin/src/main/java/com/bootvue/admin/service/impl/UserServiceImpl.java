@@ -3,10 +3,7 @@ package com.bootvue.admin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.bootvue.admin.dto.UserIn;
-import com.bootvue.admin.dto.UserQueryIn;
-import com.bootvue.admin.dto.UserQueryOut;
-import com.bootvue.admin.dto.UserRoleIn;
+import com.bootvue.admin.dto.*;
 import com.bootvue.admin.service.UserService;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.constant.AppConst;
@@ -23,10 +20,12 @@ import com.bootvue.core.service.UserMapperService;
 import com.bootvue.core.util.AppUtil;
 import com.bootvue.core.util.RsaUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -34,9 +33,11 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserServiceImpl implements UserService {
     private final UserMapperService userMapperService;
@@ -144,5 +145,41 @@ public class UserServiceImpl implements UserService {
         userMapper.updateById(user);
     }
 
+    @Override
+    public RoleUserPageOut<List<RoleUserQueryOut>> roleUserList(RoleUserQueryIn param) {
+        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
+
+        Page<User> page = new Page<>(param.getCurrent(), param.getPageSize());
+        IPage<User> users = userMapper.selectPage(page, new QueryWrapper<User>()
+                .lambda().eq(User::getTenantId, tenantId).isNull(User::getDeleteTime)
+        );
+
+        RoleUserPageOut<List<RoleUserQueryOut>> out = new RoleUserPageOut<>();
+
+        out.setTotal(users.getTotal());
+
+        out.setRows(users.getRecords().stream().map(e -> new RoleUserQueryOut(e.getId(), e.getUsername())).collect(Collectors.toList()));
+
+        if (StringUtils.hasText(param.getRoleName())) {
+            // 此角色下已有用户id集合
+            Set<Long> ids = userMapperService.listUsersByRoleName(tenantId, param.getRoleName());
+            out.setKeys(ids);
+        }
+
+        return out;
+    }
+
+    @Override
+    @Transactional
+    public void updateUserRoles(UserRolesIn param) {
+        log.info("用户: {} 批量修改用户角色, 角色id: {}, 绑定用户: {}, 取消绑定: {}", request.getHeader(AppConst.HEADER_USERNAME), param.getRoleId(), param.getSelectedKeys(), param.getUnSelectedKeys());
+        // 验证role是否存在
+        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
+        Role role = roleMapperService.findRoleByIdAndTenantId(param.getRoleId(), tenantId);
+        Assert.notNull(role, "role不存在");
+
+        // 更新user role_id
+        userMapperService.updateUserRoles(param.getSelectedKeys(), param.getUnSelectedKeys(), param.getRoleId(), tenantId);
+    }
 
 }

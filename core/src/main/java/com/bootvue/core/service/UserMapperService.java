@@ -9,8 +9,12 @@ import com.bootvue.core.entity.User;
 import com.bootvue.core.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -64,5 +68,20 @@ public class UserMapperService {
     // 管理员用户 role_id置为 0
     public void removeUserRoleId(Long roleId, Long tenantId) {
         userMapper.removeRoleId(roleId, tenantId);
+    }
+
+    public Set<Long> listUsersByRoleName(Long tenantId, String roleName) {
+        return userMapper.listUsersByRoleName(tenantId, roleName);
+    }
+
+    @CacheEvict(cacheNames = AppConst.USER_CACHE, allEntries = true)
+    public void updateUserRoles(Set<Long> selectedKeys, Set<Long> unSelectedKeys, Long roleId, Long tenantId) {
+        if (!CollectionUtils.isEmpty(selectedKeys)) {
+            userMapper.batchUpdateRole(selectedKeys, roleId, tenantId);
+        }
+
+        if (!CollectionUtils.isEmpty(unSelectedKeys)) {
+            userMapper.batchCancelRole(unSelectedKeys, roleId, tenantId);
+        }
     }
 }

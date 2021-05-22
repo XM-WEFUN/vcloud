@@ -295,23 +295,24 @@ public class AuthServiceImpl implements AuthService {
             BeanUtils.copyProperties(e, menuOut);
 
             // 父级权限
-            menuOut.setPermissions(getPermissions(e.getActionIds()));
+            Set<String> ps = getPermissions(e.getActionIds());
+            menuOut.setPermissions(ps);
+            if (!CollectionUtils.isEmpty(ps)) {
+                // 子级菜单
+                List<MenuDo> subMenuDos = menuMapperService.getMenuList(userId, roleId, e.getId());
+                List<MenuOut> children = subMenuDos.stream().map(i -> { // 子级
+                    MenuOut subMenuOut = new MenuOut();
+                    BeanUtils.copyProperties(i, subMenuOut);
+                    // 子级的权限
+                    subMenuOut.setPermissions(getPermissions(i.getActionIds()));
+                    return subMenuOut;
+                }).collect(Collectors.toList());
 
-            // 子级菜单
-            List<MenuDo> subMenuDos = menuMapperService.getMenuList(userId, roleId, e.getId());
-            List<MenuOut> children = subMenuDos.stream().map(i -> { // 子级
-                MenuOut subMenuOut = new MenuOut();
-                BeanUtils.copyProperties(i, subMenuOut);
-                // 子级的权限
-                subMenuOut.setPermissions(getPermissions(i.getActionIds()));
-                return subMenuOut;
-            }).collect(Collectors.toList());
+                menuOut.setChildren(children);
 
-            menuOut.setChildren(children);
-
-            outs.add(menuOut);
+                outs.add(menuOut);
+            }
         });
-
         return outs;
     }
 
@@ -326,7 +327,7 @@ public class AuthServiceImpl implements AuthService {
         Set<String> permissions = new HashSet<>();
         if (("0").equals(actionIds)) {
             permissions.add("list");
-        } else if (!("-1").equals(actionIds)) {
+        } else if (!("-1").equals(actionIds) && StringUtils.hasText(actionIds)) {
             // 拼装actions
             List<Action> actions = actionMapperService.getActions(Splitter.on(",").trimResults().omitEmptyStrings()
                     .splitToStream(actionIds).mapToLong(Long::parseLong).boxed().collect(Collectors.toSet()));

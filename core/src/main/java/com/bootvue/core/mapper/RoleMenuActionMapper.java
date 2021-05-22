@@ -8,4 +8,8 @@ import org.apache.ibatis.annotations.Param;
 public interface RoleMenuActionMapper extends BaseMapper<RoleMenuAction> {
     @Delete("delete from role_menu_action where role_id = #{role_id} ")
     void delByRoleId(@Param("role_id") Long roleId);
+
+    RoleMenuAction findByRoleIdAndMenuKey(@Param("role_id") Long roleId, @Param("key") String key);
+
+    void addRoleMenuActionItem(@Param("role_id") Long roleId, @Param("key") String key, @Param("ids") String ids);
 }

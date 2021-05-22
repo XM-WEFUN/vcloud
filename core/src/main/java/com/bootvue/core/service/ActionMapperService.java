@@ -27,4 +27,8 @@ public class ActionMapperService {
                 .lambda().eq(Action::getApi, api)
         );
     }
+
+    public List<Action> getActionsByNames(Set<String> actiosFields) {
+        return actionMapper.selectList(new QueryWrapper<Action>().lambda().in(Action::getAction, actiosFields));
+    }
 }

@@ -1,9 +1,6 @@
 package com.bootvue.admin.service;
 
-import com.bootvue.admin.dto.UserIn;
-import com.bootvue.admin.dto.UserQueryIn;
-import com.bootvue.admin.dto.UserQueryOut;
-import com.bootvue.admin.dto.UserRoleIn;
+import com.bootvue.admin.dto.*;
 import com.bootvue.core.result.PageOut;
 
 import java.util.List;
@@ -18,4 +15,8 @@ public interface UserService {
     void updateSelfInfo(UserIn param);
 
     void updateUserRole(UserRoleIn param);
+
+    RoleUserPageOut<List<RoleUserQueryOut>> roleUserList(RoleUserQueryIn param);
+
+    void updateUserRoles(UserRolesIn param);
 }

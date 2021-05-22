@@ -55,6 +55,10 @@ INSERT INTO `action`
 VALUES (12, '/admin/action/update', 'action:update');
 INSERT INTO `action`
 VALUES (13, '/admin/user/updateRole', 'user:update');
+INSERT INTO `action`
+VALUES (14, '/admin/user/listByRole', 'user:list');
+INSERT INTO `action`
+VALUES (15, '/admin/user/updateRoles', 'user:update');
 
 -- ----------------------------
 -- Table structure for menu
@@ -62,15 +66,16 @@ VALUES (13, '/admin/user/updateRole', 'user:update');
 DROP TABLE IF EXISTS `menu`;
 CREATE TABLE `menu`
 (
-    `id`             bigint                                                       NOT NULL AUTO_INCREMENT,
-    `title`          varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '菜单名称',
-    `sort`           int                                                          NOT NULL COMMENT '菜单顺序',
-    `key`            varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '菜单唯一key',
-    `path`           varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'path',
-    `icon`           varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT 'icon图标',
-    `p_id`           bigint                                                       NOT NULL COMMENT '父级菜单id  没有父级为0',
-    `default_select` tinyint(1)                                                   NOT NULL DEFAULT 0 COMMENT '是否默认选择  0:否   1:是',
-    `default_open`   tinyint(1)                                                   NOT NULL DEFAULT 0 COMMENT '二级菜单是否默认展开   0:否  1:是',
+    `id`             bigint                                                         NOT NULL AUTO_INCREMENT,
+    `title`          varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT '菜单名称',
+    `sort`           int                                                            NOT NULL COMMENT '菜单顺序',
+    `key`            varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT '菜单唯一key',
+    `path`           varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT 'path',
+    `icon`           varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT 'icon图标',
+    `p_id`           bigint                                                         NOT NULL COMMENT '父级菜单id  没有父级为0',
+    `actions`        varchar(4096) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '菜单对应的action权限',
+    `default_select` tinyint(1)                                                     NOT NULL DEFAULT 0 COMMENT '是否默认选择  0:否   1:是',
+    `default_open`   tinyint(1)                                                     NOT NULL DEFAULT 0 COMMENT '二级菜单是否默认展开   0:否  1:是',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 6
@@ -82,13 +87,13 @@ CREATE TABLE `menu`
 -- Records of menu
 -- ----------------------------
 INSERT INTO `menu`
-VALUES (1, '首页', 0, 'index', '/index', 'HomeOutlined', 0, 1, 0);
+VALUES (1, '首页', 0, 'index', '/index', 'HomeOutlined', 0, '[{"label":"查看","value":"index:list"}]', 1, 0);
 INSERT INTO `menu`
-VALUES (2, '系统设置', 100, 'setting', '/', 'SettingOutlined', 0, 0, 1);
+VALUES (2, '系统设置', 100, 'setting', '/', 'SettingOutlined', 0, '[{"label":"查看","value":"list"}]', 0, 1);
 INSERT INTO `menu`
-VALUES (3, '用户管理', 101, 'user', '/user', '', 2, 0, 0);
+VALUES (3, '用户管理', 101, 'user', '/user', '', 2, '[{"label":"查看","value":"user:list"},{"label":"修改","value":"user:update"},{"label":"新增","value":"user:add"},{"label":"删除","value":"user:delete"}]', 0, 0);
 INSERT INTO `menu`
-VALUES (4, '角色管理', 102, 'role', '/role', '', 2, 0, 0);
+VALUES (4, '角色管理', 102, 'role', '/role', '', 2, '[{"label":"查看","value":"role:list"},{"label":"修改","value":"role:update"},{"label":"新增","value":"role:add"},{"label":"删除","value":"role:delete"},{"label":"权限","value":"action:list,action:update"},{"label":"用户","value":"user:list,user:update"}]', 0, 0);
 
 -- ----------------------------
 -- Table structure for role
@@ -139,7 +144,7 @@ VALUES (2, 1, 2, '0');
 INSERT INTO `role_menu_action`
 VALUES (3, 1, 3, '2,3,4,5,8,9,13');
 INSERT INTO `role_menu_action`
-VALUES (4, 1, 4, '3,4,7,8,9,10,11,12');
+VALUES (4, 1, 4, '3,4,7,8,9,10,11,12,14,15');
 
 -- ----------------------------
 -- Table structure for tenant

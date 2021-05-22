@@ -54,6 +54,12 @@ public class Menu {
     private Long pId;
 
     /**
+     * 菜单对应的action权限, 格式见readme说明
+     */
+    @TableField(value = "actions")
+    private String actions;
+
+    /**
      * 是否默认选择  0:否   1:是
      */
     @TableField(value = "default_select")
