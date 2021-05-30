@@ -8,15 +8,15 @@ import com.bootvue.admin.service.UserService;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.constant.PlatformType;
-import com.bootvue.core.ddo.user.UserDo;
+import com.bootvue.core.ddo.admin.AdminDo;
+import com.bootvue.core.entity.Admin;
 import com.bootvue.core.entity.Role;
-import com.bootvue.core.entity.User;
-import com.bootvue.core.mapper.UserMapper;
+import com.bootvue.core.mapper.AdminMapper;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.PageOut;
 import com.bootvue.core.result.RCode;
+import com.bootvue.core.service.AdminMapperService;
 import com.bootvue.core.service.RoleMapperService;
-import com.bootvue.core.service.UserMapperService;
 import com.bootvue.core.util.AppUtil;
 import com.bootvue.core.util.RsaUtil;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +40,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserServiceImpl implements UserService {
-    private final UserMapperService userMapperService;
+    private final AdminMapperService adminMapperService;
     private final RoleMapperService roleMapperService;
     private final HttpServletRequest request;
-    private final UserMapper userMapper;
+    private final AdminMapper adminMapper;
     private final AppConfig appConfig;
 
     @Override
     public PageOut<List<UserQueryOut>> userList(UserQueryIn param) {
-        Page<User> page = new Page<>(param.getCurrent(), param.getPageSize());
-        IPage<UserDo> users = userMapperService.listUsers(page, Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID)), param.getUsername());
+        Page<Admin> page = new Page<>(param.getCurrent(), param.getPageSize());
+        IPage<AdminDo> users = adminMapperService.listAdmins(page, Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID)), param.getUsername());
         PageOut<List<UserQueryOut>> out = new PageOut<>();
 
         out.setTotal(users.getTotal());
@@ -60,98 +60,111 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    @CacheEvict(cacheNames = AppConst.ADMIN_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
     public void addOrUpdateUser(UserIn param) {
-        User user;
+        Admin admin;
         Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
 
         if (!ObjectUtils.isEmpty(param.getId()) && !param.getId().equals(0L)) {
             // update user
-            user = userMapper.selectById(param.getId());
+            admin = adminMapper.selectById(param.getId());
+            Assert.state(admin.getTenantId().equals(tenantId), RCode.ACCESS_DENY.getMsg());
             if (StringUtils.hasText(param.getPassword())) {
                 String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
-                user.setPassword(DigestUtils.md5Hex(password));
+                admin.setPassword(DigestUtils.md5Hex(password));
             }
             if (StringUtils.hasText(param.getPhone())) {
-                user.setPhone(param.getPhone());
+                // 当前租户下是否已存在该手机号用户
+                Admin existAdmin = adminMapperService.findByPhoneAndTenantId(param.getPhone(), tenantId);
+                Assert.isNull(existAdmin, "手机号已存在");
+                admin.setPhone(param.getPhone());
             }
             if (!ObjectUtils.isEmpty(param.getRoleId())) {
                 // 验证是否有这个role
                 Role role = roleMapperService.findRoleByIdAndTenantId(param.getRoleId(), tenantId);
-                if (ObjectUtils.isEmpty(role) || !user.getTenantId().equals(tenantId)) {
+                if (ObjectUtils.isEmpty(role) || !admin.getTenantId().equals(tenantId)) {
                     throw new AppException(RCode.PARAM_ERROR);
                 }
-                user.setRoleId(role.getId());
+                admin.setRoleId(role.getId());
             }
-            user.setUpdateTime(LocalDateTime.now());
-            userMapper.updateById(user);
+            admin.setUpdateTime(LocalDateTime.now());
+            adminMapper.updateById(admin);
         } else {
             // add
             Assert.notNull(param.getUsername(), RCode.PARAM_ERROR.getMsg());
             Assert.notNull(param.getPassword(), RCode.PARAM_ERROR.getMsg());
 
             // 用户名是否以及存在
-            User existUser = userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getUsername, param.getUsername()));
+            Admin existUser = adminMapper.selectOne(new QueryWrapper<Admin>().lambda().eq(Admin::getUsername, param.getUsername()).eq(Admin::getTenantId, tenantId));
             if (!ObjectUtils.isEmpty(existUser)) {
                 throw new AppException(RCode.PARAM_ERROR.getCode(), "用户名已存在");
+            }
+            // 当前租户下是否已存在此手机号用户
+            if (StringUtils.hasText(param.getPhone())) {
+                Admin existAdmin = adminMapperService.findByPhoneAndTenantId(param.getPhone(), tenantId);
+                Assert.isNull(existAdmin, "手机号已存在");
             }
 
             String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
 
-            user = new User(null, param.getUsername(), DigestUtils.md5Hex(password),
-                    tenantId, 0L, StringUtils.hasText(param.getPhone()) ? param.getPhone() : "",
-                    "", "", "", true, LocalDateTime.now(), null, null
+            admin = new Admin(null, param.getUsername(), StringUtils.hasText(param.getPhone()) ? param.getPhone() : "", DigestUtils.md5Hex(password),
+                    tenantId, 0L, "", true, LocalDateTime.now(), null, null
             );
-            userMapper.insert(user);
+            adminMapper.insert(admin);
         }
     }
 
     @Override
-    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    @CacheEvict(cacheNames = AppConst.ADMIN_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
     public void updateUserStatus(UserIn param) {
         Assert.notNull(param.getId(), RCode.PARAM_ERROR.getMsg());
 
-        User user = userMapper.selectById(param.getId());
-        if (!ObjectUtils.isEmpty(user)) {
-            user.setUpdateTime(LocalDateTime.now());
-            user.setStatus(!user.getStatus());
-            userMapper.updateById(user);
+        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
+        Admin admin = adminMapper.selectById(param.getId());
+        if (!ObjectUtils.isEmpty(admin)) {
+            Assert.state(admin.getTenantId().equals(tenantId), RCode.ACCESS_DENY.getMsg());
+            admin.setUpdateTime(LocalDateTime.now());
+            admin.setStatus(!admin.getStatus());
+            adminMapper.updateById(admin);
         }
     }
 
     @Override
-    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
+    @CacheEvict(cacheNames = AppConst.ADMIN_CACHE, key = "#param.id", condition = "#param.id != null && #param.id > 0")
     public void updateSelfInfo(UserIn param) {
-        User user = userMapper.selectById(param.getId());
-        Assert.notNull(user, RCode.PARAM_ERROR.getMsg());
+        Admin admin = adminMapper.selectById(param.getId());
+        Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
+        Assert.state(admin.getTenantId().equals(request.getHeader(AppConst.HEADER_TENANT_ID)), RCode.ACCESS_DENY.getMsg());
 
         String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
-        user.setPassword(DigestUtils.md5Hex(password));
-        userMapper.updateById(user);
+        admin.setPassword(DigestUtils.md5Hex(password));
+        adminMapper.updateById(admin);
     }
 
     @Override
-    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#param.userId")
+    @CacheEvict(cacheNames = AppConst.ADMIN_CACHE, key = "#param.userId")
     public void updateUserRole(UserRoleIn param) {
         Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
         Role role = roleMapperService.findRoleByNameAndTenantId(param.getRoleName(), tenantId);
         Assert.notNull(role, RCode.PARAM_ERROR.getMsg());
+        Assert.state(role.getTenantId().equals(tenantId), RCode.ACCESS_DENY.getMsg());
 
-        User user = userMapper.selectById(param.getUserId());
-        if (user.getRoleId() < 0 || user.getRoleId().equals(role.getId())) {
+        Admin admin = adminMapper.selectById(param.getUserId());
+        Assert.state(admin.getTenantId().equals(tenantId), RCode.ACCESS_DENY.getMsg());
+        if (admin.getRoleId().equals(role.getId())) {
             return;
         }
-        user.setRoleId(role.getId());
-        userMapper.updateById(user);
+        admin.setRoleId(role.getId());
+        adminMapper.updateById(admin);
     }
 
     @Override
     public RoleUserPageOut<List<RoleUserQueryOut>> roleUserList(RoleUserQueryIn param) {
         Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
 
-        Page<User> page = new Page<>(param.getCurrent(), param.getPageSize());
-        IPage<User> users = userMapper.selectPage(page, new QueryWrapper<User>()
-                .lambda().eq(User::getTenantId, tenantId).isNull(User::getDeleteTime)
+        Page<Admin> page = new Page<>(param.getCurrent(), param.getPageSize());
+        IPage<Admin> users = adminMapper.selectPage(page, new QueryWrapper<Admin>()
+                .lambda().eq(Admin::getTenantId, tenantId).isNull(Admin::getDeleteTime)
         );
 
         RoleUserPageOut<List<RoleUserQueryOut>> out = new RoleUserPageOut<>();
@@ -162,7 +175,7 @@ public class UserServiceImpl implements UserService {
 
         if (StringUtils.hasText(param.getRoleName())) {
             // 此角色下已有用户id集合
-            Set<Long> ids = userMapperService.listUsersByRoleName(tenantId, param.getRoleName());
+            Set<Long> ids = adminMapperService.listAdminsByRoleName(tenantId, param.getRoleName());
             out.setKeys(ids);
         }
 
@@ -177,9 +190,9 @@ public class UserServiceImpl implements UserService {
         Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
         Role role = roleMapperService.findRoleByIdAndTenantId(param.getRoleId(), tenantId);
         Assert.notNull(role, "role不存在");
-
+        Assert.state(role.getTenantId().equals(tenantId), RCode.ACCESS_DENY.getMsg());
         // 更新user role_id
-        userMapperService.updateUserRoles(param.getSelectedKeys(), param.getUnSelectedKeys(), param.getRoleId(), tenantId);
+        adminMapperService.updateAdminRoles(param.getSelectedKeys(), param.getUnSelectedKeys(), param.getRoleId(), tenantId);
     }
 
 }

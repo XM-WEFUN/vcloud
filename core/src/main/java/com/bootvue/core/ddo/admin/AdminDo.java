@@ -1,4 +1,4 @@
-package com.bootvue.core.ddo.user;
+package com.bootvue.core.ddo.admin;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDo {
+public class AdminDo {
     private Long id;
     private String username;
     private String role;

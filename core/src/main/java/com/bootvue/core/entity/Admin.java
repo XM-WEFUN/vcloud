@@ -15,43 +15,62 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "`user`")
-public class User implements Serializable {
-    private static final long serialVersionUID = -8310905773465850691L;
+@TableName(value = "`admin`")
+public class Admin implements Serializable {
+    private static final long serialVersionUID = -5027036893653430126L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @TableField(value = "tenant_id")
-    private Long tenantId;
-
-    @TableField(value = "username")  // 昵称
+    /**
+     * 用户名
+     */
+    @TableField(value = "username")
     private String username;
 
-    @TableField(value = "openid")
-    private String openid;
-
+    /**
+     * 手机号
+     */
     @TableField(value = "phone")
     private String phone;
 
+    /**
+     * 密码
+     */
+    @TableField(value = "`password`")
+    private String password;
+
+    /**
+     * 租户id
+     */
+    @TableField(value = "tenant_id")
+    private Long tenantId;
+
+    /**
+     * 角色id
+     */
+    @TableField(value = "role_id")
+    private Long roleId;
+
+    /**
+     * 头像
+     */
     @TableField(value = "avatar")
     private String avatar;
 
-    @TableField(value = "gender")
-    private Integer gender;  // 性别  0未知  1男  2女
-
-    @TableField(value = "country")
-    private String country;
-
-    @TableField(value = "province")
-    private String province;
-
-    @TableField(value = "city")
-    private String city;
+    /**
+     * 账号状态 0:禁用  1:正常
+     */
+    @TableField(value = "`status`")
+    private Boolean status;
 
     @TableField(value = "create_time")
     private LocalDateTime createTime;
 
     @TableField(value = "update_time")
     private LocalDateTime updateTime;
+
+    @TableField(value = "delete_time")
+    private LocalDateTime deleteTime;
+
 }

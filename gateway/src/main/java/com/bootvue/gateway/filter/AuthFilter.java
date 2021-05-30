@@ -4,13 +4,13 @@ import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Keys;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.entity.Action;
+import com.bootvue.core.entity.Admin;
 import com.bootvue.core.entity.RoleMenuAction;
-import com.bootvue.core.entity.User;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.ActionMapperService;
+import com.bootvue.core.service.AdminMapperService;
 import com.bootvue.core.service.RoleMenuActionMapperService;
-import com.bootvue.core.service.UserMapperService;
 import com.bootvue.core.util.JwtUtil;
 import com.google.common.base.Splitter;
 import io.jsonwebtoken.Claims;
@@ -26,6 +26,8 @@ import org.springframework.util.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +38,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
     private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private final AppConfig appConfig;
-    private final UserMapperService userMapperService;
+    private final AdminMapperService adminMapperService;
     private final ActionMapperService actionMapperService;
     private final RoleMenuActionMapperService roleMenuActionMapperService;
 
@@ -75,16 +77,44 @@ public class AuthFilter implements GlobalFilter, Ordered {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 
-        // 数据库再次校验用户信息 (cache)
-        User user = userMapperService.findById(claims.get("user_id", Long.class));
+        Long roleId = claims.get(AppConst.HEADER_ROLEID, Long.class);   // 用户角色
 
-        if (ObjectUtils.isEmpty(user)) {
+        ServerHttpRequest newHttpRequest;
+
+        if (roleId.compareTo(0L) < 0) {
+            newHttpRequest = handleUserRequest(exchange, chain, request, path, claims); // 普通非管理员用户
+        } else {
+            newHttpRequest = handleAdminRequest(exchange, chain, request, path, claims); // 管理员用户
+        }
+
+        return chain.filter(exchange.mutate().request(newHttpRequest).build());
+    }
+
+    private ServerHttpRequest handleUserRequest(ServerWebExchange exchange, GatewayFilterChain chain, ServerHttpRequest request, String path, Claims claims) {
+        // request header添加用户信息
+        // request header添加上用户信息  中文需要URIEncode
+
+        return request.mutate().headers((headers) -> {
+            headers.add(AppConst.HEADER_USER_ID, String.valueOf(claims.get(AppConst.HEADER_USER_ID, Long.class)));
+            headers.add(AppConst.HEADER_OPENID, String.valueOf(claims.get(AppConst.HEADER_OPENID, String.class)));
+            headers.add(AppConst.HEADER_ROLEID, String.valueOf(-1L));
+            headers.add(AppConst.HEADER_USERNAME, String.valueOf(URLEncoder.encode(claims.get(AppConst.HEADER_USERNAME, String.class), StandardCharsets.UTF_8)));
+            headers.add(AppConst.HEADER_TENANT_ID, String.valueOf(claims.get(AppConst.HEADER_TENANT_ID, Long.class)));
+        }).build();
+
+    }
+
+    private ServerHttpRequest handleAdminRequest(ServerWebExchange exchange, GatewayFilterChain chain, ServerHttpRequest request, String path, Claims claims) {
+        // 数据库再次校验用户信息 (cache)
+        Admin admin = adminMapperService.findById(claims.get(AppConst.HEADER_USER_ID, Long.class));
+
+        if (ObjectUtils.isEmpty(admin)) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 
-        // api接口权限校验 /admin /xxx的需要权限校验
+        // api接口权限校验 /admin   /xxx的需要权限校验
         try {
-            handleRequestAuthorization(path, user);
+            handleRequestAuthorization(path, admin);
         } catch (AppException e) {
             throw new AppException(e.getCode(), e.getMsg());
         } catch (Exception e) {
@@ -94,15 +124,12 @@ public class AuthFilter implements GlobalFilter, Ordered {
         // request header添加用户信息
         // request header添加上用户信息  中文需要URIEncode
 
-        request.mutate().headers((headers) -> {
-            headers.add("user_id", String.valueOf(user.getId()));
-            headers.add("username", user.getUsername());
-            headers.add("openid", user.getOpenid());
-            headers.add("role_id", String.valueOf(user.getRoleId()));
-            headers.add("tenant_id", String.valueOf(user.getTenantId()));
+        return request.mutate().headers((headers) -> {
+            headers.add(AppConst.HEADER_USER_ID, String.valueOf(admin.getId()));
+            headers.add(AppConst.HEADER_ROLEID, String.valueOf(admin.getRoleId()));
+            headers.add(AppConst.HEADER_USERNAME, String.valueOf(admin.getUsername()));
+            headers.add(AppConst.HEADER_TENANT_ID, String.valueOf(admin.getTenantId()));
         }).build();
-
-        return chain.filter(exchange.mutate().request(request).build());
     }
 
     @Override
@@ -110,9 +137,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
         return Integer.MIN_VALUE;
     }
 
-    // 权限验证
-    private void handleRequestAuthorization(String path, User user) {
-        if (CollectionUtils.isEmpty(appConfig.getAuthorizationUrls()) || PATH_MATCHER.match("/admin/user/updateSelf", path)) {
+    // 管理员用户权限验证
+    private void handleRequestAuthorization(String path, Admin user) {
+        if (CollectionUtils.isEmpty(appConfig.getAuthorizationUrls()) ||
+                PATH_MATCHER.match("/admin/user/update_self", path)) {
             return;
         }
 

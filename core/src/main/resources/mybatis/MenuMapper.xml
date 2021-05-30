@@ -4,14 +4,16 @@
     <select id="getMenuList" resultType="com.bootvue.core.ddo.menu.MenuDo">
         SELECT m.*,
                rma.action_ids
-        FROM `user` u,
+        FROM `admin` a,
              role_menu_action rma,
              menu m
-        WHERE u.id = #{user_id}
+        WHERE a.id = #{user_id}
+          AND m.tenant_id = #{tenant_id}
           AND rma.role_id = #{role_id}
-          and u.role_id > 0
+          AND a.role_id > 0
           AND m.id = rma.menu_id
           AND m.p_id = #{p_id}
+          AND rma.action_ids >= 0
         ORDER BY m.sort ASC
     </select>
 </mapper>

@@ -17,6 +17,9 @@ public class Menu {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @TableField(value = "tenant_id")
+    private Long tenantId;
+    
     /**
      * 菜单名称
      */

@@ -49,11 +49,11 @@ public class ActionServiceImpl implements ActionService {
         List<ActionItem> out = new ArrayList<>();
 
         // 父级菜单
-        List<Menu> menus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, 0L).orderByAsc(Menu::getSort));
+        List<Menu> menus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, 0L).eq(Menu::getTenantId, tenantId).orderByAsc(Menu::getSort));
         menus.stream().forEach(e -> {
             ActionItem item = getAction(param.getId(), e);
             // 子菜单
-            List<Menu> subMenus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, e.getId()).orderByAsc(Menu::getSort));
+            List<Menu> subMenus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, e.getId()).eq(Menu::getTenantId, tenantId).orderByAsc(Menu::getSort));
             List<ActionItem> children = new ArrayList<>();
             subMenus.stream().forEach(i -> children.add(getAction(param.getId(), i)));
             item.setChildren(children);

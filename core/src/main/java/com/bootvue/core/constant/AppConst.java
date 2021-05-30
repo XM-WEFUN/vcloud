@@ -8,6 +8,7 @@ public class AppConst {
     public static final String REFRESH_TOKEN = "refresh_token";
 
     // spring cache name
+    public static final String ADMIN_CACHE = "cache:admin";
     public static final String USER_CACHE = "cache:user";
     public static final String ACTION_CACHE = "cache:action";
 

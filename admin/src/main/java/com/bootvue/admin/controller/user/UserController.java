@@ -35,7 +35,7 @@ public class UserController {
         return userService.userList(param);
     }
 
-    @PostMapping("/listByRole")
+    @PostMapping("/list_by_role")
     @ApiOperation("查询-某个角色下包含的用户列表")
     public RoleUserPageOut<List<RoleUserQueryOut>> roleUserList(@RequestBody RoleUserQueryIn param) {
         return userService.roleUserList(param);
@@ -53,13 +53,13 @@ public class UserController {
         userService.addOrUpdateUser(param);
     }
 
-    @PostMapping("/updateStatus")
+    @PostMapping("/update_status")
     @ApiOperation("更新管理员用户状态")
     public void updateUserStatus(@RequestBody UserIn param) {
         userService.updateUserStatus(param);
     }
 
-    @PostMapping("/updateSelf")
+    @PostMapping("/update_self")
     @ApiOperation("更新用户自身信息")
     public void updateSelfInfo(@RequestBody UserIn param) {
         Long userId = Long.valueOf(request.getHeader(AppConst.HEADER_USER_ID));
@@ -67,14 +67,14 @@ public class UserController {
         userService.updateSelfInfo(param);
     }
 
-    @PostMapping("/updateRole")
+    @PostMapping("/update_role")
     @ApiOperation("修改用户角色")
     public void updateRole(@RequestBody @Valid UserRoleIn param, BindingResult result) {
         R.handleErr(result);
         userService.updateUserRole(param);
     }
 
-    @PostMapping("/updateRoles")
+    @PostMapping("/update_roles")
     @ApiOperation("批量修改用户角色")
     public void updateRoles(@RequestBody @Valid UserRolesIn param, BindingResult result) {
         R.handleErr(result);

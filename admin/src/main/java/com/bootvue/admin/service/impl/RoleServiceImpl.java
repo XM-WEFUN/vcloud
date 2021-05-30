@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bootvue.admin.dto.RoleIn;
 import com.bootvue.admin.dto.RoleQueryIn;
 import com.bootvue.admin.dto.RoleQueryOut;
+import com.bootvue.admin.service.RoleService;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.entity.Role;
 import com.bootvue.core.mapper.RoleMapper;
@@ -13,7 +14,7 @@ import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.PageOut;
 import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.RoleMenuActionMapperService;
-import com.bootvue.core.service.UserMapperService;
+import com.bootvue.core.service.AdminMapperService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class RoleServiceImpl implements RoleService {
     private final RoleMapper roleMapper;
     private final HttpServletRequest request;
     private final RoleMenuActionMapperService roleMenuActionMapperService;
-    private final UserMapperService userMapperService;
+    private final AdminMapperService adminMapperService;
 
     @Override
     public PageOut<List<RoleQueryOut>> roleList(RoleQueryIn param) {
@@ -89,6 +90,6 @@ public class RoleServiceImpl implements RoleService {
         // role_menu_action
         roleMenuActionMapperService.delByRoleId(role.getId());
         // user
-        userMapperService.removeUserRoleId(role.getId(), tenanId);
+        adminMapperService.removeUserRoleId(role.getId(), tenanId);
     }
 }

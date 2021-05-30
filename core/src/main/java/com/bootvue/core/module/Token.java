@@ -16,6 +16,7 @@ import java.io.Serializable;
 @Slf4j
 public class Token implements Serializable {
     private static final long serialVersionUID = -1962424963088919992L;
+
     private Long userId;
     private String username;
     private Long tenantId;

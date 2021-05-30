@@ -16,12 +16,13 @@ public class MenuMapperService {
     /**
      * 获取菜单
      *
-     * @param userId  用户id
-     * @param roleId  角色id
-     * @param menuPid menu菜单父级id
+     * @param userId   用户id
+     * @param tenantId tenant id
+     * @param roleId   角色id
+     * @param menuPid  menu菜单父级id
      * @return
      */
-    public List<MenuDo> getMenuList(Long userId, Long roleId, Long menuPid) {
-        return menuMapper.getMenuList(userId, roleId, menuPid);
+    public List<MenuDo> getMenuList(Long userId, Long tenantId, Long roleId, Long menuPid) {
+        return menuMapper.getMenuList(userId, tenantId, roleId, menuPid);
     }
 }

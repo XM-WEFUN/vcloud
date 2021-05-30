@@ -11,16 +11,15 @@ import com.bootvue.core.config.app.Keys;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.ddo.menu.MenuDo;
 import com.bootvue.core.entity.Action;
+import com.bootvue.core.entity.Admin;
 import com.bootvue.core.entity.Tenant;
 import com.bootvue.core.entity.User;
+import com.bootvue.core.mapper.AdminMapper;
 import com.bootvue.core.mapper.UserMapper;
 import com.bootvue.core.module.Token;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
-import com.bootvue.core.service.ActionMapperService;
-import com.bootvue.core.service.MenuMapperService;
-import com.bootvue.core.service.TenantMapperService;
-import com.bootvue.core.service.UserMapperService;
+import com.bootvue.core.service.*;
 import com.bootvue.core.util.JwtUtil;
 import com.bootvue.core.util.RsaUtil;
 import com.bootvue.core.wechat.WechatApi;
@@ -56,9 +55,11 @@ public class AuthServiceImpl implements AuthService {
 
     private final RedissonClient redissonClient;
     private final AppConfig appConfig;
-    private final UserMapperService userMapperService;
+    private final AdminMapperService adminMapperService;
     private final TenantMapperService tenantMapperService;
+    private final AdminMapper adminMapper;
     private final UserMapper userMapper;
+    private final UserMapperService userMapperService;
     private final MenuMapperService menuMapperService;
     private final ActionMapperService actionMapperService;
 
@@ -110,18 +111,20 @@ public class AuthServiceImpl implements AuthService {
 
             if (ObjectUtils.isEmpty(user)) {
                 Tenant tenant = tenantMapperService.findByTenantCode(credentials.getTenantCode());
-                user = new User(null, "wx_" + RandomUtil.randomString(5) + wechat.getNickName().substring(0, 2).trim(),
-                        RandomUtil.randomString(32), tenant.getId(), -1L, "", wechatSession.getOpenid(), wechat.getNickName(),
-                        wechat.getAvatarUrl(), true, LocalDateTime.now(), null, null);
+                user = new User(null, tenant.getId(), wechat.getNickName(), wechatSession.getOpenid(), "", wechat.getAvatarUrl(), wechat.getGender(),
+                        wechat.getCountry(), wechat.getProvince(), wechat.getCity(), LocalDateTime.now(), null);
                 userMapper.insert(user);
             } else {
                 user.setAvatar(wechat.getAvatarUrl());
-                user.setNickname(wechat.getNickName());
+                user.setUsername(wechat.getNickName());
+                user.setCountry(wechat.getCountry());
+                user.setProvince(wechat.getProvince());
+                user.setCity(wechat.getCity());
                 user.setUpdateTime(LocalDateTime.now());
                 userMapper.updateById(user);
             }
 
-            return getAuthResponse(user);
+            return getAuthResponse(null, user);
 
         } catch (Exception e) {
             log.error("微信小程序用户认证失败: 参数: {}", credentials);
@@ -133,8 +136,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void handleSmsCode(PhoneParams phoneParams) {
         // 校验手机号是否存在
-        User user = userMapperService.findByPhone(phoneParams.getPhone(), phoneParams.getTenantCode());
-        if (ObjectUtils.isEmpty(user)) {
+        Admin admin = adminMapperService.findByPhone(phoneParams.getPhone(), phoneParams.getTenantCode());
+        if (ObjectUtils.isEmpty(admin)) {
             throw new AppException(RCode.PARAM_ERROR);
         }
         String code = RandomUtil.randomNumbers(6);
@@ -174,12 +177,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 用户信息
-        Long userId = claims.get("user_id", Long.class);
-        User user = userMapperService.findById(userId);
-        if (ObjectUtils.isEmpty(user)) {
-            user = userMapper.selectById(userId);
+        Long adminUserId = claims.get(AppConst.HEADER_USER_ID, Long.class);
+        Admin admin = adminMapperService.findById(adminUserId);
+        if (ObjectUtils.isEmpty(admin)) {
+            admin = adminMapper.selectById(adminUserId);
         }
-        return getAuthResponse(user);
+        return getAuthResponse(admin, null);
     }
 
     /**
@@ -201,7 +204,7 @@ public class AuthServiceImpl implements AuthService {
         // 验证通过删除code
         bucket.delete();
 
-        return getAuthResponse(userMapperService.findByPhone(credentials.getPhone(), credentials.getTenantCode()));
+        return getAuthResponse(adminMapperService.findByPhone(credentials.getPhone(), credentials.getTenantCode()), null);
     }
 
     /**
@@ -226,36 +229,41 @@ public class AuthServiceImpl implements AuthService {
 
         String password = RsaUtil.getPassword(appConfig, credentials.getPlatform(), credentials.getPassword());
         // 验证 用户名 密码
-        User user = userMapperService.findByUsernameAndPassword(credentials.getUsername(),
+        Admin admin = adminMapperService.findByUsernameAndPassword(credentials.getUsername(),
                 DigestUtils.md5Hex(password),
                 credentials.getTenantCode());
 
-        return getAuthResponse(user);
+        return getAuthResponse(admin, null);
     }
 
     /**
      * 用户信息&token
      *
-     * @param user user对象
+     * @param admin admin对象
+     * @param user  user对象
      * @return AuthResponse
      */
-    private AuthResponse getAuthResponse(User user) {
+    private AuthResponse getAuthResponse(Admin admin, User user) {
         AuthResponse response = new AuthResponse();
-        if (ObjectUtils.isEmpty(user) || user.getRoleId().equals(0L)) {
+        if ((ObjectUtils.isEmpty(admin) || admin.getId().equals(0L)) && (ObjectUtils.isEmpty(user) || user.getId().equals(0L))) {
             throw new AppException(RCode.PARAM_ERROR.getCode(), "用户凭证错误");
         }
 
         // 响应token信息
         Token accessToken = new Token();
         Token refreshToken = new Token();
-        BeanUtils.copyProperties(user, accessToken);
-        BeanUtils.copyProperties(user, refreshToken);
-        accessToken.setUserId(user.getId());
-        accessToken.setType(AppConst.ACCESS_TOKEN);
-        refreshToken.setUserId(user.getId());
-        refreshToken.setType(AppConst.REFRESH_TOKEN);
 
-        BeanUtils.copyProperties(user, response);
+        BeanUtils.copyProperties(ObjectUtils.isEmpty(admin) ? user : admin, accessToken);
+        BeanUtils.copyProperties(ObjectUtils.isEmpty(admin) ? user : admin, refreshToken);
+        accessToken.setUserId(ObjectUtils.isEmpty(admin) ? user.getId() : admin.getId());
+        accessToken.setType(AppConst.ACCESS_TOKEN);
+        accessToken.setRoleId(ObjectUtils.isEmpty(admin) ? -1L : admin.getRoleId());
+
+        refreshToken.setUserId(ObjectUtils.isEmpty(admin) ? user.getId() : admin.getId());
+        refreshToken.setType(AppConst.REFRESH_TOKEN);
+        refreshToken.setRoleId(ObjectUtils.isEmpty(admin) ? -1L : admin.getRoleId());
+
+        BeanUtils.copyProperties(ObjectUtils.isEmpty(admin) ? user : admin, response);
 
         //  access_token 7200s
         LocalDateTime accessTokenExpire = LocalDateTime.now().plusSeconds(7200L);
@@ -269,10 +277,11 @@ public class AuthServiceImpl implements AuthService {
         response.setRefreshToken(refreshTokenStr);
 
         // 菜单权限信息
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        response.setMenus(getMenus(user.getId(), user.getRoleId()));
-        log.info("菜单权限处理耗时: {} s", stopwatch.stop().elapsed(TimeUnit.SECONDS));
-
+        if (!ObjectUtils.isEmpty(admin) && admin.getRoleId().compareTo(0L) > 0) {
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            response.setMenus(getMenus(admin.getId(), admin.getTenantId(), admin.getRoleId()));
+            log.info("菜单权限处理耗时: {} s", stopwatch.stop().elapsed(TimeUnit.SECONDS));
+        }
         return response;
     }
 
@@ -284,11 +293,10 @@ public class AuthServiceImpl implements AuthService {
      * @param roleId
      * @return
      */
-    private List<MenuOut> getMenus(Long userId, Long roleId) {
+    private List<MenuOut> getMenus(Long userId, Long tenantId, Long roleId) {
         List<MenuOut> outs = new ArrayList<>();
-
         // 父一级菜单
-        List<MenuDo> menuDos = menuMapperService.getMenuList(userId, roleId, 0L);
+        List<MenuDo> menuDos = menuMapperService.getMenuList(userId, tenantId, roleId, 0L);
 
         menuDos.stream().forEach(e -> {  // 父级
             MenuOut menuOut = new MenuOut();
@@ -299,7 +307,7 @@ public class AuthServiceImpl implements AuthService {
             menuOut.setPermissions(ps);
             if (!CollectionUtils.isEmpty(ps)) {
                 // 子级菜单
-                List<MenuDo> subMenuDos = menuMapperService.getMenuList(userId, roleId, e.getId());
+                List<MenuDo> subMenuDos = menuMapperService.getMenuList(userId, tenantId, roleId, e.getId());
                 List<MenuOut> children = subMenuDos.stream().map(i -> { // 子级
                     MenuOut subMenuOut = new MenuOut();
                     BeanUtils.copyProperties(i, subMenuOut);

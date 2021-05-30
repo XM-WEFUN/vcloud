@@ -36,7 +36,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 [认证相关 /auth/oauth](http://localhost:8080/auth/swagger-ui/index.html?urls.primaryName=auth)
 
-[后端接口 /admin](http://localhost:8080/admin/swagger-ui/index.html?urls.primaryName=admin)
+[管理平台后端接口 /admin](http://localhost:8080/admin/swagger-ui/index.html?urls.primaryName=admin)
 
 ## 状态码
 
@@ -144,6 +144,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
   {
   "user_id": 1,
   "username": "admin",
+  "role_id": 0,
   "type": "access_token",
   "jti": "cfd22c99-e0b8-4e98-a8af-xxoo",
   "iat": 1610961974,
@@ -160,7 +161,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 > 按钮非特指, 对应前端当前页面下同类型的所有按钮, 需要前后端约定好
 
-- 非后台管理员类型用户 `user role_id`为`-1` , 管理员账号未分配角色的`role_id`为`0`
+- `role_id`: >0 有效的管理平台用户(系统管理员或代理平台等) 0(初始用户(管理平台没有菜单权限的用户/非系统、代理等管理平台端的用户))   -1(普通用户, 无平台权限)
 
 - 二级菜单父一级 `permissions` ["list"]或者没有, 对应 `role_menu_action actions`字段, `0`(有查看权限)/`-1`(没有查看权限)
 

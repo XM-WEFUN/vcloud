@@ -31,10 +31,6 @@ public class AuthResponse {
     @ApiModelProperty(notes = "头像")
     private String avatar;
 
-    @ApiModelProperty(notes = "昵称")
-    private String nickname;
-
-
     @ApiModelProperty(notes = "菜单权限")
     private List<MenuOut> menus;
 }

@@ -65,9 +65,12 @@ vcloud:
       private-key: |-
         oo
   cache:
-    - cache-name: user
+    - cache-name: admin
       ttl: 1800000
       max-idle-time: 1200000
+    - cache-name: user
+        ttl: 1800000
+        max-idle-time: 1200000
     - cache-name: action
       ttl: 1800000
       max-idle-time: 1200000

@@ -1,4 +1,4 @@
-package com.bootvue.admin.service.impl;
+package com.bootvue.admin.service;
 
 import com.bootvue.admin.dto.RoleIn;
 import com.bootvue.admin.dto.RoleQueryIn;

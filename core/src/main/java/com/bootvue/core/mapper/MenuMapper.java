@@ -8,5 +8,5 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface MenuMapper extends BaseMapper<Menu> {
-    List<MenuDo> getMenuList(@Param("user_id") Long userId, @Param("role_id") Long roleId, @Param("p_id") Long menuPid);
+    List<MenuDo> getMenuList(@Param("user_id") Long userId, @Param("tenant_id") Long tenantId, @Param("role_id") Long roleId, @Param("p_id") Long menuPid);
 }

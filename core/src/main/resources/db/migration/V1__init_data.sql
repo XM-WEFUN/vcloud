@@ -21,7 +21,7 @@ CREATE TABLE `action`
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `api_index` (`api`) USING BTREE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 13
+  AUTO_INCREMENT = 15
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
   ROW_FORMAT = DYNAMIC;
@@ -38,7 +38,7 @@ VALUES (3, '/admin/user/list', 'user:list');
 INSERT INTO `action`
 VALUES (4, '/admin/user/update', 'user:update');
 INSERT INTO `action`
-VALUES (5, '/admin/user/updateStatus', 'user:update');
+VALUES (5, '/admin/user/update_status', 'user:update');
 INSERT INTO `action`
 VALUES (6, '/admin/user/delete', 'user:delete');
 INSERT INTO `action`
@@ -54,11 +54,45 @@ VALUES (11, '/admin/action/list', 'action:list');
 INSERT INTO `action`
 VALUES (12, '/admin/action/update', 'action:update');
 INSERT INTO `action`
-VALUES (13, '/admin/user/updateRole', 'user:update');
+VALUES (13, '/admin/user/update_role', 'user:update');
 INSERT INTO `action`
-VALUES (14, '/admin/user/listByRole', 'user:list');
+VALUES (14, '/admin/user/list_by_role', 'user:list');
 INSERT INTO `action`
-VALUES (15, '/admin/user/updateRoles', 'user:update');
+VALUES (15, '/admin/user/update_roles', 'user:update');
+
+-- ----------------------------
+-- Table structure for admin
+-- ----------------------------
+DROP TABLE IF EXISTS `admin`;
+CREATE TABLE `admin`
+(
+    `id`          bigint                                                        NOT NULL AUTO_INCREMENT,
+    `username`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名',
+    `phone`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '手机号',
+    `password`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '密码',
+    `tenant_id`   bigint                                                        NOT NULL COMMENT '租户id',
+    `role_id`     bigint                                                        NOT NULL DEFAULT 0 COMMENT '角色id',
+    `avatar`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像',
+    `status`      tinyint(1)                                                    NOT NULL DEFAULT 0 COMMENT '账号状态 0:禁用  1:正常',
+    `create_time` datetime(3)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `update_time` datetime(3)                                                   NULL     DEFAULT NULL,
+    `delete_time` datetime(3)                                                   NULL     DEFAULT NULL,
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `ut_index` (`username`, `tenant_id`) USING BTREE,
+    INDEX `username_index` (`username`) USING BTREE,
+    INDEX `phone_index` (`phone`) USING BTREE,
+    INDEX `tenant_index` (`tenant_id`) USING BTREE
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 2
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci
+  ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of admin
+-- ----------------------------
+INSERT INTO `admin`
+VALUES (1, 'admin', '17705920000', md5('123456'), 1, 1, '', 1, now(3), NULL, NULL);
 
 -- ----------------------------
 -- Table structure for menu
@@ -67,6 +101,7 @@ DROP TABLE IF EXISTS `menu`;
 CREATE TABLE `menu`
 (
     `id`             bigint                                                         NOT NULL AUTO_INCREMENT,
+    `tenant_id`      bigint                                                         NOT NULL COMMENT 'tenant id',
     `title`          varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT '菜单名称',
     `sort`           int                                                            NOT NULL COMMENT '菜单顺序',
     `key`            varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT '菜单唯一key',
@@ -78,7 +113,7 @@ CREATE TABLE `menu`
     `default_open`   tinyint(1)                                                     NOT NULL DEFAULT 0 COMMENT '二级菜单是否默认展开   0:否  1:是',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 6
+  AUTO_INCREMENT = 4
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
   ROW_FORMAT = DYNAMIC;
@@ -87,13 +122,13 @@ CREATE TABLE `menu`
 -- Records of menu
 -- ----------------------------
 INSERT INTO `menu`
-VALUES (1, '首页', 0, 'index', '/index', 'HomeOutlined', 0, '[{"label":"查看","value":"index:list"}]', 1, 0);
+VALUES (1, 1, '首页', 0, 'index', '/index', 'HomeOutlined', 0, '[{\"label\":\"查看\",\"value\":\"index:list\"}]', 1, 0);
 INSERT INTO `menu`
-VALUES (2, '系统设置', 100, 'setting', '/', 'SettingOutlined', 0, '[{"label":"查看","value":"list"}]', 0, 1);
+VALUES (2, 1, '系统设置', 100, 'setting', '/', 'SettingOutlined', 0, '[{\"label\":\"查看\",\"value\":\"list\"}]', 0, 1);
 INSERT INTO `menu`
-VALUES (3, '用户管理', 101, 'user', '/user', '', 2, '[{"label":"查看","value":"user:list"},{"label":"修改","value":"user:update"},{"label":"新增","value":"user:add"},{"label":"删除","value":"user:delete"}]', 0, 0);
+VALUES (3, 1, '用户管理', 101, 'user', '/user', '', 2, '[{\"label\":\"查看\",\"value\":\"user:list\"},{\"label\":\"修改\",\"value\":\"user:update\"},{\"label\":\"新增\",\"value\":\"user:add\"},{\"label\":\"删除\",\"value\":\"user:delete\"}]', 0, 0);
 INSERT INTO `menu`
-VALUES (4, '角色管理', 102, 'role', '/role', '', 2, '[{"label":"查看","value":"role:list"},{"label":"修改","value":"role:update"},{"label":"新增","value":"role:add"},{"label":"删除","value":"role:delete"},{"label":"权限","value":"action:list,action:update"},{"label":"用户","value":"user:list,user:update"}]', 0, 0);
+VALUES (4, 1, '角色管理', 102, 'role', '/role', '', 2, '[{\"label\":\"查看\",\"value\":\"role:list\"},{\"label\":\"修改\",\"value\":\"role:update\"},{\"label\":\"新增\",\"value\":\"role:add\"},{\"label\":\"删除\",\"value\":\"role:delete\"},{\"label\":\"权限\",\"value\":\"action:list,action:update\"},{\"label\":\"用户\",\"value\":\"user:list,user:update\"}]', 0, 0);
 
 -- ----------------------------
 -- Table structure for role
@@ -107,7 +142,7 @@ CREATE TABLE `role`
     PRIMARY KEY (`id`) USING BTREE,
     INDEX `tenant_index` (`tenant_id`) USING BTREE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 2
+  AUTO_INCREMENT = 1
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
   ROW_FORMAT = DYNAMIC;
@@ -130,9 +165,10 @@ CREATE TABLE `role_menu_action`
     `action_ids` varchar(4096) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'action id ,分隔',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
+  AUTO_INCREMENT = 4
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
-  ROW_FORMAT = Dynamic;
+  ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menu_action
@@ -159,7 +195,7 @@ CREATE TABLE `tenant`
     `delete_time` datetime(3)                                                  NULL     DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 2
+  AUTO_INCREMENT = 1
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
   ROW_FORMAT = DYNAMIC;
@@ -168,7 +204,7 @@ CREATE TABLE `tenant`
 -- Records of tenant
 -- ----------------------------
 INSERT INTO `tenant`
-VALUES (1, '000000', '运营平台', now(3), NULL);
+VALUES (1, 'V00000000001', '运营平台', now(3), NULL);
 
 -- ----------------------------
 -- Table structure for user
@@ -176,34 +212,28 @@ VALUES (1, '000000', '运营平台', now(3), NULL);
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
-    `id`          bigint                                                        NOT NULL AUTO_INCREMENT,
-    `username`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名',
-    `password`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '密码',
-    `tenant_id`   bigint                                                        NOT NULL COMMENT '租户id',
-    `role_id`     bigint                                                        NOT NULL DEFAULT 0 COMMENT '角色id',
-    `phone`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '手机号',
-    `openid`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '小程序openid',
-    `nickname`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '昵称',
-    `avatar`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像',
-    `status`      tinyint(1)                                                    NOT NULL DEFAULT 0 COMMENT '账号状态 0:禁用  1:正常',
-    `create_time` datetime(3)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `update_time` datetime(3)                                                   NULL     DEFAULT NULL,
-    `delete_time` datetime(3)                                                   NULL     DEFAULT NULL,
+    `id`          bigint                                                         NOT NULL AUTO_INCREMENT,
+    `tenant_id`   bigint                                                         NOT NULL COMMENT '租户id',
+    `username`    varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名 昵称',
+    `openid`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT '小程序openid',
+    `phone`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT '手机号',
+    `avatar`      varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像',
+    `gender`      tinyint(1)                                                     NOT NULL DEFAULT 0 COMMENT '性别 0:未知 1:男 2:女',
+    `country`     varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT '国家',
+    `province`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT '省',
+    `city`        varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT '城市',
+    `create_time` datetime(3)                                                    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `update_time` datetime(3)                                                    NULL     DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `ut_index` (`username`, `tenant_id`) USING BTREE,
-    INDEX `username_index` (`username`) USING BTREE,
-    INDEX `phone_index` (`phone`) USING BTREE,
-    INDEX `tenant_index` (`tenant_id`) USING BTREE
+    UNIQUE INDEX `openid_index` (`tenant_id`, `openid`) USING BTREE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 2
+  AUTO_INCREMENT = 1
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
-  ROW_FORMAT = DYNAMIC;
+  ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user`
-VALUES (1, 'admin', md5('123456'), 1, 1, '17705920000', '', '', '', 1, now(3), NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

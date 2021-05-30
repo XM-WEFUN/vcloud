@@ -3,7 +3,7 @@ package com.bootvue.admin.controller.role;
 import com.bootvue.admin.dto.RoleIn;
 import com.bootvue.admin.dto.RoleQueryIn;
 import com.bootvue.admin.dto.RoleQueryOut;
-import com.bootvue.admin.service.impl.RoleService;
+import com.bootvue.admin.service.RoleService;
 import com.bootvue.core.result.PageOut;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
