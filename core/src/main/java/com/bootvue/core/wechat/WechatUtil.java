@@ -4,6 +4,7 @@ package com.bootvue.core.wechat;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -61,5 +62,9 @@ public class WechatUtil {
             log.error("微信加密数据解密失败", e);
         }
         return null;
+    }
+
+    public static String getSignature(String sessionKey, String rawData) {
+        return DigestUtils.sha1Hex(rawData + sessionKey);
     }
 }

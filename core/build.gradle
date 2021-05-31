@@ -18,6 +18,7 @@ dependencies {
     api libs.get('commons-io')
     api libs.get('commons-fileupload')
     api libs.get('commons-pool2')
+    api libs.get('caffeine')
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-data-redis'
     api 'org.springframework.boot:spring-boot-starter-validation'

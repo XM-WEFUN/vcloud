@@ -4,6 +4,7 @@ import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.bootvue.auth.dto.*;
 import com.bootvue.auth.service.AuthService;
 import com.bootvue.core.config.app.AppConfig;
@@ -43,6 +44,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -97,31 +99,38 @@ public class AuthServiceImpl implements AuthService {
                 throw new AppException(RCode.PARAM_ERROR);
             }
 
-            // 2. 校验数据签名
-            if (!DigestUtils.sha1Hex(wechat.getRawData() + wechatSession.getSessionKey()).equalsIgnoreCase(wechat.getSignature())) {
-                log.error("微信小程序加密参数校验失败");
-                throw new AppException(RCode.PARAM_ERROR);
-            }
+            // 用户是否存在  不存在新增用户
+            Tenant tenant = tenantMapperService.findByTenantCode(credentials.getTenantCode());
+            User user = userMapperService.findByOpenid(wechatSession.getOpenid(), tenant.getId());
 
-            // 3. 敏感数据暂不处理
-            log.info("加密数据: {}", WechatUtil.decrypt(wechatSession.getSessionKey(), wechat.getEncryptedData(), wechat.getIv()));
+            if (StringUtils.hasText(wechat.getSignature()) && ObjectUtils.isEmpty(user)) {
+                //  校验数据签名
+                if (!WechatUtil.getSignature(wechatSession.getSessionKey(), wechat.getRawData()).equalsIgnoreCase(wechat.getSignature())) {
+                    log.error("微信小程序加密参数校验失败");
+                    throw new AppException(RCode.PARAM_ERROR);
+                }
 
-            // 4. 用户是否存在  新增/更新用户
-            User user = userMapperService.findByOpenid(wechatSession.getOpenid(), credentials.getTenantCode());
+                //  加密数据
+                JSONObject encryptData = WechatUtil.decrypt(wechatSession.getSessionKey(), wechat.getEncryptedData(), wechat.getIv());
+                log.info("加密数据: {}", encryptData);
+                // 敏感数据有效性校验
+                JSONObject watermark = encryptData.getJSONObject("watermark");
+                if (!keys.getWechatAppid().equalsIgnoreCase(watermark.getString("appid")) ||
+                        Math.abs(LocalDateTime.now().toInstant(ZoneOffset.of("+8")).getEpochSecond() - watermark.getLong("timestamp")) > 2 * 60) {
+                    log.error("加密数据appid不符或水印时间戳时间不符, {}", encryptData);
+                    throw new AppException(RCode.PARAM_ERROR);
+                }
+                String country = StringUtils.hasText(encryptData.getString("country")) ? encryptData.getString("country") : "";
+                String avatar = StringUtils.hasText(encryptData.getString("avatarUrl")) ? encryptData.getString("avatarUrl") : "";
+                String nickname = StringUtils.hasText(encryptData.getString("nickName")) ? encryptData.getString("nickName") : "wx_" + RandomStringUtils.randomAlphabetic(8);
+                String province = StringUtils.hasText(encryptData.getString("province")) ? encryptData.getString("province") : "";
+                String city = StringUtils.hasText(encryptData.getString("city")) ? encryptData.getString("city") : "";
+                Integer gender = encryptData.getInteger("gender");
 
-            if (ObjectUtils.isEmpty(user)) {
-                Tenant tenant = tenantMapperService.findByTenantCode(credentials.getTenantCode());
-                user = new User(null, tenant.getId(), wechat.getNickName(), wechatSession.getOpenid(), "", wechat.getAvatarUrl(), wechat.getGender(),
-                        wechat.getCountry(), wechat.getProvince(), wechat.getCity(), LocalDateTime.now(), null);
+                user = new User(null, tenant.getId(), nickname, wechatSession.getOpenid(), "", avatar, gender,
+                        country, province, city, LocalDateTime.now(), null);
                 userMapper.insert(user);
-            } else {
-                user.setAvatar(wechat.getAvatarUrl());
-                user.setUsername(wechat.getNickName());
-                user.setCountry(wechat.getCountry());
-                user.setProvince(wechat.getProvince());
-                user.setCity(wechat.getCity());
-                user.setUpdateTime(LocalDateTime.now());
-                userMapper.updateById(user);
+
             }
 
             return getAuthResponse(null, user);
@@ -177,12 +186,21 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 用户信息
-        Long adminUserId = claims.get(AppConst.HEADER_USER_ID, Long.class);
-        Admin admin = adminMapperService.findById(adminUserId);
-        if (ObjectUtils.isEmpty(admin)) {
-            admin = adminMapper.selectById(adminUserId);
+        Long roleId = claims.get(AppConst.HEADER_ROLEID, Long.class);
+        Long userId = claims.get(AppConst.HEADER_USER_ID, Long.class);
+        if (roleId.compareTo(0L) >= 0) {
+            Admin admin = adminMapperService.findById(userId);
+            if (ObjectUtils.isEmpty(admin)) {
+                admin = adminMapper.selectById(userId);
+            }
+            return getAuthResponse(admin, null);
+        } else {
+            User user = userMapperService.findById(userId);
+            if (ObjectUtils.isEmpty(user)) {
+                user = userMapper.selectById(userId);
+            }
+            return getAuthResponse(null, user);
         }
-        return getAuthResponse(admin, null);
     }
 
     /**

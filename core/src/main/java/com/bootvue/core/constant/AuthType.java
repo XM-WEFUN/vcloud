@@ -11,7 +11,7 @@ public enum AuthType {
     REFRESH_TOKEN(0, "refresh_token"),
     USERNAME_PASSWORD_LOGIN(1, "username_password_login"),
     SMS_LOGIN(2, "sms_login"),
-    WECHAT(3, "wechat");
+    WECHAT(3, "wechat_app");
     private Integer value;
     private String type;
 }
