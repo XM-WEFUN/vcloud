@@ -47,6 +47,9 @@ vcloud:
     - /**/v3/**
   authorization-urls:
     - /admin/**
+  un-authorization-urls:
+    - /admin/user/update_self
+    - /admin/user/list_self
   auth-key:
     - app-id: web
       secret: 6842224b-7ddb-4c63-af62-1db58d77b2a5

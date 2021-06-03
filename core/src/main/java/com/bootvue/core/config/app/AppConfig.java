@@ -19,8 +19,9 @@ import java.util.Set;
 public class AppConfig {
 
     private Boolean swagger;  // 是否允许生成swagger文档
-    private Set<String> skipUrls; //  白名单 放行uri
+    private Set<String> skipUrls; //  白名单 无需认证 放行uri
     private Set<String> authorizationUrls; // 需要权限验证的接口
+    private Set<String> unAuthorizationUrls; // 不需要权限校验
     private Set<Keys> authKey;   // 客户端认证凭证
     private Set<Caches> cache;  // spring cache
 

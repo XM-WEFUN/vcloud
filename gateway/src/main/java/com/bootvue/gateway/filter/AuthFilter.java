@@ -139,11 +139,19 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
     // 管理员用户权限验证
     private void handleRequestAuthorization(String path, Admin user) {
-        if (CollectionUtils.isEmpty(appConfig.getAuthorizationUrls()) ||
-                PATH_MATCHER.match("/admin/user/update_self", path)) {
+        if (CollectionUtils.isEmpty(appConfig.getAuthorizationUrls())) {
             return;
         }
+        // 不需要校验
+        if (!CollectionUtils.isEmpty(appConfig.getUnAuthorizationUrls())) {
+            for (String unAuthorizationUrl : appConfig.getUnAuthorizationUrls()) {
+                if (PATH_MATCHER.match(unAuthorizationUrl, path)) {
+                    return;
+                }
+            }
+        }
 
+        // 需要校验权限的请求
         boolean flag = true;
         for (String authorizationUrl : appConfig.getAuthorizationUrls()) {
             if (PATH_MATCHER.match(authorizationUrl, path)) {
