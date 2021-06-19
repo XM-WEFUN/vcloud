@@ -5,7 +5,7 @@ import com.bootvue.core.result.PageOut;
 
 import java.util.List;
 
-public interface UserService {
+public interface AdminService {
     PageOut<List<UserQueryOut>> userList(UserQueryIn param);
 
     void addOrUpdateUser(UserIn param);

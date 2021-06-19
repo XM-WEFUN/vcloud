@@ -17,7 +17,11 @@ import java.time.LocalDateTime;
 public class UserQueryOut {
     private Long id;
     private String username;
+    private Long roleId;
     private String roleName;
+    private String tenantName;
+    private Long tenantId;
+    private String phone;
 
     @JsonSerialize(using = StatusSerializer.class, nullsUsing = StatusSerializer.class)
     private Boolean status; // 状态  1 正常  0禁用

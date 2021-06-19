@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bootvue.admin.dto.*;
-import com.bootvue.admin.service.UserService;
+import com.bootvue.admin.service.AdminService;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.constant.PlatformType;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class UserServiceImpl implements UserService {
+public class AdminServiceImpl implements AdminService {
     private final AdminMapperService adminMapperService;
     private final RoleMapperService roleMapperService;
     private final HttpServletRequest request;
@@ -54,8 +54,8 @@ public class UserServiceImpl implements UserService {
 
         out.setTotal(users.getTotal());
 
-        out.setRows(users.getRecords().stream().map(e -> new UserQueryOut(e.getId(), e.getUsername(),
-                e.getRole(), e.getStatus(), e.getCreateTime())).collect(Collectors.toList()));
+        out.setRows(users.getRecords().stream().map(e -> new UserQueryOut(e.getId(), e.getUsername(), e.getRoleId(),
+                e.getRole(), e.getTenantName(), e.getTenantId(), e.getPhone(), e.getStatus(), e.getCreateTime())).collect(Collectors.toList()));
         return out;
     }
 
@@ -70,19 +70,24 @@ public class UserServiceImpl implements UserService {
             admin = adminMapper.selectById(param.getId());
             Assert.state(admin.getTenantId().equals(tenantId), RCode.ACCESS_DENY.getMsg());
             if (StringUtils.hasText(param.getPassword())) {
-                String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
+                String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.getPlatform(Integer.valueOf(request.getHeader(AppConst.HEADER_PLATFORM))), param.getPassword()), AppConst.PASSWORD_REGEX);
                 admin.setPassword(DigestUtils.md5Hex(password));
             }
             if (StringUtils.hasText(param.getPhone())) {
                 // 当前租户下是否已存在该手机号用户
                 Admin existAdmin = adminMapperService.findByPhoneAndTenantId(param.getPhone(), tenantId);
-                Assert.isNull(existAdmin, "手机号已存在");
-                admin.setPhone(param.getPhone());
+                if (!ObjectUtils.isEmpty(existAdmin)) {
+                    if (!param.getPhone().equals(existAdmin.getPhone())) {
+                        throw new AppException(RCode.PARAM_ERROR);
+                    }
+                } else {
+                    admin.setPhone(param.getPhone());
+                }
             }
             if (!ObjectUtils.isEmpty(param.getRoleId())) {
                 // 验证是否有这个role
                 Role role = roleMapperService.findRoleByIdAndTenantId(param.getRoleId(), tenantId);
-                if (ObjectUtils.isEmpty(role) || !admin.getTenantId().equals(tenantId)) {
+                if (ObjectUtils.isEmpty(role) || !admin.getTenantId().equals(tenantId) || !role.getTenantId().equals(tenantId)) {
                     throw new AppException(RCode.PARAM_ERROR);
                 }
                 admin.setRoleId(role.getId());
@@ -105,10 +110,16 @@ public class UserServiceImpl implements UserService {
                 Assert.isNull(existAdmin, "手机号已存在");
             }
 
-            String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
+            String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.getPlatform(Integer.valueOf(request.getHeader(AppConst.HEADER_PLATFORM))), param.getPassword()), AppConst.PASSWORD_REGEX);
 
+            // 验证是否有这个role
+            Role role = roleMapperService.findRoleByIdAndTenantId(param.getRoleId(), tenantId);
+            if (ObjectUtils.isEmpty(role) || !role.getTenantId().equals(tenantId)) {
+                throw new AppException(RCode.PARAM_ERROR);
+            }
+            
             admin = new Admin(null, param.getUsername(), StringUtils.hasText(param.getPhone()) ? param.getPhone() : "", DigestUtils.md5Hex(password),
-                    tenantId, 0L, "", true, LocalDateTime.now(), null, null
+                    tenantId, param.getRoleId(), "", true, LocalDateTime.now(), null, null
             );
             adminMapper.insert(admin);
         }
@@ -136,7 +147,7 @@ public class UserServiceImpl implements UserService {
         Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
         Assert.state(admin.getTenantId().equals(request.getHeader(AppConst.HEADER_TENANT_ID)), RCode.ACCESS_DENY.getMsg());
 
-        String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.WEB, param.getPassword()), AppConst.PASSWORD_REGEX);
+        String password = AppUtil.checkPattern(RsaUtil.getPassword(appConfig, PlatformType.getPlatform(Integer.valueOf(request.getHeader(AppConst.HEADER_PLATFORM))), param.getPassword()), AppConst.PASSWORD_REGEX);
         admin.setPassword(DigestUtils.md5Hex(password));
         adminMapper.updateById(admin);
     }

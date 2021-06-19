@@ -11,8 +11,8 @@ public enum RCode {
     UNAUTHORIZED_ERROR(401, "Unauthorized"),
     ACCESS_DENY(403, "Forbidden"),
     NOT_FOUND(404, "Not Found"),
-    GATEWAY_ERROR(503, "gateway error"),
-    DEFAULT(600, "系统异常"),
+    GATEWAY_ERROR(503, "Gateway Error"),
+    DEFAULT(600, "System Error"),
     ;
 
     private final Integer code;

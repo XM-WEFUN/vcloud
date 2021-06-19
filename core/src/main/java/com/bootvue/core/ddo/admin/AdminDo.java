@@ -14,7 +14,11 @@ import java.time.LocalDateTime;
 public class AdminDo {
     private Long id;
     private String username;
+    private Long roleId;
     private String role;
+    private Long tenantId;
+    private String tenantName;
+    private String phone;
     private Boolean status;
     private LocalDateTime createTime;
 }

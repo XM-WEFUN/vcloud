@@ -55,7 +55,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 `type` : [必需] 0: 换取新的access_token与refresh_token 1: 用户名密码登录 2: 短信登录 3: 微信小程序认证
 
-`platform` : [必需] 客户端平台类型 0:web 1:微信小程序 2:android 3:ios
+`platform` : [必需] 账号所属平台类型 0:运营平台 1:代理平台 2:客户平台 3....
 
 - 用户名密码登录
 
@@ -234,7 +234,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - access_token: `7200s` refresh_token: `20d` 每次与access_token同步刷新
 
-- gateway向后端服务服务转发请求时 header添加了`user_id` `username` `role_id` `openid` `tenant_id`
+- gateway向后端服务服务转发请求时 header添加了`id` `username` `role_id` `openid` `tenant_id` 等....
 
 - 所有用到的cache缓存都要在config.yaml自定义配置中指定 包括 `ttl` `maxIdleTime` 如果没有配置.默认缓存不过期
 

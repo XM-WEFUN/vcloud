@@ -2,15 +2,15 @@ package com.bootvue.core.result;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
-
-import java.util.Objects;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class R<T> {
     private Integer code;
@@ -35,8 +35,8 @@ public class R<T> {
 
     public static void handleErr(BindingResult result) {
         if (result.hasErrors()) {
-            String msg = Objects.requireNonNull(result.getFieldError()).getDefaultMessage();
-            throw new AppException(RCode.PARAM_ERROR.getCode(), msg);
+            log.error("参数错误: {}", result.getFieldError());
+            throw new AppException(RCode.PARAM_ERROR);
         }
     }
 }

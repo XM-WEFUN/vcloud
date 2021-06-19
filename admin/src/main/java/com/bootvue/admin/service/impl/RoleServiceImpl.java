@@ -8,13 +8,14 @@ import com.bootvue.admin.dto.RoleQueryIn;
 import com.bootvue.admin.dto.RoleQueryOut;
 import com.bootvue.admin.service.RoleService;
 import com.bootvue.core.constant.AppConst;
+import com.bootvue.core.ddo.role.RoleDo;
 import com.bootvue.core.entity.Role;
 import com.bootvue.core.mapper.RoleMapper;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.PageOut;
 import com.bootvue.core.result.RCode;
-import com.bootvue.core.service.RoleMenuActionMapperService;
 import com.bootvue.core.service.AdminMapperService;
+import com.bootvue.core.service.RoleMenuActionMapperService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,11 +38,11 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public PageOut<List<RoleQueryOut>> roleList(RoleQueryIn param) {
         Page<Role> page = new Page<>(param.getCurrent(), param.getPageSize());
-        IPage<Role> roles = roleMapper.findRoles(page, Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID)), param.getRoleName());
+        IPage<RoleDo> roles = roleMapper.findRoles(page, Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID)), param.getRoleName());
 
         PageOut<List<RoleQueryOut>> out = new PageOut<>();
         out.setTotal(roles.getTotal());
-        out.setRows(roles.getRecords().stream().map(e -> new RoleQueryOut(e.getId(), e.getName())).collect(Collectors.toList()));
+        out.setRows(roles.getRecords().stream().map(e -> new RoleQueryOut(e.getId(), e.getRoleName(), e.getTenantName())).collect(Collectors.toList()));
         return out;
     }
 

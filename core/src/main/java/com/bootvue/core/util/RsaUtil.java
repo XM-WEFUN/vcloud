@@ -1,7 +1,7 @@
 package com.bootvue.core.util;
 
 import com.bootvue.core.config.app.AppConfig;
-import com.bootvue.core.config.app.Keys;
+import com.bootvue.core.config.app.Key;
 import com.bootvue.core.constant.PlatformType;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
@@ -111,7 +111,7 @@ public class RsaUtil {
      *
      * @return string
      */
-    public static String getKeyString(Key key) {
+    public static String getKeyString(java.security.Key key) {
         byte[] keyBytes = key.getEncoded();
         return Base64.getEncoder().encodeToString(keyBytes);
     }
@@ -196,10 +196,10 @@ public class RsaUtil {
             throw new AppException(RCode.PARAM_ERROR);
         }
         try {
-            Keys keys = AppConfig.getKeys(appConfig, platformType);
-            Assert.notNull(keys, "参数错误");
+            Key keys = AppConfig.getKeys(appConfig, platformType);
+            Assert.notNull(keys, RCode.PARAM_ERROR.getMsg());
             String password = RsaUtil.decrypt(keys.getPrivateKey(), encryptedData);
-            Assert.notNull(password, "密码不能为空");
+            Assert.notNull(password, RCode.PARAM_ERROR.getMsg());
             return password;
         } catch (Exception e) {
             throw new AppException(RCode.PARAM_ERROR);

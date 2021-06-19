@@ -22,7 +22,7 @@ public class GlobalExceptionHandle {
     @ResponseBody
     public <T> R<T> handleException(IllegalArgumentException e) {
         log.error("拦截到IllegalArgumentException异常: ", e);
-        return R.error(new AppException(RCode.PARAM_ERROR.getCode(), e.getMessage()));
+        return R.error(new AppException(RCode.PARAM_ERROR));
     }
 
     @ExceptionHandler(value = {Exception.class})

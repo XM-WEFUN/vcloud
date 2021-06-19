@@ -22,7 +22,7 @@ public class AdminMapperService {
     private final AdminMapper adminMapper;
 
     /**
-     * 用户id 查询管理员用户
+     * 用户id 查询管理员用户 (有效的)
      *
      * @param id admin id
      * @return admin

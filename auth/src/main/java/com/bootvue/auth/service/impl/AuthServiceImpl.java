@@ -5,11 +5,14 @@ import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.bootvue.auth.UserInfo;
 import com.bootvue.auth.dto.*;
 import com.bootvue.auth.service.AuthService;
 import com.bootvue.core.config.app.AppConfig;
-import com.bootvue.core.config.app.Keys;
+import com.bootvue.core.config.app.Key;
 import com.bootvue.core.constant.AppConst;
+import com.bootvue.core.constant.PlatformType;
 import com.bootvue.core.ddo.menu.MenuDo;
 import com.bootvue.core.entity.Action;
 import com.bootvue.core.entity.Admin;
@@ -39,6 +42,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -91,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
     private AuthResponse handleWechatLogin(Credentials credentials) {
         try {
             // 1. 获取openid与session_key
-            Keys keys = AppConfig.getKeys(appConfig, credentials.getPlatform());
+            Key keys = AppConfig.getKeys(appConfig, credentials.getPlatform());
             WechatParams wechat = credentials.getWechat();
 
             WechatSession wechatSession = WechatApi.code2Session(wechat.getCode(), keys.getWechatAppid(), keys.getWechatSecret());
@@ -133,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
 
             }
 
-            return getAuthResponse(null, user);
+            return getAuthResponse(new UserInfo(user.getId(), user.getUsername(), user.getPhone(), user.getAvatar(), user.getTenantId(), PlatformType.CUSTOMER.getValue(), -1L));
 
         } catch (Exception e) {
             log.error("微信小程序用户认证失败: 参数: {}", credentials);
@@ -187,19 +191,22 @@ public class AuthServiceImpl implements AuthService {
 
         // 用户信息
         Long roleId = claims.get(AppConst.HEADER_ROLEID, Long.class);
-        Long userId = claims.get(AppConst.HEADER_USER_ID, Long.class);
-        if (roleId.compareTo(0L) >= 0) {
-            Admin admin = adminMapperService.findById(userId);
-            if (ObjectUtils.isEmpty(admin)) {
-                admin = adminMapper.selectById(userId);
+        Long id = claims.get(AppConst.HEADER_USER_ID, Long.class);
+        PlatformType platform = PlatformType.getPlatform(claims.get(AppConst.HEADER_PLATFORM, Integer.class));
+
+        if (PlatformType.ADMIN.equals(platform) || PlatformType.AGENT.equals(platform)) {  // 运营平台||代理平台
+            Admin admin = adminMapperService.findById(id);
+            if (ObjectUtils.isEmpty(admin)) { // 缓存失效
+                admin = adminMapper.selectOne(new QueryWrapper<Admin>().lambda().eq(Admin::getId, id).eq(Admin::getStatus, true).isNull(Admin::getDeleteTime));
             }
-            return getAuthResponse(admin, null);
-        } else {
-            User user = userMapperService.findById(userId);
+            Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
+            return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), admin.getTenantId(), platform.getValue(), roleId));
+        } else { // 其它平台
+            User user = userMapperService.findById(id);
             if (ObjectUtils.isEmpty(user)) {
-                user = userMapper.selectById(userId);
+                user = userMapper.selectById(id);
             }
-            return getAuthResponse(null, user);
+            return getAuthResponse(new UserInfo(id, user.getUsername(), user.getPhone(), user.getAvatar(), user.getTenantId(), platform.getValue(), -1L));
         }
     }
 
@@ -222,7 +229,19 @@ public class AuthServiceImpl implements AuthService {
         // 验证通过删除code
         bucket.delete();
 
-        return getAuthResponse(adminMapperService.findByPhone(credentials.getPhone(), credentials.getTenantCode()), null);
+        // platform类型
+        switch (credentials.getPlatform()) {
+            case ADMIN: // 运营平台
+            case AGENT: // 代理平台
+                Admin admin = adminMapperService.findByPhone(credentials.getPhone(), credentials.getTenantCode());
+                Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
+                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
+            case CUSTOMER:
+                log.info("handle customer login....");
+                return null;
+            default:
+                throw new AppException(RCode.PARAM_ERROR);
+        }
     }
 
     /**
@@ -246,42 +265,40 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String password = RsaUtil.getPassword(appConfig, credentials.getPlatform(), credentials.getPassword());
-        // 验证 用户名 密码
-        Admin admin = adminMapperService.findByUsernameAndPassword(credentials.getUsername(),
-                DigestUtils.md5Hex(password),
-                credentials.getTenantCode());
 
-        return getAuthResponse(admin, null);
+        // platform类型
+        switch (credentials.getPlatform()) {
+            case ADMIN: // 运营平台
+            case AGENT:
+                // 验证 用户名 密码
+                Admin admin = adminMapperService.findByUsernameAndPassword(credentials.getUsername(),
+                        DigestUtils.md5Hex(password),
+                        credentials.getTenantCode());
+                Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
+                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
+            case CUSTOMER:
+                log.info("handle customer login....");
+                return null;
+            default:
+                throw new AppException(RCode.PARAM_ERROR);
+        }
     }
 
     /**
      * 用户信息&token
      *
-     * @param admin admin对象
-     * @param user  user对象
+     * @param info userinfo对象
      * @return AuthResponse
      */
-    private AuthResponse getAuthResponse(Admin admin, User user) {
-        AuthResponse response = new AuthResponse();
-        if ((ObjectUtils.isEmpty(admin) || admin.getId().equals(0L)) && (ObjectUtils.isEmpty(user) || user.getId().equals(0L))) {
-            throw new AppException(RCode.PARAM_ERROR.getCode(), "用户凭证错误");
-        }
-
+    private AuthResponse getAuthResponse(UserInfo info) {
         // 响应token信息
         Token accessToken = new Token();
         Token refreshToken = new Token();
 
-        BeanUtils.copyProperties(ObjectUtils.isEmpty(admin) ? user : admin, accessToken);
-        BeanUtils.copyProperties(ObjectUtils.isEmpty(admin) ? user : admin, refreshToken);
-        accessToken.setUserId(ObjectUtils.isEmpty(admin) ? user.getId() : admin.getId());
+        BeanUtils.copyProperties(info, accessToken);
+        BeanUtils.copyProperties(info, refreshToken);
         accessToken.setType(AppConst.ACCESS_TOKEN);
-        accessToken.setRoleId(ObjectUtils.isEmpty(admin) ? -1L : admin.getRoleId());
-
-        refreshToken.setUserId(ObjectUtils.isEmpty(admin) ? user.getId() : admin.getId());
         refreshToken.setType(AppConst.REFRESH_TOKEN);
-        refreshToken.setRoleId(ObjectUtils.isEmpty(admin) ? -1L : admin.getRoleId());
-
-        BeanUtils.copyProperties(ObjectUtils.isEmpty(admin) ? user : admin, response);
 
         //  access_token 7200s
         LocalDateTime accessTokenExpire = LocalDateTime.now().plusSeconds(7200L);
@@ -291,13 +308,19 @@ public class AuthServiceImpl implements AuthService {
         String accessTokenStr = JwtUtil.encode(accessTokenExpire, BeanUtil.beanToMap(accessToken, true, true));
         String refreshTokenStr = JwtUtil.encode(refreshTokenExpire, BeanUtil.beanToMap(refreshToken, true, true));
 
+        // response对象
+        AuthResponse response = new AuthResponse();
+
+        response.setUsername(info.getUsername());
+        response.setPhone(info.getPhone());
+        response.setAvatar(info.getAvatar());
         response.setAccessToken(accessTokenStr);
         response.setRefreshToken(refreshTokenStr);
 
         // 菜单权限信息
-        if (!ObjectUtils.isEmpty(admin) && admin.getRoleId().compareTo(0L) > 0) {
+        if (info.getRoleId().compareTo(0L) > 0) {
             Stopwatch stopwatch = Stopwatch.createStarted();
-            response.setMenus(getMenus(admin.getId(), admin.getTenantId(), admin.getRoleId()));
+            response.setMenus(getMenus(info.getId(), info.getTenantId(), info.getRoleId()));
             log.info("菜单权限处理耗时: {} s", stopwatch.stop().elapsed(TimeUnit.SECONDS));
         }
         return response;

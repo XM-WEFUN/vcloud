@@ -17,9 +17,10 @@ import java.io.Serializable;
 public class Token implements Serializable {
     private static final long serialVersionUID = -1962424963088919992L;
 
-    private Long userId;
+    private Long id;
     private String username;
     private Long tenantId;
+    private Integer platform; // 账号所属平台
     private String type;  // token类型   access_token | refresh_token
     private Long roleId; //角色id
 }

@@ -12,4 +12,5 @@ import lombok.Setter;
 public class RoleQueryOut {
     private Long id;
     private String roleName;
+    private String tenantName;
 }

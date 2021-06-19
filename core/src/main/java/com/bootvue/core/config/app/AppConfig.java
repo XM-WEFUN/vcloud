@@ -22,7 +22,7 @@ public class AppConfig {
     private Set<String> skipUrls; //  白名单 无需认证 放行uri
     private Set<String> authorizationUrls; // 需要权限验证的接口
     private Set<String> unAuthorizationUrls; // 不需要权限校验
-    private Set<Keys> authKey;   // 客户端认证凭证
+    private Set<Key> keys;   // 客户端认证凭证
     private Set<Caches> cache;  // spring cache
 
     /**
@@ -30,11 +30,11 @@ public class AppConfig {
      *
      * @param appConfig    appConfig
      * @param platformType 客户端类型
-     * @return Keys
+     * @return Key
      */
-    public static Keys getKeys(AppConfig appConfig, PlatformType platformType) {
+    public static Key getKeys(AppConfig appConfig, PlatformType platformType) {
 
-        for (Keys keys : appConfig.getAuthKey()) {
+        for (Key keys : appConfig.getKeys()) {
             if (keys.getPlatform().equals(platformType.getValue())) {
                 return keys;
             }

@@ -4,13 +4,20 @@
     <select id="listAdmins" resultType="com.bootvue.core.ddo.admin.AdminDo">
         SELECT a.id          id,
                a.username    username,
+               r.id          roleId,
                r.`name`      role,
+               t.id          tenant_id,
+               t.name        tenant_name,
+               a.phone       phone,
                a.`status`    status,
                a.create_time create_time
         FROM `admin` a
-                     LEFT JOIN role r ON (a.tenant_id = #{tenant_id} and a.role_id = r.id)
-                where a.role_id != -1
-                  and a.delete_time is null
+                     LEFT JOIN role r ON (a.role_id = r.id)
+                     left join tenant t on (a.tenant_id = t.id)
+                where a.delete_time is null
+        <if test="tenant_id > 1">
+            and a.tenant_id = #{tenant_id}
+        </if>
         <if test="username != null and username != ''">
             and a.username = concat('%', #{username}, '%')
         </if>

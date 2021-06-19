@@ -38,7 +38,8 @@ public class Credentials {
     @NotNull(message = "认证方式不能为空")
     private AuthType type;
 
-    @ApiModelProperty(notes = "客户端平台类型 0:web 1:微信小程序", required = true)
+    @ApiModelProperty(notes = "客户端平台类型 0:运营平台 1:代理平台 2:客户平台 3....", required = true)
+    @NotNull(message = "platform不能为空")
     private PlatformType platform;
 
     @ApiModelProperty(notes = "旧的refresh_token")

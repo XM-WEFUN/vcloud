@@ -1,7 +1,7 @@
 package com.bootvue.admin.controller.user;
 
 import com.bootvue.admin.dto.*;
-import com.bootvue.admin.service.UserService;
+import com.bootvue.admin.service.AdminService;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.result.PageOut;
 import com.bootvue.core.result.R;
@@ -26,7 +26,7 @@ import java.util.List;
 @RequestMapping("/user")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserController {
-    private final UserService userService;
+    private final AdminService userService;
     private final HttpServletRequest request;
 
     @PostMapping("/list")
@@ -65,13 +65,6 @@ public class UserController {
         Long userId = Long.valueOf(request.getHeader(AppConst.HEADER_USER_ID));
         param.setId(userId);
         userService.updateSelfInfo(param);
-    }
-
-    @PostMapping("/update_role")
-    @ApiOperation("修改用户角色")
-    public void updateRole(@RequestBody @Valid UserRoleIn param, BindingResult result) {
-        R.handleErr(result);
-        userService.updateUserRole(param);
     }
 
     @PostMapping("/update_roles")

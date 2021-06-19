@@ -54,11 +54,9 @@ VALUES (11, '/admin/action/list', 'action:list');
 INSERT INTO `action`
 VALUES (12, '/admin/action/update', 'action:update');
 INSERT INTO `action`
-VALUES (13, '/admin/user/update_role', 'user:update');
+VALUES (13, '/admin/user/list_by_role', 'user:list');
 INSERT INTO `action`
-VALUES (14, '/admin/user/list_by_role', 'user:list');
-INSERT INTO `action`
-VALUES (15, '/admin/user/update_roles', 'user:update');
+VALUES (14, '/admin/user/update_roles', 'user:update');
 
 -- ----------------------------
 -- Table structure for admin
@@ -178,9 +176,9 @@ VALUES (1, 1, 1, '1');
 INSERT INTO `role_menu_action`
 VALUES (2, 1, 2, '0');
 INSERT INTO `role_menu_action`
-VALUES (3, 1, 3, '2,3,4,5,8,9,13');
+VALUES (3, 1, 3, '2,3,4,5,8,9');
 INSERT INTO `role_menu_action`
-VALUES (4, 1, 4, '3,4,7,8,9,10,11,12,14,15');
+VALUES (4, 1, 4, '3,4,7,8,9,10,11,12,13,14');
 
 -- ----------------------------
 -- Table structure for tenant

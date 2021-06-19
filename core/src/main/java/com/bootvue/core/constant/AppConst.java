@@ -15,10 +15,11 @@ public class AppConst {
 
     // request headers
     public static final String HEADER_TENANT_ID = "tenant_id";
-    public static final String HEADER_USER_ID = "user_id";
+    public static final String HEADER_USER_ID = "id";
     public static final String HEADER_USERNAME = "username";
     public static final String HEADER_OPENID = "openid";
     public static final String HEADER_ROLEID = "role_id";
+    public static final String HEADER_PLATFORM = "platform";
 
     //    --------------------正则
     // 手机号

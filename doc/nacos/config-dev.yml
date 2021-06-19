@@ -50,7 +50,7 @@ vcloud:
   un-authorization-urls:
     - /admin/user/update_self
     - /admin/user/list_self
-  auth-key:
+  keys:
     - app-id: web
       secret: 6842224b-7ddb-4c63-af62-1db58d77b2a5
       platform: 0
@@ -60,7 +60,7 @@ vcloud:
         ooooo
     - app-id: wechat
       secret: a135ec07-6eb2-4300-840a-9977dd8c813c
-      platform: 1
+      platform: 2
       wechat-app-id: "xxxx"
       wechat-secret: "xxxx"
       public-key: |-
@@ -72,8 +72,8 @@ vcloud:
       ttl: 1800000
       max-idle-time: 1200000
     - cache-name: user
-        ttl: 1800000
-        max-idle-time: 1200000
+      ttl: 1800000
+      max-idle-time: 1200000
     - cache-name: action
       ttl: 1800000
       max-idle-time: 1200000
