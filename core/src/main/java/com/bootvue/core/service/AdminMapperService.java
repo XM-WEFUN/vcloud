@@ -78,4 +78,9 @@ public class AdminMapperService {
             adminMapper.batchCancelRole(unSelectedKeys, roleId, tenantId);
         }
     }
+
+    @CacheEvict(cacheNames = AppConst.ADMIN_CACHE, allEntries = true)
+    public void updateAdminStatusByTenantId(Long tenantId, Integer status) {
+        adminMapper.batchUpdateStatusByTenantId(tenantId, status);
+    }
 }

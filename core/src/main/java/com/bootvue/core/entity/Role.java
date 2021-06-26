@@ -14,6 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 @TableName(value = "`role`")
 public class Role {
+    
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 

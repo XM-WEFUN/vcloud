@@ -23,7 +23,7 @@ public class AppConfig {
     private Set<String> authorizationUrls; // 需要权限验证的接口
     private Set<String> unAuthorizationUrls; // 不需要权限校验
     private Set<Key> keys;   // 客户端认证凭证
-    private Set<Caches> cache;  // spring cache
+    private Set<Cache> caches;  // spring cache
 
     /**
      * 获取客户端对应的密钥等参数

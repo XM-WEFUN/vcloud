@@ -8,9 +8,15 @@
         from role r,
              tenant t
                 where r.tenant_id = t.id
-                  and r.tenant_id = #{tenant_id}
+                  and t.delete_time is null
+        <if test="tenant_id > 1">
+            and r.tenant_id = #{tenant_id}
+        </if>
         <if test="role_name != null and role_name != ''">
             and r.`name` like concat('%', #{role_name}, '%')
+        </if>
+        <if test="tid != null">
+            and r.tenant_id = #{tid}
         </if>
         order by r.id desc
     </select>

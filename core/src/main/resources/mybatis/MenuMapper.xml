@@ -16,4 +16,24 @@
           AND rma.action_ids >= 0
         ORDER BY m.sort ASC
     </select>
+
+    <select id="listMenus" resultType="com.bootvue.core.ddo.menu.MenuTenantDo">
+        select m.id                                                           id,
+               t.id                                                           tenant_id,
+               t.name                                                         tenant_name,
+               m.title                                                        title,
+               m.sort                                                         sort,
+               m.`key`                                                        `key`,
+               m.path                                                         path,
+               m.icon                                                         icon,
+               m.p_id                                                         pid,
+               if(m.p_id = 0, '', (select title from menu where id = m.p_id)) ptitle,
+               m.actions                                                      actions,
+               m.default_select                                               default_select,
+               m.default_open                                                 default_open
+        from menu m,
+             tenant t
+        where m.tenant_id = t.id
+        order by sort asc
+    </select>
 </mapper>

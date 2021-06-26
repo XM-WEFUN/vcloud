@@ -2,6 +2,11 @@ package com.bootvue.admin.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bootvue.admin.controller.action.dto.ActionIn;
+import com.bootvue.admin.controller.action.dto.ActionOut;
+import com.bootvue.admin.controller.action.dto.ActionQueryIn;
 import com.bootvue.admin.dto.*;
 import com.bootvue.admin.service.ActionService;
 import com.bootvue.core.constant.AppConst;
@@ -9,8 +14,13 @@ import com.bootvue.core.entity.Action;
 import com.bootvue.core.entity.Menu;
 import com.bootvue.core.entity.Role;
 import com.bootvue.core.entity.RoleMenuAction;
+import com.bootvue.core.mapper.ActionMapper;
 import com.bootvue.core.mapper.MenuMapper;
+import com.bootvue.core.mapper.RoleMapper;
 import com.bootvue.core.mapper.RoleMenuActionMapper;
+import com.bootvue.core.result.AppException;
+import com.bootvue.core.result.PageOut;
+import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.ActionMapperService;
 import com.bootvue.core.service.RoleMapperService;
 import com.google.common.base.Joiner;
@@ -37,23 +47,24 @@ public class ActionServiceImpl implements ActionService {
     private final RoleMenuActionMapper roleMenuActionMapper;
     private final ActionMapperService actionMapperService;
     private final HttpServletRequest request;
+    private final ActionMapper actionMapper;
+    private final RoleMapper roleMapper;
 
     @Override
     public List<ActionItem> actionList(RoleIn param) {
         Assert.notNull(param.getId(), "参数错误");
-        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
-        Role role = roleMapperService.findRoleByIdAndTenantId(param.getId(), tenantId);
+        Role role = roleMapper.selectById(param.getId());
         Assert.notNull(role, "参数错误");
 
         // 菜单&action权限信息
         List<ActionItem> out = new ArrayList<>();
 
         // 父级菜单
-        List<Menu> menus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, 0L).eq(Menu::getTenantId, tenantId).orderByAsc(Menu::getSort));
+        List<Menu> menus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, 0L).eq(Menu::getTenantId, role.getTenantId()).orderByAsc(Menu::getSort));
         menus.stream().forEach(e -> {
             ActionItem item = getAction(param.getId(), e);
             // 子菜单
-            List<Menu> subMenus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, e.getId()).eq(Menu::getTenantId, tenantId).orderByAsc(Menu::getSort));
+            List<Menu> subMenus = menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getPId, e.getId()).eq(Menu::getTenantId, role.getTenantId()).orderByAsc(Menu::getSort));
             List<ActionItem> children = new ArrayList<>();
             subMenus.stream().forEach(i -> children.add(getAction(param.getId(), i)));
             item.setChildren(children);
@@ -98,6 +109,42 @@ public class ActionServiceImpl implements ActionService {
                 roleMenuActionMapper.updateById(rmaItem);
             }
         });
+    }
+
+    @Override
+    public PageOut<List<ActionOut>> getActionList(ActionQueryIn param) {
+        Page<Action> page = new Page<>(param.getCurrent(), param.getPageSize());
+        IPage<Action> actions = actionMapper.getActions(page, param.getApi());
+        PageOut<List<ActionOut>> out = new PageOut<>();
+
+        out.setTotal(actions.getTotal());
+        out.setRows(actions.getRecords().stream().map(e -> new ActionOut(e.getId(), e.getApi(), e.getAction())).collect(Collectors.toList()));
+        return out;
+    }
+
+    @Override
+    public void addOrUpdateAction(ActionIn param) {
+        Action exist = actionMapper.selectOne(new QueryWrapper<Action>().lambda().eq(Action::getApi, param.getApi()));
+
+        if (!ObjectUtils.isEmpty(param.getId()) && param.getId().compareTo(0L) > 0) {
+            // update
+            Action action = actionMapper.selectById(param.getId());
+            if (!ObjectUtils.isEmpty(exist) && !exist.getId().equals(action.getId())) {
+                throw new AppException(RCode.PARAM_ERROR.getCode(), "api已存在");
+            }
+            action.setApi(param.getApi());
+            action.setAction(param.getAction());
+            actionMapper.updateById(action);
+        } else {
+            // add
+            Assert.isNull(exist, "api已存在");
+            actionMapper.insert(new Action(null, param.getApi(), param.getAction()));
+        }
+    }
+
+    @Override
+    public void deleteAction(ActionIn param) {
+        actionMapper.delete(new QueryWrapper<Action>().lambda().eq(Action::getId, param.getId()));
     }
 
     private ActionItem getAction(Long roleId, Menu menu) {

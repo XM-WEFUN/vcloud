@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class UserRolesIn {
+public class AdminRolesIn {
     private Set<Long> selectedKeys;
     private Set<Long> unSelectedKeys;
 

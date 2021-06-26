@@ -80,33 +80,34 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         PlatformType platform = PlatformType.getPlatform(claims.get(AppConst.HEADER_PLATFORM, Integer.class)); // 账号所属平台
 
-        if (PlatformType.ADMIN.equals(platform) || PlatformType.AGENT.equals(platform)) {
-            // 数据库再次校验用户信息 (cache)
-            Admin admin = adminMapperService.findById(claims.get(AppConst.HEADER_USER_ID, Long.class));
+        switch (platform) {
+            case ADMIN:
+                // 数据库再次校验用户信息 (cache)
+                Admin admin = adminMapperService.findById(claims.get(AppConst.HEADER_USER_ID, Long.class));
 
-            if (ObjectUtils.isEmpty(admin)) {
-                throw new AppException(RCode.UNAUTHORIZED_ERROR);
-            }
+                if (ObjectUtils.isEmpty(admin)) {
+                    throw new AppException(RCode.UNAUTHORIZED_ERROR);
+                }
 
-            // api接口权限校验   appconfig相关配置
-            try {
-                handleRequestAuthorization(path, admin);
-            } catch (AppException e) {
-                throw new AppException(e.getCode(), e.getMsg());
-            } catch (Exception e) {
-                throw new AppException(RCode.DEFAULT.getCode(), RCode.DEFAULT.getMsg());
-            }
+                // api接口权限校验   appconfig相关配置
+                try {
+                    handleRequestAuthorization(path, admin);
+                } catch (AppException e) {
+                    throw new AppException(e.getCode(), e.getMsg());
+                } catch (Exception e) {
+                    throw new AppException(RCode.DEFAULT.getCode(), RCode.DEFAULT.getMsg());
+                }
 
-            return chain.filter(exchange.mutate().request(handleRequest(request, admin.getId(), admin.getRoleId(), admin.getTenantId(), "", admin.getUsername())).build());
-        } else {
-            // 用户平台
-            // 再次校验用户信息
-            log.info("用户再次校验........");
-            return null;
+                return chain.filter(exchange.mutate().request(handleRequest(request, platform, admin.getId(), admin.getRoleId(), admin.getTenantId(), "", admin.getUsername())).build());
+            default:
+                // 用户平台
+                // 再次校验用户信息
+                log.info("用户再次校验........");
+                return null;
         }
     }
 
-    private ServerHttpRequest handleRequest(ServerHttpRequest request, Long id, Long roleId, Long tenantId, String openid, String username) {
+    private ServerHttpRequest handleRequest(ServerHttpRequest request, PlatformType platform, Long id, Long roleId, Long tenantId, String openid, String username) {
         // request header添加用户信息
         // request header添加上用户信息  中文需要URIEncode
 
@@ -116,6 +117,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
             headers.add(AppConst.HEADER_ROLEID, String.valueOf(roleId));
             headers.add(AppConst.HEADER_USERNAME, String.valueOf(URLEncoder.encode(username, StandardCharsets.UTF_8)));
             headers.add(AppConst.HEADER_TENANT_ID, String.valueOf(tenantId));
+            headers.add(AppConst.HEADER_PLATFORM, String.valueOf(platform.getValue()));
         }).build();
     }
 

@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class UserRoleIn {
+public class AdminRoleIn {
     @NotNull(message = "用户id不能为空")
     private Long userId;
     @NotEmpty(message = "角色名不能为空")

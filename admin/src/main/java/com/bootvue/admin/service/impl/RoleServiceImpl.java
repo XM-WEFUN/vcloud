@@ -10,7 +10,9 @@ import com.bootvue.admin.service.RoleService;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.ddo.role.RoleDo;
 import com.bootvue.core.entity.Role;
+import com.bootvue.core.entity.Tenant;
 import com.bootvue.core.mapper.RoleMapper;
+import com.bootvue.core.mapper.TenantMapper;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.PageOut;
 import com.bootvue.core.result.RCode;
@@ -34,11 +36,12 @@ public class RoleServiceImpl implements RoleService {
     private final HttpServletRequest request;
     private final RoleMenuActionMapperService roleMenuActionMapperService;
     private final AdminMapperService adminMapperService;
+    private final TenantMapper tenantMapper;
 
     @Override
     public PageOut<List<RoleQueryOut>> roleList(RoleQueryIn param) {
         Page<Role> page = new Page<>(param.getCurrent(), param.getPageSize());
-        IPage<RoleDo> roles = roleMapper.findRoles(page, Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID)), param.getRoleName());
+        IPage<RoleDo> roles = roleMapper.findRoles(page, Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID)), param.getRoleName(), param.getTid());
 
         PageOut<List<RoleQueryOut>> out = new PageOut<>();
         out.setTotal(roles.getTotal());
@@ -48,26 +51,26 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void addOrUpdateRole(RoleIn param) {
-        Assert.notNull(param.getRoleName(), RCode.PARAM_ERROR.getMsg());
         // 角色名是否已存在
-        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
-        Role existRole = roleMapper.selectOne(new QueryWrapper<Role>().lambda()
-                .eq(Role::getName, param.getRoleName())
-                .eq(Role::getTenantId, tenantId)
-        );
-        if (!ObjectUtils.isEmpty(existRole)) {
-            throw new AppException(RCode.PARAM_ERROR.getCode(), "角色名已存在");
-        }
+        Role existRole = roleMapper.selectOne(new QueryWrapper<Role>().lambda().eq(Role::getName, param.getRoleName()).eq(Role::getId, param.getTid()));
+        Assert.isNull(existRole, "角色名已存在");
 
         if (ObjectUtils.isEmpty(param.getId()) || param.getId().equals(0L)) {
-            // 新增
-            roleMapper.insert(new Role(null, tenantId, param.getRoleName()));
-        } else {
-            // 更新
-            Role role = roleMapper.selectById(param.getId());
-            if (ObjectUtils.isEmpty(role) || !role.getTenantId().equals(tenantId)) {
+            // 是否是管理员用户
+            Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
+            if (!tenantId.equals(1L) && !tenantId.equals(param.getTid())) {
                 throw new AppException(RCode.PARAM_ERROR);
             }
+
+            // 租户是否存在
+            Tenant tenant = tenantMapper.selectById(param.getTid());
+            Assert.notNull(tenant, RCode.PARAM_ERROR.getMsg());
+            // 新增
+            roleMapper.insert(new Role(null, param.getTid(), param.getRoleName()));
+        } else {
+            // 更新
+            Role role = roleMapper.selectOne(new QueryWrapper<Role>().lambda().eq(Role::getId, param.getId()));
+            Assert.notNull(role, RCode.PARAM_ERROR.getMsg());
 
             role.setName(param.getRoleName());
             roleMapper.updateById(role);
@@ -81,8 +84,12 @@ public class RoleServiceImpl implements RoleService {
         Assert.notNull(param.getId(), RCode.PARAM_ERROR.getMsg());
 
         Role role = roleMapper.selectById(param.getId());
-        Long tenanId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
-        if (ObjectUtils.isEmpty(role) || !role.getTenantId().equals(tenanId)) {
+        Long tenantId = Long.valueOf(request.getHeader(AppConst.HEADER_TENANT_ID));
+        if (ObjectUtils.isEmpty(role)) {
+            throw new AppException(RCode.PARAM_ERROR);
+        }
+
+        if (!tenantId.equals(1L) && !tenantId.equals(role.getTenantId())) {
             throw new AppException(RCode.PARAM_ERROR);
         }
 
@@ -91,6 +98,6 @@ public class RoleServiceImpl implements RoleService {
         // role_menu_action
         roleMenuActionMapperService.delByRoleId(role.getId());
         // user
-        adminMapperService.removeUserRoleId(role.getId(), tenanId);
+        adminMapperService.removeUserRoleId(role.getId(), tenantId);
     }
 }

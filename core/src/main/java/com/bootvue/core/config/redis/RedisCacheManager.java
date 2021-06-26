@@ -1,7 +1,7 @@
 package com.bootvue.core.config.redis;
 
 import com.bootvue.core.config.app.AppConfig;
-import com.bootvue.core.config.app.Caches;
+import com.bootvue.core.config.app.Cache;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.cache.CacheConfig;
@@ -29,7 +29,7 @@ public class RedisCacheManager {
     CacheManager cacheManager(RedissonClient redissonClient) {
         Map<String, CacheConfig> config = new HashMap<String, CacheConfig>();
         // 过期时间   最长空闲时间
-        Set<Caches> cache = appConfig.getCache();
+        Set<Cache> cache = appConfig.getCaches();
         if (!CollectionUtils.isEmpty(cache)) {
             cache.forEach(it -> config.put("cache:" + it.getCacheName(), new CacheConfig(it.getTtl(), it.getMaxIdleTime())));
         }

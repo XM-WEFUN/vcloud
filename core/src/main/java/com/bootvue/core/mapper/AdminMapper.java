@@ -29,4 +29,5 @@ public interface AdminMapper extends BaseMapper<Admin> {
 
     void batchCancelRole(@Param("un_selected_keys") Set<Long> unSelectedKeys, @Param("role_id") Long roleId, @Param("tenant_id") Long tenantId);
 
+    void batchUpdateStatusByTenantId(@Param("tenant_id") Long tenantId, @Param("status") Integer status);
 }

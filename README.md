@@ -247,7 +247,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 - 数据初始化: 每个租户`role`表至少有一个超级管理员的角色,
   `menu`表填充所有的菜单信息,`actions`字段为菜单对应的action权限, 格式json字符串(二级菜单父一级的value为`list`):
   ```json
-  [{"label":"查看","value":"role:list"},{"label":"修改","value":"role:update"},{"label":"新增","value":"role:add"},{"label":"删除","value":"role:delete"},{"label":"权限","value":"action:list,update"},{"label":"用户","value":"user:list,update"}]
+  [{"label":"查看","value":"role:list"},{"label":"修改","value":"role:update"},{"label":"新增","value":"role:add"},{"label":"删除","value":"role:delete"},{"label":"权限","value":"action:list,action:update"},{"label":"用户","value":"user:list,user:update"}]
   ```
   `action`填写所有需要做权限控制的接口信息,`role_menu_action`初始分配租户超级管理员的菜单接口对应关系
 
@@ -284,7 +284,7 @@ vcloud:
         <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/4.png"></td>
     </tr>
      <tr>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/1.png"></td>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/2.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/11.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/33.png"></td>
     </tr>
 </table>

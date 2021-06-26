@@ -6,17 +6,15 @@ import com.bootvue.core.result.PageOut;
 import java.util.List;
 
 public interface AdminService {
-    PageOut<List<UserQueryOut>> userList(UserQueryIn param);
+    PageOut<List<AdminQueryOut>> userList(AdminQueryIn param);
 
-    void addOrUpdateUser(UserIn param);
+    void addOrUpdateUser(AdminIn param);
 
-    void updateUserStatus(UserIn param);
+    void updateUserStatus(AdminIn param);
 
-    void updateSelfInfo(UserIn param);
-
-    void updateUserRole(UserRoleIn param);
+    void updateSelfInfo(AdminIn param);
 
     RoleUserPageOut<List<RoleUserQueryOut>> roleUserList(RoleUserQueryIn param);
 
-    void updateUserRoles(UserRolesIn param);
+    void updateUserRoles(AdminRolesIn param);
 }

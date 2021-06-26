@@ -6,6 +6,7 @@ import com.bootvue.core.entity.RoleMenuAction;
 import com.bootvue.core.mapper.RoleMenuActionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +26,14 @@ public class RoleMenuActionMapperService {
     }
 
     // 删除某个role_id对应的所有记录
+    @CacheEvict(cacheNames = AppConst.ACTION_CACHE, key = "#id")
     public void delByRoleId(Long id) {
         roleMenuActionMapper.delByRoleId(id);
     }
-    
+
+
+    @CacheEvict(cacheNames = AppConst.ACTION_CACHE, allEntries = true)
+    public void delByMenuId(Long menu_id) {
+        roleMenuActionMapper.delByMenuId(menu_id);
+    }
 }

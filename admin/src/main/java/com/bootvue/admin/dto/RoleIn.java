@@ -8,4 +8,5 @@ import lombok.Setter;
 public class RoleIn {
     private Long id;
     private String roleName;
+    private Long tid;
 }

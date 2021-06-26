@@ -11,7 +11,7 @@ import javax.validation.constraints.Pattern;
 @Getter
 @Setter
 @ApiModel("新增/更新管理员用户入参")
-public class UserIn {
+public class AdminIn {
 
     @ApiModelProperty(notes = "更新时id必传")
     private Long id;
@@ -19,5 +19,6 @@ public class UserIn {
     @Pattern(regexp = AppConst.PASSWORD_REGEX, message = "密码强度太弱")
     private String password;
     private String phone;
+    private Long tid;
     private Long roleId;
 }

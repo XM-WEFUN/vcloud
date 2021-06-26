@@ -59,4 +59,10 @@
         and a.role_id = #{role_id}
         and a.delete_time is null
     </update>
+
+    <update id="batchUpdateStatusByTenantId">
+        update admin a
+        set a.status =#{status}
+        where a.tenant_id = #{tenant_id}
+    </update>
 </mapper>

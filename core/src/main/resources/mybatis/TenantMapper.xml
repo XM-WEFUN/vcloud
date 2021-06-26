@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bootvue.core.mapper.TenantMapper">
+    <select id="getTenantList" resultType="com.bootvue.core.entity.Tenant">
+        select *
+        from tenant t
+                where t.delete_time is null
+        <if test="name != null and name != ''">
+            and t.name like concat('%', name, '%')
+        </if>
+    </select>
 </mapper>

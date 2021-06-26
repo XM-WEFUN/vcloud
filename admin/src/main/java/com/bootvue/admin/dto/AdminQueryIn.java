@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserQueryIn {
+public class AdminQueryIn {
     private Integer current = 1;
     private Integer pageSize = 10;
     private String username;
