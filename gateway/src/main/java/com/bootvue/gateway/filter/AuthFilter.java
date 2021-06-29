@@ -81,6 +81,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
         PlatformType platform = PlatformType.getPlatform(claims.get(AppConst.HEADER_PLATFORM, Integer.class)); // 账号所属平台
 
         switch (platform) {
+            case AGENT:
+                // 代理端
+                // 禁止 请求 /admin 相关接口   其它业务看着处理
+                // 权限验证和下边admin一样
             case ADMIN:
                 // 数据库再次校验用户信息 (cache)
                 Admin admin = adminMapperService.findById(claims.get(AppConst.HEADER_USER_ID, Long.class));
