@@ -129,7 +129,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - token结构
 
-  `access_token`: `7200s` `refresh_token`: `20d`
+  `access_token`: `7200s` `refresh_token`: `30d`
 
   ```json
   {
@@ -224,7 +224,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - 除了skip-urls 其它接口请求头都要携带token:`access_token`
 
-- access_token: `7200s` ,refresh_token: `20d` 每次与access_token同步刷新, 实际有效时间都会延迟5分钟
+- access_token: `7200s` ,refresh_token: `30d` 每次与access_token同步刷新, 实际有效时间都会延迟5分钟
 
 - gateway向后端服务服务转发请求时 header添加了`id` `username` `role_id` `openid` `tenant_id` 等....
 

@@ -121,7 +121,7 @@ public class AuthServiceImpl implements AuthService {
                 userMapper.updateById(user);
             }
 
-            return getAuthResponse(new UserInfo(user.getId(), user.getUsername(), user.getPhone(), user.getAvatar(), user.getTenantId(), PlatformType.CUSTOMER.getValue(), -1L));
+            return getAuthResponse(new UserInfo(user.getId(), user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), user.getTenantId(), PlatformType.CUSTOMER.getValue(), -1L));
 
         } catch (Exception e) {
             log.error("微信小程序用户认证失败: 参数: {}", credentials);
@@ -184,13 +184,13 @@ public class AuthServiceImpl implements AuthService {
                 admin = adminMapper.selectOne(new QueryWrapper<Admin>().lambda().eq(Admin::getId, id).eq(Admin::getStatus, true).isNull(Admin::getDeleteTime));
             }
             Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
-            return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), admin.getTenantId(), platform.getValue(), roleId));
+            return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), 0, admin.getTenantId(), platform.getValue(), roleId));
         } else { // 其它平台
             User user = userMapperService.findById(id);
             if (ObjectUtils.isEmpty(user)) {
                 user = userMapper.selectById(id);
             }
-            return getAuthResponse(new UserInfo(id, user.getUsername(), user.getPhone(), user.getAvatar(), user.getTenantId(), platform.getValue(), -1L));
+            return getAuthResponse(new UserInfo(id, user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), user.getTenantId(), platform.getValue(), -1L));
         }
     }
 
@@ -219,7 +219,7 @@ public class AuthServiceImpl implements AuthService {
             case AGENT: // 代理平台
                 Admin admin = adminMapperService.findByPhone(credentials.getPhone(), credentials.getTenantCode());
                 Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
-                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
+                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), 0, admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
             case CUSTOMER:
                 log.info("handle customer login....");
                 return null;
@@ -259,7 +259,7 @@ public class AuthServiceImpl implements AuthService {
                         DigestUtils.md5Hex(password),
                         credentials.getTenantCode());
                 Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
-                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
+                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), 0, admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
             case CUSTOMER:
                 log.info("handle customer login....");
                 return null;
@@ -286,8 +286,8 @@ public class AuthServiceImpl implements AuthService {
 
         //  access_token 7200s
         LocalDateTime accessTokenExpire = LocalDateTime.now().plusSeconds(7200L).plusMinutes(5L);
-        // refresh_token 20d
-        LocalDateTime refreshTokenExpire = LocalDateTime.now().plusDays(20L).plusMinutes(5L);
+        // refresh_token 30d
+        LocalDateTime refreshTokenExpire = LocalDateTime.now().plusDays(30L).plusMinutes(5L);
 
         String accessTokenStr = JwtUtil.encode(accessTokenExpire, BeanUtil.beanToMap(accessToken, true, true));
         String refreshTokenStr = JwtUtil.encode(refreshTokenExpire, BeanUtil.beanToMap(refreshToken, true, true));
@@ -298,6 +298,7 @@ public class AuthServiceImpl implements AuthService {
         response.setUsername(info.getUsername());
         response.setPhone(info.getPhone());
         response.setAvatar(info.getAvatar());
+        response.setGender(info.getGender());
         response.setAccessToken(accessTokenStr);
         response.setRefreshToken(refreshTokenStr);
 

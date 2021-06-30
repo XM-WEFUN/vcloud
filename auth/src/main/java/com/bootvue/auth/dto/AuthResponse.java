@@ -22,7 +22,7 @@ public class AuthResponse {
     @ApiModelProperty(notes = "access token 有效时间7200s", required = true)
     private String accessToken;
 
-    @ApiModelProperty(notes = "refresh token 有效时间20d", required = true)
+    @ApiModelProperty(notes = "refresh token 有效时间30d", required = true)
     private String refreshToken;
 
     @ApiModelProperty(notes = "手机号")
@@ -30,6 +30,9 @@ public class AuthResponse {
 
     @ApiModelProperty(notes = "头像")
     private String avatar;
+
+    @ApiModelProperty(notes = "性别 0未知 1男 2女")
+    private Integer gender;
 
     @ApiModelProperty(notes = "菜单权限")
     private List<MenuOut> menus;

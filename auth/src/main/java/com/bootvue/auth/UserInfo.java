@@ -14,6 +14,7 @@ public class UserInfo {
     private String username;
     private String phone;
     private String avatar;
+    private Integer gender;
     private Long tenantId;
     private Integer platform;
     private Long roleId;  // 角色id  >0 管理用户  =0 未分配角色的管理账号  -1普通用户
