@@ -98,19 +98,15 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
   {
     "tenant_code": "000000",
     "type": 3,
-    "platform": 1,
+    "platform": 2,
     "wechat": {
-        "code": "xxx",
-        "nick_name": "",
+        "openid": "xxx",
+        "nickname": "",
         "gender": 1,
-        "avatar_url": "",
+        "avatar": "",
         "province": "",
         "country": "",
-        "city": "",
-        "iv": "",
-        "encrypted_data": "",
-        "raw_data": "",
-        "signature": ""
+        "city": ""
      }
   }
   ```
@@ -122,16 +118,11 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
     "code": 200,
     "msg": "success",
     "data": {
-        "user_id": 1,
-        "tenant_code": "000000",
         "username": "admin",
-        "nickname": "",
         "phone": "17705920000",
         "avatar": "",
-        "roles": "admin",
         "access_token": "xxoo",
-        "refresh_token": "ooxx",
-        "expires": 7200
+        "refresh_token": "ooxx"
     }
   }
   ```
@@ -145,6 +136,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
   "user_id": 1,
   "username": "admin",
   "role_id": 0,
+  "platform": 0,
   "type": "access_token",
   "jti": "cfd22c99-e0b8-4e98-a8af-xxoo",
   "iat": 1610961974,
@@ -232,7 +224,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - 除了skip-urls 其它接口请求头都要携带token:`access_token`
 
-- access_token: `7200s` refresh_token: `20d` 每次与access_token同步刷新
+- access_token: `7200s` ,refresh_token: `20d` 每次与access_token同步刷新, 实际有效时间都会延迟5分钟
 
 - gateway向后端服务服务转发请求时 header添加了`id` `username` `role_id` `openid` `tenant_id` 等....
 

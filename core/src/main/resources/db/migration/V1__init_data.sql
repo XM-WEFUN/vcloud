@@ -249,18 +249,18 @@ VALUES (1, 'V00000000001', '运营平台', now(3), NULL);
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
-    `id`          bigint                                                         NOT NULL AUTO_INCREMENT,
-    `tenant_id`   bigint                                                         NOT NULL COMMENT '租户id',
-    `username`    varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名 昵称',
-    `openid`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT '小程序openid',
-    `phone`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT '手机号',
-    `avatar`      varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像',
-    `gender`      tinyint(1)                                                     NOT NULL DEFAULT 0 COMMENT '性别 0:未知 1:男 2:女',
-    `country`     varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT '国家',
-    `province`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT '省',
-    `city`        varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL DEFAULT '' COMMENT '城市',
-    `create_time` datetime(3)                                                    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `update_time` datetime(3)                                                    NULL     DEFAULT NULL,
+    `id`          bigint                                                        NOT NULL AUTO_INCREMENT,
+    `tenant_id`   bigint                                                        NOT NULL COMMENT '租户id',
+    `username`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名 昵称',
+    `openid`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '小程序openid',
+    `phone`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '手机号',
+    `avatar`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像',
+    `gender`      tinyint(1)                                                    NOT NULL DEFAULT 0 COMMENT '性别 0:未知 1:男 2:女',
+    `country`     varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '国家',
+    `province`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '省',
+    `city`        varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '城市',
+    `create_time` datetime(3)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `update_time` datetime(3)                                                   NULL     DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `openid_index` (`tenant_id`, `openid`) USING BTREE
 ) ENGINE = InnoDB
