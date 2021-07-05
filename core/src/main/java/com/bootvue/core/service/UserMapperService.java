@@ -6,6 +6,7 @@ import com.bootvue.core.entity.User;
 import com.bootvue.core.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -22,5 +23,10 @@ public class UserMapperService {
     @Cacheable(cacheNames = AppConst.USER_CACHE, key = "#id", unless = "#result == null")
     public User findById(Long id) {
         return userMapper.selectById(id);
+    }
+
+    @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#user.id")
+    public int updateUser(User user) {
+        return userMapper.updateById(user);
     }
 }

@@ -83,15 +83,16 @@ subprojects {
             implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
         }
 
-        if (project.name == 'gateway') {
-            dependencies {
-                implementation project(":core")
-                implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
-            }
-        } else {
-            dependencies {
-                implementation project(":web")
-            }
+        switch (project.name) {
+            case 'gateway':
+                dependencies {
+                    implementation project(":core")
+                    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+                }
+            default:
+                dependencies {
+                    implementation project(":web")
+                }
         }
 
         task copyResources(type: Copy) {

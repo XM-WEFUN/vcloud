@@ -118,7 +118,7 @@ public class AuthServiceImpl implements AuthService {
                 user.setProvince(province);
                 user.setCity(city);
                 user.setUpdateTime(LocalDateTime.now());
-                userMapper.updateById(user);
+                userMapperService.updateUser(user);
             }
 
             return getAuthResponse(new UserInfo(user.getId(), user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), user.getTenantId(), PlatformType.CUSTOMER.getValue(), -1L));
