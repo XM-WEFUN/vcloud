@@ -107,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
             if (ObjectUtils.isEmpty(user)) {
                 // 新增小程序用户
                 user = new User(null, tenant.getId(), nickname, wechat.getOpenid(), "", avatar, gender,
-                        country, province, city, LocalDateTime.now(), null);
+                        country, province, city, true, "", LocalDateTime.now(), null);
                 userMapper.insert(user);
             } else {
                 // 更新用户信息

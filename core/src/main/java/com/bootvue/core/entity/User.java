@@ -49,6 +49,12 @@ public class User implements Serializable {
     @TableField(value = "city")
     private String city;
 
+    @TableField(value = "status")
+    private Boolean status;
+
+    @TableField(value = "remark")
+    private String remark;
+
     @TableField(value = "create_time")
     private LocalDateTime createTime;
 

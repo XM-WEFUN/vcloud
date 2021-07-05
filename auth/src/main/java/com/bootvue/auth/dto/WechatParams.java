@@ -18,5 +18,5 @@ public class WechatParams {
     private String province;
     private String country;
     private String city;
-    
+    private Integer riskRank; // 用户风险等级 微信安全风控
 }
