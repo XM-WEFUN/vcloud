@@ -89,6 +89,7 @@ subprojects {
                     implementation project(":core")
                     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
                 }
+                break
             default:
                 dependencies {
                     implementation project(":web")
