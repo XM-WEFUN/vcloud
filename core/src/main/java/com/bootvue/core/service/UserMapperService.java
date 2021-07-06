@@ -22,7 +22,7 @@ public class UserMapperService {
 
     @Cacheable(cacheNames = AppConst.USER_CACHE, key = "#id", unless = "#result == null")
     public User findById(Long id) {
-        return userMapper.selectById(id);
+        return userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getId, id).eq(User::getStatus, true));
     }
 
     @CacheEvict(cacheNames = AppConst.USER_CACHE, key = "#user.id")

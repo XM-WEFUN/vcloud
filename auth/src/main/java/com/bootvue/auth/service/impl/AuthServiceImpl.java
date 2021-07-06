@@ -188,7 +188,7 @@ public class AuthServiceImpl implements AuthService {
         } else { // 其它平台
             User user = userMapperService.findById(id);
             if (ObjectUtils.isEmpty(user)) {
-                user = userMapper.selectById(id);
+                user = userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getId, id).eq(User::getStatus, true));
             }
             return getAuthResponse(new UserInfo(id, user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), user.getTenantId(), platform.getValue(), -1L));
         }
