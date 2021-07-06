@@ -7,11 +7,13 @@ import com.bootvue.core.constant.PlatformType;
 import com.bootvue.core.entity.Action;
 import com.bootvue.core.entity.Admin;
 import com.bootvue.core.entity.RoleMenuAction;
+import com.bootvue.core.entity.User;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.ActionMapperService;
 import com.bootvue.core.service.AdminMapperService;
 import com.bootvue.core.service.RoleMenuActionMapperService;
+import com.bootvue.core.service.UserMapperService;
 import com.bootvue.core.util.JwtUtil;
 import com.google.common.base.Splitter;
 import io.jsonwebtoken.Claims;
@@ -40,6 +42,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
     private final AppConfig appConfig;
     private final AdminMapperService adminMapperService;
+    private final UserMapperService userMapperService;
     private final ActionMapperService actionMapperService;
     private final RoleMenuActionMapperService roleMenuActionMapperService;
 
@@ -79,6 +82,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
 
         PlatformType platform = PlatformType.getPlatform(claims.get(AppConst.HEADER_PLATFORM, Integer.class)); // 账号所属平台
+        Long userId = claims.get(AppConst.HEADER_USER_ID, Long.class);
 
         switch (platform) {
             case AGENT:
@@ -87,7 +91,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 // 权限验证和下边admin一样
             case ADMIN:
                 // 数据库再次校验用户信息 (cache)
-                Admin admin = adminMapperService.findById(claims.get(AppConst.HEADER_USER_ID, Long.class));
+                Admin admin = adminMapperService.findById(userId);
 
                 if (ObjectUtils.isEmpty(admin)) {
                     throw new AppException(RCode.UNAUTHORIZED_ERROR);
@@ -102,12 +106,21 @@ public class AuthFilter implements GlobalFilter, Ordered {
                     throw new AppException(RCode.DEFAULT.getCode(), RCode.DEFAULT.getMsg());
                 }
 
-                return chain.filter(exchange.mutate().request(handleRequest(request, platform, admin.getId(), admin.getRoleId(), admin.getTenantId(), "", admin.getUsername())).build());
+                return chain.filter(exchange.mutate().request(
+                        handleRequest(request, platform, admin.getId(), admin.getRoleId(), admin.getTenantId(), "", admin.getUsername()))
+                        .build());
             default:
                 // 用户平台
                 // 再次校验用户信息
-                log.info("用户再次校验........");
-                return null;
+                User user = userMapperService.findById(userId);
+
+                if (ObjectUtils.isEmpty(user)) {
+                    throw new AppException(RCode.UNAUTHORIZED_ERROR);
+                }
+
+                return chain.filter(exchange.mutate().request(
+                        handleRequest(request, platform, user.getId(), -1L, user.getTenantId(), user.getOpenid(), user.getUsername()))
+                        .build());
         }
     }
 
