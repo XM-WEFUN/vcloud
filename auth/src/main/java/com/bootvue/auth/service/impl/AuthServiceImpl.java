@@ -11,6 +11,7 @@ import com.bootvue.auth.service.AuthService;
 import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.config.app.Key;
 import com.bootvue.core.constant.AppConst;
+import com.bootvue.core.constant.GenderEnum;
 import com.bootvue.core.constant.PlatformType;
 import com.bootvue.core.ddo.menu.MenuDo;
 import com.bootvue.core.entity.Action;
@@ -102,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
             String nickname = StringUtils.hasText(wechat.getNickname()) ? wechat.getNickname() : "wx_" + RandomStringUtils.randomAlphabetic(8);
             String province = StringUtils.hasText(wechat.getProvince()) ? wechat.getProvince() : "";
             String city = StringUtils.hasText(wechat.getCity()) ? wechat.getCity() : "";
-            Integer gender = wechat.getGender();
+            GenderEnum gender = GenderEnum.find(wechat.getGender());
 
             if (ObjectUtils.isEmpty(user)) {
                 // 新增小程序用户
@@ -184,7 +185,7 @@ public class AuthServiceImpl implements AuthService {
                 admin = adminMapper.selectOne(new QueryWrapper<Admin>().lambda().eq(Admin::getId, id).eq(Admin::getStatus, true).isNull(Admin::getDeleteTime));
             }
             Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
-            return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), 0, admin.getTenantId(), platform.getValue(), roleId));
+            return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, admin.getTenantId(), platform.getValue(), roleId));
         } else { // 其它平台
             User user = userMapperService.findById(id);
             if (ObjectUtils.isEmpty(user)) {
@@ -219,7 +220,7 @@ public class AuthServiceImpl implements AuthService {
             case AGENT: // 代理平台
                 Admin admin = adminMapperService.findByPhone(credentials.getPhone(), credentials.getTenantCode());
                 Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
-                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), 0, admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
+                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
             case CUSTOMER:
                 log.info("handle customer login....");
                 return null;
@@ -259,7 +260,7 @@ public class AuthServiceImpl implements AuthService {
                         DigestUtils.md5Hex(password),
                         credentials.getTenantCode());
                 Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
-                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), 0, admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
+                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, admin.getTenantId(), credentials.getPlatform().getValue(), admin.getRoleId()));
             case CUSTOMER:
                 log.info("handle customer login....");
                 return null;
@@ -298,7 +299,7 @@ public class AuthServiceImpl implements AuthService {
         response.setUsername(info.getUsername());
         response.setPhone(info.getPhone());
         response.setAvatar(info.getAvatar());
-        response.setGender(info.getGender());
+        response.setGender(info.getGender().getValue());
         response.setAccessToken(accessTokenStr);
         response.setRefreshToken(refreshTokenStr);
 

@@ -17,8 +17,8 @@ public enum PlatformType {  // 账号所属平台
     CUSTOMER(2, "客户平台"),
     ;
 
-    private Integer value;
-    private String type;
+    private final Integer value;
+    private final String type;
 
     private static final Map<Integer, PlatformType> lookup = new HashMap<>();
     private static final Map<String, PlatformType> lookups = new HashMap<>();

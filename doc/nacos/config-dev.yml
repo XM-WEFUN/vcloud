@@ -37,6 +37,7 @@ mybatis-plus:
     cache-enabled: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath*:mybatis/**/*.xml
+  type-enums-package: com.bootvue.core.constant
 
 # 自定义配置
 vcloud:

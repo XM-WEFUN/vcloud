@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.bootvue.core.constant.GenderEnum;
 import lombok.*;
 
 import java.io.Serializable;
@@ -38,7 +39,7 @@ public class User implements Serializable {
     private String avatar;
 
     @TableField(value = "gender")
-    private Integer gender;  // 性别  0未知  1男  2女
+    private GenderEnum gender;  // 性别  0未知  1男  2女
 
     @TableField(value = "country")
     private String country;

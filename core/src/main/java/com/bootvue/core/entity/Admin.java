@@ -58,9 +58,6 @@ public class Admin implements Serializable {
     @TableField(value = "avatar")
     private String avatar;
 
-    /**
-     * 账号状态 0:禁用  1:正常
-     */
     @TableField(value = "`status`")
     private Boolean status;
 

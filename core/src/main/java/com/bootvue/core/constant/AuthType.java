@@ -12,6 +12,6 @@ public enum AuthType {
     USERNAME_PASSWORD_LOGIN(1, "username_password_login"),
     SMS_LOGIN(2, "sms_login"),
     WECHAT(3, "wechat_app");
-    private Integer value;
-    private String type;
+    private final Integer value;
+    private final String type;
 }
