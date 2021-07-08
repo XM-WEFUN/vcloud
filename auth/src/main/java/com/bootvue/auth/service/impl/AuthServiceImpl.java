@@ -4,7 +4,6 @@ import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bootvue.auth.UserInfo;
 import com.bootvue.auth.dto.*;
 import com.bootvue.auth.service.AuthService;
@@ -181,16 +180,11 @@ public class AuthServiceImpl implements AuthService {
 
         if (PlatformType.ADMIN.equals(platform) || PlatformType.AGENT.equals(platform)) {  // 运营平台||代理平台
             Admin admin = adminMapperService.findById(id);
-            if (ObjectUtils.isEmpty(admin)) { // 缓存失效
-                admin = adminMapper.selectOne(new QueryWrapper<Admin>().lambda().eq(Admin::getId, id).eq(Admin::getStatus, true).isNull(Admin::getDeleteTime));
-            }
             Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
             return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, admin.getTenantId(), platform.getValue(), roleId));
         } else { // 其它平台
             User user = userMapperService.findById(id);
-            if (ObjectUtils.isEmpty(user)) {
-                user = userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getId, id).eq(User::getStatus, true));
-            }
+            Assert.notNull(user, RCode.PARAM_ERROR.getMsg());
             return getAuthResponse(new UserInfo(id, user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), user.getTenantId(), platform.getValue(), -1L));
         }
     }
