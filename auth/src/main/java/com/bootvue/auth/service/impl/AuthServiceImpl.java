@@ -180,11 +180,15 @@ public class AuthServiceImpl implements AuthService {
 
         if (PlatformType.ADMIN.equals(platform) || PlatformType.AGENT.equals(platform)) {  // 运营平台||代理平台
             Admin admin = adminMapperService.findById(id);
-            Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
+            if (ObjectUtils.isEmpty(admin)) {
+                throw new AppException(RCode.UNAUTHORIZED_ERROR);
+            }
             return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, admin.getTenantId(), platform.getValue(), roleId));
         } else { // 其它平台
             User user = userMapperService.findById(id);
-            Assert.notNull(user, RCode.PARAM_ERROR.getMsg());
+            if (ObjectUtils.isEmpty(user)) {
+                throw new AppException(RCode.UNAUTHORIZED_ERROR);
+            }
             return getAuthResponse(new UserInfo(id, user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), user.getTenantId(), platform.getValue(), -1L));
         }
     }
