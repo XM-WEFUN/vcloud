@@ -22,8 +22,11 @@ public class AuthResponse {
     @ApiModelProperty(notes = "access token 有效时间7200s", required = true)
     private String accessToken;
 
-    @ApiModelProperty(notes = "refresh token 有效时间30d", required = true)
+    @ApiModelProperty(notes = "refresh token", required = true)
     private String refreshToken;
+
+    @ApiModelProperty(notes = "refresh_token 有效时长秒", required = true)
+    private Long expire;
 
     @ApiModelProperty(notes = "手机号")
     private String phone;

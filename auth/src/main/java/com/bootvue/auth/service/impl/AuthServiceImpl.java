@@ -4,6 +4,7 @@ import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.bootvue.auth.UserInfo;
 import com.bootvue.auth.dto.*;
 import com.bootvue.auth.service.AuthService;
@@ -17,7 +18,6 @@ import com.bootvue.core.entity.Action;
 import com.bootvue.core.entity.Admin;
 import com.bootvue.core.entity.Tenant;
 import com.bootvue.core.entity.User;
-import com.bootvue.core.mapper.AdminMapper;
 import com.bootvue.core.mapper.UserMapper;
 import com.bootvue.core.module.Token;
 import com.bootvue.core.result.AppException;
@@ -25,6 +25,9 @@ import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.*;
 import com.bootvue.core.util.JwtUtil;
 import com.bootvue.core.util.RsaUtil;
+import com.bootvue.core.wechat.WechatApi;
+import com.bootvue.core.wechat.WechatUtil;
+import com.bootvue.core.wechat.vo.WechatSession;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Stopwatch;
@@ -43,7 +46,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -58,7 +63,6 @@ public class AuthServiceImpl implements AuthService {
     private final AppConfig appConfig;
     private final AdminMapperService adminMapperService;
     private final TenantMapperService tenantMapperService;
-    private final AdminMapper adminMapper;
     private final UserMapper userMapper;
     private final UserMapperService userMapperService;
     private final MenuMapperService menuMapperService;
@@ -92,21 +96,43 @@ public class AuthServiceImpl implements AuthService {
             // 1. 获取openid与session_key
             Key keys = AppConfig.getKeys(appConfig, credentials.getPlatform());
             WechatParams wechat = credentials.getWechat();
+            log.info("微信用户风险等级: {}", wechat.getRiskRank());
+            WechatSession wechatSession = WechatApi.code2Session(wechat.getCode(), keys.getWechatAppid(), keys.getWechatSecret());
+            // session_key暂时无用
+            if (ObjectUtils.isEmpty(wechatSession) || !StringUtils.hasText(wechatSession.getOpenid()) || !StringUtils.hasText(wechatSession.getSessionKey())) {
+                throw new AppException(RCode.PARAM_ERROR);
+            }
+            //  校验数据签名
+            if (!WechatUtil.getSignature(wechatSession.getSessionKey(), wechat.getRawData()).equalsIgnoreCase(wechat.getSignature())) {
+                log.error("微信小程序加密参数校验失败, 计算签名: {}, 用户参数签名: {}", WechatUtil.getSignature(wechatSession.getSessionKey(), wechat.getRawData()), wechat.getSignature());
+                throw new AppException(RCode.PARAM_ERROR);
+            }
+
+            //  加密数据
+            JSONObject encryptData = WechatUtil.decrypt(wechatSession.getSessionKey(), wechat.getEncryptedData(), wechat.getIv());
+            log.info("加密数据: {}", encryptData);
+            // 敏感数据有效性校验
+            JSONObject watermark = encryptData.getJSONObject("watermark");
+            if (!keys.getWechatAppid().equalsIgnoreCase(watermark.getString("appid")) ||
+                    Math.abs(LocalDateTime.now().toInstant(ZoneOffset.of("+8")).getEpochSecond() - watermark.getLong("timestamp")) > 2 * 60) {
+                log.error("加密数据appid不符或水印时间戳时间不符, {}", encryptData);
+                throw new AppException(RCode.PARAM_ERROR);
+            }
 
             // 用户是否存在  不存在新增用户
             Tenant tenant = tenantMapperService.findByTenantCode(credentials.getTenantCode());
-            User user = userMapperService.findByOpenid(wechat.getOpenid(), tenant.getId());
+            User user = userMapperService.findByOpenid(wechatSession.getOpenid(), tenant.getId());
 
-            String country = StringUtils.hasText(wechat.getCountry()) ? wechat.getCountry() : "";
-            String avatar = StringUtils.hasText(wechat.getAvatar()) ? wechat.getAvatar() : "";
-            String nickname = StringUtils.hasText(wechat.getNickname()) ? wechat.getNickname() : "wx_" + RandomStringUtils.randomAlphabetic(8);
-            String province = StringUtils.hasText(wechat.getProvince()) ? wechat.getProvince() : "";
-            String city = StringUtils.hasText(wechat.getCity()) ? wechat.getCity() : "";
-            GenderEnum gender = GenderEnum.find(wechat.getGender());
+            String country = StringUtils.hasText(encryptData.getString("country")) ? encryptData.getString("country") : "";
+            String avatar = StringUtils.hasText(encryptData.getString("avatarUrl")) ? encryptData.getString("avatarUrl") : "";
+            String nickname = StringUtils.hasText(encryptData.getString("nickName")) ? encryptData.getString("nickName") : "wx_" + RandomStringUtils.randomAlphabetic(8);
+            String province = StringUtils.hasText(encryptData.getString("province")) ? encryptData.getString("province") : "";
+            String city = StringUtils.hasText(encryptData.getString("city")) ? encryptData.getString("city") : "";
+            GenderEnum gender = GenderEnum.find(encryptData.getIntValue("gender"));
 
             if (ObjectUtils.isEmpty(user)) {
                 // 新增小程序用户
-                user = new User(null, tenant.getId(), nickname, wechat.getOpenid(), "", avatar, gender,
+                user = new User(null, tenant.getId(), nickname, wechatSession.getOpenid(), "", avatar, gender,
                         country, province, city, true, "", LocalDateTime.now(), null);
                 userMapper.insert(user);
             } else {
@@ -285,8 +311,8 @@ public class AuthServiceImpl implements AuthService {
 
         //  access_token 7200s
         LocalDateTime accessTokenExpire = LocalDateTime.now().plusSeconds(7200L).plusMinutes(5L);
-        // refresh_token 30d
-        LocalDateTime refreshTokenExpire = LocalDateTime.now().plusDays(30L).plusMinutes(5L);
+        // refresh_token 180d
+        LocalDateTime refreshTokenExpire = LocalDateTime.now().plusDays(180L).plusMinutes(5L);
 
         String accessTokenStr = JwtUtil.encode(accessTokenExpire, BeanUtil.beanToMap(accessToken, true, true));
         String refreshTokenStr = JwtUtil.encode(refreshTokenExpire, BeanUtil.beanToMap(refreshToken, true, true));
@@ -300,6 +326,7 @@ public class AuthServiceImpl implements AuthService {
         response.setGender(info.getGender().getValue());
         response.setAccessToken(accessTokenStr);
         response.setRefreshToken(refreshTokenStr);
+        response.setExpire(Duration.ofDays(180L).getSeconds());
 
         // 菜单权限信息
         if (info.getRoleId().compareTo(0L) > 0) {
