@@ -150,15 +150,25 @@ VALUES (1, 1, '首页', 0, 'index', '/index', 'HomeOutlined', 0, '[{\"label\":\"
 INSERT INTO `menu`
 VALUES (2, 1, '系统设置', 100, 'setting', '/', 'SettingOutlined', 0, '[{\"label\":\"查看\",\"value\":\"list\"}]', 0, 1);
 INSERT INTO `menu`
-VALUES (3, 1, '租户管理', 101, 'tenant', '/tenant', '', 2, '[{\"label\":\"查看\",\"value\":\"tenant:list\"},{\"label\":\"新增\",\"value\":\"tenant:add\"},{\"label\":\"修改\",\"value\":\"tenant:update\"},{\"label\":\"删除\",\"value\":\"tenant:delete\"}]', 0, 0);
+VALUES (3, 1, '租户管理', 101, 'tenant', '/tenant', '', 2,
+        '[{\"label\":\"查看\",\"value\":\"tenant:list\"},{\"label\":\"新增\",\"value\":\"tenant:add\"},{\"label\":\"修改\",\"value\":\"tenant:update\"},{\"label\":\"删除\",\"value\":\"tenant:delete\"}]',
+        0, 0);
 INSERT INTO `menu`
-VALUES (4, 1, '菜单管理', 102, 'menu', '/menu', '', 2, '[{\"label\":\"查看\",\"value\":\"menu:list\"},{\"label\":\"新增\",\"value\":\"menu:add,tenant:list\"},{\"label\":\"修改\",\"value\":\"menu:update\"},{\"label\":\"删除\",\"value\":\"menu:delete\"}]', 0, 0);
+VALUES (4, 1, '菜单管理', 102, 'menu', '/menu', '', 2,
+        '[{\"label\":\"查看\",\"value\":\"menu:list\"},{\"label\":\"新增\",\"value\":\"menu:add,tenant:list\"},{\"label\":\"修改\",\"value\":\"menu:update\"},{\"label\":\"删除\",\"value\":\"menu:delete\"}]',
+        0, 0);
 INSERT INTO `menu`
-VALUES (5, 1, '接口权限', 103, 'action', '/action', '', 2, '[{\"label\":\"查看\",\"value\":\"action:list\"},{\"label\":\"新增\",\"value\":\"action:add\"},{\"label\":\"修改\",\"value\":\"action:update\"},{\"label\":\"删除\",\"value\":\"action:delete\"}]', 0, 0);
+VALUES (5, 1, '接口权限', 103, 'action', '/action', '', 2,
+        '[{\"label\":\"查看\",\"value\":\"action:list\"},{\"label\":\"新增\",\"value\":\"action:add\"},{\"label\":\"修改\",\"value\":\"action:update\"},{\"label\":\"删除\",\"value\":\"action:delete\"}]',
+        0, 0);
 INSERT INTO `menu`
-VALUES (6, 1, '角色管理', 104, 'role', '/role', '', 2, '[{\"label\":\"查看\",\"value\":\"role:list\"},{\"label\":\"修改\",\"value\":\"role:update\"},{\"label\":\"新增\",\"value\":\"role:add\"},{\"label\":\"删除\",\"value\":\"role:delete\"},{\"label\":\"权限\",\"value\":\"action:list,action:update\"},{\"label\":\"用户\",\"value\":\"admin:list,admin:update\"}]', 0, 0);
+VALUES (6, 1, '角色管理', 104, 'role', '/role', '', 2,
+        '[{\"label\":\"查看\",\"value\":\"role:list\"},{\"label\":\"修改\",\"value\":\"role:update\"},{\"label\":\"新增\",\"value\":\"role:add\"},{\"label\":\"删除\",\"value\":\"role:delete\"},{\"label\":\"权限\",\"value\":\"action:list,action:update\"},{\"label\":\"用户\",\"value\":\"admin:list,admin:update\"}]',
+        0, 0);
 INSERT INTO `menu`
-VALUES (7, 1, '用户管理', 105, 'admin', '/admin', '', 2, '[{\"label\":\"查看\",\"value\":\"admin:list\"},{\"label\":\"修改\",\"value\":\"admin:update\"},{\"label\":\"新增\",\"value\":\"admin:add\"},{\"label\":\"删除\",\"value\":\"admin:delete\"}]', 0, 0);
+VALUES (7, 1, '用户管理', 105, 'admin', '/admin', '', 2,
+        '[{\"label\":\"查看\",\"value\":\"admin:list\"},{\"label\":\"修改\",\"value\":\"admin:update\"},{\"label\":\"新增\",\"value\":\"admin:add\"},{\"label\":\"删除\",\"value\":\"admin:delete\"}]',
+        0, 0);
 
 -- ----------------------------
 -- Table structure for role

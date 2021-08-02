@@ -94,10 +94,9 @@ public class AuthServiceImpl implements AuthService {
     private AuthResponse handleWechatLogin(Credentials credentials) {
         try {
             // 1. 获取openid与session_key
-            Key keys = AppConfig.getKeys(appConfig, credentials.getPlatform());
             WechatParams wechat = credentials.getWechat();
             log.info("微信用户风险等级: {}", wechat.getRiskRank());
-            WechatSession wechatSession = WechatApi.code2Session(wechat.getCode(), keys.getWechatAppid(), keys.getWechatSecret());
+            WechatSession wechatSession = WechatApi.code2Session(wechat.getCode(), appConfig.getWechatAppid(), appConfig.getWechatSecret());
             // session_key暂时无用
             if (ObjectUtils.isEmpty(wechatSession) || !StringUtils.hasText(wechatSession.getOpenid()) || !StringUtils.hasText(wechatSession.getSessionKey())) {
                 throw new AppException(RCode.PARAM_ERROR);
@@ -113,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
             log.info("加密数据: {}", encryptData);
             // 敏感数据有效性校验
             JSONObject watermark = encryptData.getJSONObject("watermark");
-            if (!keys.getWechatAppid().equalsIgnoreCase(watermark.getString("appid")) ||
+            if (!appConfig.getWechatAppid().equalsIgnoreCase(watermark.getString("appid")) ||
                     Math.abs(LocalDateTime.now().toInstant(ZoneOffset.of("+8")).getEpochSecond() - watermark.getLong("timestamp")) > 2 * 60) {
                 log.error("加密数据appid不符或水印时间戳时间不符, {}", encryptData);
                 throw new AppException(RCode.PARAM_ERROR);

@@ -9,6 +9,4 @@ public class Key {
     private Integer platform;
     private String publicKey;
     private String privateKey;
-    private String wechatAppid;
-    private String wechatSecret;
 }

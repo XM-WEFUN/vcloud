@@ -9,7 +9,7 @@ Sponsor [![paypal.me/bootvue](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/ico
 
 |  Spring Cloud   | Spring Cloud Alibaba  | Spring Boot| Nacos | Sentinel| RocketMQ | Seata|
 |  ----  | ----  | ----  | ----  | ----  | ----  | ----  |
-| 2020.0.2  | 2021.1 |2.4.2 |    1.4.1 |1.8.0 |4.4.0|1.3.0|
+| 2020.0.3  | 2.2.6.RELEASE |2.4.9 |    1.4.2 |1.8.1 |4.4.0|1.3.0|
 
 ## 模块
 
@@ -55,7 +55,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 `type` : [必需] 0: 换取新的access_token与refresh_token 1: 用户名密码登录 2: 短信登录 3: 微信小程序认证
 
-`platform` : [必需] 账号所属平台类型 0:运营平台 1:代理平台 2:客户平台 3....
+`platform` : [必需] 账号所属平台类型 0:运营平台 1:代理平台 2:客户平台 3:小程序平台....
 
 - 用户名密码登录
 
