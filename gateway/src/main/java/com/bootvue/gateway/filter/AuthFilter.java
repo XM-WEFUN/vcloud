@@ -56,12 +56,14 @@ public class AuthFilter implements GlobalFilter, Ordered {
                     // /auth/oauth/**下的所有接口需要验证客户端key
                     if (path.startsWith("/auth/oauth")) {
                         // 检查客户端Key
-                        Key keys = appConfig.getKeys().stream()
+                        Key key = appConfig.getKeys().stream()
                                 .filter(it -> it.getAppid().equals(request.getQueryParams().getFirst("appid"))
-                                        && it.getSecret().equals(request.getQueryParams().getFirst("secret")))
+                                        && it.getSecret().equals(request.getQueryParams().getFirst("secret"))
+                                        && String.valueOf(it.getPlatform()).equals(request.getQueryParams().getFirst("platform"))
+                                )
                                 .findAny().orElse(null);
 
-                        if (ObjectUtils.isEmpty(keys)) {
+                        if (ObjectUtils.isEmpty(key)) {
                             throw new AppException(RCode.PARAM_ERROR.getCode(), "客户端参数无效");
                         }
                     }
@@ -107,7 +109,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 }
 
                 return chain.filter(exchange.mutate().request(
-                        handleRequest(request, platform, admin.getId(), admin.getRoleId(), admin.getTenantId(), "", admin.getUsername()))
+                                handleRequest(request, platform, admin.getId(), admin.getRoleId(), admin.getTenantId(), "", admin.getUsername()))
                         .build());
             default:
                 // 用户平台
@@ -119,7 +121,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 }
 
                 return chain.filter(exchange.mutate().request(
-                        handleRequest(request, platform, user.getId(), -1L, user.getTenantId(), user.getOpenid(), user.getUsername()))
+                                handleRequest(request, platform, user.getId(), -1L, user.getTenantId(), user.getOpenid(), user.getUsername()))
                         .build());
         }
     }
@@ -171,7 +173,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
                     break;
                 }
                 List<String> ids = actions.stream().flatMap(e ->
-                        Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(e.getActionIds()))
+                                Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(e.getActionIds()))
                         .collect(Collectors.toList());
                 if (!ids.contains(String.valueOf(action.getId()))) {
                     flag = false;

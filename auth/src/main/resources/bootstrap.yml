@@ -7,11 +7,11 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.100.80:8848
-        namespace: 78e29e1d-43c3-4a79-a9fb-78106e94ba74
+        namespace: 562ceff0-353a-4c7f-91ef-f946ec9f7f39
         group: DEFAULT_GROUP
       config:
         server-addr: 192.168.100.80:8848
-        namespace: 78e29e1d-43c3-4a79-a9fb-78106e94ba74
+        namespace: 562ceff0-353a-4c7f-91ef-f946ec9f7f39
         file-extension: yml
         extension-configs:
           - data-id: config-${spring.profiles.active}.yml
