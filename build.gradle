@@ -1,0 +1,115 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${SpringBootVersion}"
+    id 'io.spring.dependency-management' version "${DependencyManagement}"
+}
+
+apply from: 'version.gradle'
+
+allprojects {
+    group 'com.bootvue'
+    version '1.0.0'
+
+    repositories {
+        maven {
+            url 'https://maven.aliyun.com/repository/public/'
+        }
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'io.spring.dependency-management'
+
+    dependencyManagement {
+        imports {
+            mavenBom SpringBootPlugin.BOM_COORDINATES
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+            mavenBom "com.alibaba.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
+        }
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+    jar {
+        enabled = true
+    }
+
+    bootJar {
+        enabled = false
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencies {
+        implementation 'org.springframework.cloud:spring-cloud-starter'
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        }
+    }
+    test {
+        useJUnitPlatform()
+    }
+
+    // 模块自定义配置
+    if (project.name != 'core' && project.name != 'web') {
+
+        apply plugin: 'org.springframework.boot'
+
+        bootJar {
+            enabled = true
+            mainClass.set("com.bootvue." + project.name.substring(0, 1).toUpperCase() + project.name.substring(1) + "Application")
+            destinationDirectory = file(getRootProject().getBuildDir())
+            archiveFileName = project.name + '.jar'
+        }
+
+        dependencies {
+            implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+            implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+            implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
+            implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+        }
+
+        switch (project.name) {
+            case 'gateway':
+                dependencies {
+                    implementation project(":core")
+                    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+                }
+                break
+            default:
+                dependencies {
+                    implementation project(":web")
+                }
+        }
+
+        task copyResources(type: Copy) {
+            from "${project(':core').projectDir}/src/main/resources"
+            if (project.name != 'gateway') {
+                from "${project(':web').projectDir}/src/main/resources"
+            }
+            into "${project.buildDir}/resources/main"
+            exclude '**/rebel.xml'
+            includeEmptyDirs = true
+        }
+
+        afterEvaluate {
+            tasks.matching {
+                t -> t.name.startsWith('process')
+            }.each { it.dependsOn(copyResources) }
+        }
+    }
+}

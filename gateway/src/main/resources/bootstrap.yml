@@ -1,0 +1,21 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.100.80:8848
+        namespace: 562ceff0-353a-4c7f-91ef-f946ec9f7f39
+        group: DEFAULT_GROUP
+      config:
+        server-addr: 192.168.100.80:8848
+        file-extension: yml
+        namespace: 562ceff0-353a-4c7f-91ef-f946ec9f7f39
+        extension-configs:
+          - data-id: config-${spring.profiles.active}.yml
+            group: DEFAULT_GROUP
+            refresh: true
+  profiles:
+    active: dev

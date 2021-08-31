@@ -1,0 +1,8 @@
+rootProject.name = 'vcloud'
+include 'gateway'
+include 'auth'
+include 'admin'
+include 'core'
+include 'scheduler'
+include 'mq'
+include 'web'
