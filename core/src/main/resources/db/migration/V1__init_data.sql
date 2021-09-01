@@ -80,7 +80,7 @@ CREATE TABLE `menu`
 INSERT INTO `menu`
 VALUES (1, 1, '首页', 0, 'index', '/index', 'HomeOutlined', 0, 1, 1, 0);
 INSERT INTO `menu`
-VALUES (2, 1, '系统设置', 500, 'setting', '/setting', 'SettingOutlined', 0, 1, 0, 1);
+VALUES (2, 1, '系统设置', 500, 'setting', '/', 'SettingOutlined', 0, 1, 0, 1);
 INSERT INTO `menu`
 VALUES (3, 1, '租户管理', 501, 'tenant', '/tenant', '', 2, 1, 0, 0);
 INSERT INTO `menu`
