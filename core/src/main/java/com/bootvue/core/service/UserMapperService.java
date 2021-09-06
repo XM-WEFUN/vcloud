@@ -20,11 +20,10 @@ public class UserMapperService {
         );
     }
 
-    public User findByOpenidAndTenantId(String openid, Long tenantId) {
+    public User findByOpenid(String openid) {
         return userMapper.selectOne(new QueryWrapper<User>()
                 .lambda()
                 .eq(User::getOpenid, openid)
-                .eq(User::getTenantId, tenantId)
         );
     }
 

@@ -12,10 +12,8 @@ import com.bootvue.core.config.app.AppConfig;
 import com.bootvue.core.constant.AppConst;
 import com.bootvue.core.constant.GenderEnum;
 import com.bootvue.core.constant.PlatformType;
-import com.bootvue.core.dto.RoleMenuDo;
 import com.bootvue.core.entity.Admin;
 import com.bootvue.core.entity.Menu;
-import com.bootvue.core.entity.Tenant;
 import com.bootvue.core.entity.User;
 import com.bootvue.core.mapper.UserMapper;
 import com.bootvue.core.model.Token;
@@ -23,13 +21,13 @@ import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import com.bootvue.core.service.AdminMapperService;
 import com.bootvue.core.service.MenuMapperService;
-import com.bootvue.core.service.TenantMapperService;
+import com.bootvue.core.service.RoleMenuMapperService;
 import com.bootvue.core.service.UserMapperService;
 import com.bootvue.core.util.JwtUtil;
+import com.bootvue.core.util.RsaUtil;
 import com.bootvue.core.wechat.WechatApi;
 import com.bootvue.core.wechat.WechatUtil;
 import com.bootvue.core.wechat.vo.WechatSession;
-import com.google.common.base.Splitter;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,16 +39,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -63,10 +58,10 @@ public class AuthServiceImpl implements AuthService {
     private final RedissonClient redissonClient;
     private final AppConfig appConfig;
     private final AdminMapperService adminMapperService;
-    private final TenantMapperService tenantMapperService;
     private final UserMapper userMapper;
     private final UserMapperService userMapperService;
     private final MenuMapperService menuMapperService;
+    private final RoleMenuMapperService roleMenuMapperService;
 
     @Override
     public AuthResponse authentication(Credentials credentials) {
@@ -119,8 +114,7 @@ public class AuthServiceImpl implements AuthService {
             }
 
             // 用户是否存在  不存在新增用户
-            Tenant tenant = tenantMapperService.findByTenantCode(credentials.getTenantCode());
-            User user = userMapperService.findByOpenidAndTenantId(wechatSession.getOpenid(), tenant.getId());
+            User user = userMapperService.findByOpenid(wechatSession.getOpenid());
 
             String country = StringUtils.hasText(encryptData.getString("country")) ? encryptData.getString("country") : "";
             String avatar = StringUtils.hasText(encryptData.getString("avatarUrl")) ? encryptData.getString("avatarUrl") : "";
@@ -131,8 +125,7 @@ public class AuthServiceImpl implements AuthService {
 
             if (ObjectUtils.isEmpty(user)) {
                 // 新增小程序用户
-                user = new User(null, tenant.getId(), nickname, wechatSession.getOpenid(), "", avatar, gender,
-                        country, province, city, true, "", LocalDateTime.now(), null);
+                user = new User(null, nickname, wechatSession.getOpenid(), "", avatar, gender, country, province, city, true, "", LocalDateTime.now(), null);
                 userMapper.insert(user);
             } else {
                 // 更新用户信息
@@ -146,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
                 userMapperService.updateUser(user);
             }
 
-            return getAuthResponse(new UserInfo(user.getId(), user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), user.getTenantId(), PlatformType.CUSTOMER, ""));
+            return getAuthResponse(new UserInfo(user.getId(), user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), PlatformType.CUSTOMER));
 
         } catch (Exception e) {
             log.error("微信小程序用户认证失败: 参数: {}", credentials);
@@ -158,7 +151,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void handleSmsCode(PhoneParams phoneParams) {
         // 校验手机号是否存在
-        Admin admin = adminMapperService.findByPhoneAndTenantCode(phoneParams.getPhone(), phoneParams.getTenantCode());
+        Admin admin = adminMapperService.findByPhone(phoneParams.getPhone());
         if (ObjectUtils.isEmpty(admin)) {
             throw new AppException(RCode.PARAM_ERROR);
         }
@@ -199,24 +192,22 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 用户信息
-        Long roleId = claims.get(AppConst.HEADER_ROLEID, Long.class);
         Long id = claims.get(AppConst.HEADER_USER_ID, Long.class);
         PlatformType platform = PlatformType.getPlatform(claims.get(AppConst.HEADER_PLATFORM, Integer.class));
 
         switch (platform) {
-            case AGENT: // 运营平台||代理平台
             case ADMIN:
                 Admin admin = adminMapperService.findById(id);
                 if (ObjectUtils.isEmpty(admin)) {
                     throw new AppException(RCode.UNAUTHORIZED_ERROR);
                 }
-                return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, admin.getTenantId(), platform, admin.getRoleIds()));
+                return getAuthResponse(new UserInfo(id, admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, platform));
             default: // 其它平台
                 User user = userMapperService.findById(id);
                 if (ObjectUtils.isEmpty(user)) {
                     throw new AppException(RCode.UNAUTHORIZED_ERROR);
                 }
-                return getAuthResponse(new UserInfo(id, user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), user.getTenantId(), platform, ""));
+                return getAuthResponse(new UserInfo(id, user.getUsername(), user.getPhone(), user.getAvatar(), user.getGender(), platform));
         }
     }
 
@@ -228,7 +219,7 @@ public class AuthServiceImpl implements AuthService {
      */
     private AuthResponse handleSmsLogin(Credentials credentials) {
         // 验证手机验证码 与 手机号
-        if (!StringUtils.hasText(credentials.getCode()) || !StringUtils.hasText(credentials.getTenantCode())) {
+        if (!StringUtils.hasText(credentials.getCode())) {
             throw new AppException(RCode.PARAM_ERROR);
         }
         RBucket<String> bucket = redissonClient.getBucket(String.format(AppConst.SMS_KEY, credentials.getPhone()));
@@ -242,10 +233,9 @@ public class AuthServiceImpl implements AuthService {
         // platform类型
         switch (credentials.getPlatform()) {
             case ADMIN: // 运营平台
-            case AGENT: // 代理平台
-                Admin admin = adminMapperService.findByPhoneAndTenantCode(credentials.getPhone(), credentials.getTenantCode());
+                Admin admin = adminMapperService.findByPhone(credentials.getPhone());
                 Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
-                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, admin.getTenantId(), credentials.getPlatform(), admin.getRoleIds()));
+                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, credentials.getPlatform()));
             case CUSTOMER:
                 log.info("handle customer login....");
                 return null;
@@ -274,19 +264,15 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(RCode.PARAM_ERROR.getCode(), "验证码无效");
         }
 
-        //String password = RsaUtil.getPassword(appConfig, credentials.getPlatform(), credentials.getPassword());
-        String password = "123456";
+        String password = RsaUtil.getPassword(appConfig, credentials.getPlatform(), credentials.getPassword());
 
         // platform类型
         switch (credentials.getPlatform()) {
             case ADMIN: // 运营平台
-            case AGENT:
                 // 验证 用户名 密码
-                Admin admin = adminMapperService.findByUsernameAndPassword(credentials.getUsername(),
-                        DigestUtils.md5Hex(password),
-                        credentials.getTenantCode());
+                Admin admin = adminMapperService.findByUsernameAndPassword(credentials.getUsername(), DigestUtils.md5Hex(password));
                 Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
-                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, admin.getTenantId(), credentials.getPlatform(), admin.getRoleIds()));
+                return getAuthResponse(new UserInfo(admin.getId(), admin.getUsername(), admin.getPhone(), admin.getAvatar(), GenderEnum.UNKNOWN, credentials.getPlatform()));
             case CUSTOMER:
                 log.info("handle customer login....");
                 return null;
@@ -332,36 +318,20 @@ public class AuthServiceImpl implements AuthService {
         response.setRefreshToken(refreshTokenStr);
 
         // 菜单
-        if (!info.getPlatform().equals(PlatformType.CUSTOMER) && StringUtils.hasText(info.getRoleIds())) {
-            response.setMenus(getMenu(info.getRoleIds()));
+        if (!info.getPlatform().equals(PlatformType.CUSTOMER)) {
+            response.setMenus(getMenu(info.getId()));
         }
         return response;
     }
 
-    // 获取角色菜单信息
-    private List<MenuOut> getMenu(String roleIds) {
-        List<String> ids = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(roleIds);
-        List<RoleMenuDo> roleMenuDos = menuMapperService.findMenuIdByRoleId(ids);
-
-        if (CollectionUtils.isEmpty(roleMenuDos)) {
-            return null;
-        }
-
-        // 角色菜单并集
-        Set<Long> menus = new HashSet<>();
-
-        roleMenuDos.stream().forEach(roleMenuDo -> {
-            Set<Long> menuIds = Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(roleMenuDo.getMenuIds()).mapToLong(Long::parseLong).boxed().collect(Collectors.toSet());
-            menus.addAll(menuIds);
-        });
-
-        if (CollectionUtils.isEmpty(menus)) {
-            return null;
-        }
+    // 获取菜单信息
+    private List<MenuOut> getMenu(Long userId) {
+        // 用户 权限对应的菜单ids
+        List<Long> ids = roleMenuMapperService.findMenuIdsByAdminId(userId);
+        List<Menu> ms = menuMapperService.listMenuByIds(ids);
 
         List<MenuOut> out = new ArrayList<>();
 
-        List<Menu> ms = menuMapperService.findMenuByMenuId(menus);
         for (Menu m : ms) {
             if (!m.getPId().equals(0L)) {
                 continue;

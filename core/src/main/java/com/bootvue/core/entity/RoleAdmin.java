@@ -12,14 +12,14 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "`role_menu`")
-public class RoleMenu {
+@TableName(value = "`role_admin`")
+public class RoleAdmin {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @TableField(value = "role_id")
     private Long roleId; // 角色id
 
-    @TableField(value = "menu_id")
-    private Long menuId; // 菜单id
+    @TableField(value = "admin_id")
+    private Long adminId; // 管理员用户id
 }

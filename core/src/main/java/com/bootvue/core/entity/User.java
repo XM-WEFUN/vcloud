@@ -24,12 +24,6 @@ public class User implements Serializable {
     private Long id;
 
     /**
-     * 租户id
-     */
-    @TableField(value = "tenant_id")
-    private Long tenantId;
-
-    /**
      * 用户名 昵称
      */
     @TableField(value = "username")

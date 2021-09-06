@@ -11,7 +11,7 @@
  Target Server Version : 80026
  File Encoding         : 65001
 
- Date: 30/08/2021 17:57:07
+ Date: 03/09/2021 15:15:37
 */
 
 SET NAMES utf8mb4;
@@ -27,19 +27,16 @@ CREATE TABLE `admin`
     `username`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名',
     `phone`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '手机号',
     `password`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '密码',
-    `tenant_id`   bigint                                                        NOT NULL COMMENT '租户id',
-    `role_ids`    varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '角色id集合',
     `avatar`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像',
     `status`      tinyint(1)                                                    NOT NULL DEFAULT 0 COMMENT '账号状态 0:禁用  1:正常',
     `create_time` datetime(3)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `update_time` datetime(3)                                                   NULL     DEFAULT NULL,
     `delete_time` datetime(3)                                                   NULL     DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `ut_index` (`username`, `tenant_id`) USING BTREE,
-    INDEX `username_index` (`username`) USING BTREE,
-    INDEX `phone_index` (`phone`) USING BTREE,
-    INDEX `tenant_index` (`tenant_id`) USING BTREE
+    UNIQUE INDEX `username_index` (`username`) USING BTREE,
+    INDEX `phone_index` (`phone`) USING BTREE
 ) ENGINE = InnoDB
+  AUTO_INCREMENT = 2
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
   ROW_FORMAT = DYNAMIC;
@@ -48,8 +45,7 @@ CREATE TABLE `admin`
 -- Records of admin
 -- ----------------------------
 INSERT INTO `admin`
-VALUES (1, 'admin', '17705920000', md5('123456'), 1, '1', '', 1, now(3), NULL,
-        NULL);
+VALUES (1, 'admin', '17705920000', md5('123456'), '', 1, now(3), NULL, NULL);
 
 -- ----------------------------
 -- Table structure for menu
@@ -58,7 +54,6 @@ DROP TABLE IF EXISTS `menu`;
 CREATE TABLE `menu`
 (
     `id`             bigint                                                       NOT NULL AUTO_INCREMENT,
-    `tenant_id`      bigint                                                       NOT NULL COMMENT 'tenant id',
     `title`          varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '菜单名称',
     `sort`           int                                                          NOT NULL COMMENT '菜单顺序',
     `key`            varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '菜单唯一key',
@@ -70,6 +65,7 @@ CREATE TABLE `menu`
     `default_open`   tinyint(1)                                                   NOT NULL DEFAULT 0 COMMENT '二级菜单是否默认展开   0:否  1:是',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
+  AUTO_INCREMENT = 5
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
   ROW_FORMAT = DYNAMIC;
@@ -78,17 +74,15 @@ CREATE TABLE `menu`
 -- Records of menu
 -- ----------------------------
 INSERT INTO `menu`
-VALUES (1, 1, '首页', 0, 'index', '/index', 'HomeOutlined', 0, 1, 1, 0);
+VALUES (1, '首页', 0, 'index', '/index', 'HomeOutlined', 0, 1, 1, 0);
 INSERT INTO `menu`
-VALUES (2, 1, '系统设置', 500, 'setting', '/', 'SettingOutlined', 0, 1, 0, 1);
+VALUES (2, '系统设置', 500, 'setting', '/', 'SettingOutlined', 0, 1, 0, 1);
 INSERT INTO `menu`
-VALUES (3, 1, '租户管理', 501, 'tenant', '/tenant', '', 2, 1, 0, 0);
+VALUES (3, '菜单管理', 501, 'menu', '/menu', '', 2, 1, 0, 0);
 INSERT INTO `menu`
-VALUES (4, 1, '菜单管理', 502, 'menu', '/menu', '', 2, 1, 0, 0);
+VALUES (4, '角色管理', 502, 'role', '/role', '', 2, 1, 0, 0);
 INSERT INTO `menu`
-VALUES (5, 1, '角色管理', 503, 'role', '/role', '', 2, 1, 0, 0);
-INSERT INTO `menu`
-VALUES (6, 1, '用户管理', 504, 'admin', '/admin', '', 2, 1, 0, 0);
+VALUES (5, '用户管理', 503, 'admin', '/admin', '', 2, 1, 0, 0);
 
 -- ----------------------------
 -- Table structure for role
@@ -96,22 +90,19 @@ VALUES (6, 1, '用户管理', 504, 'admin', '/admin', '', 2, 1, 0, 0);
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role`
 (
-    `id`        bigint                                                       NOT NULL AUTO_INCREMENT,
-    `tenant_id` bigint                                                       NOT NULL COMMENT '租户id',
-    `name`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '角色名称',
-    PRIMARY KEY (`id`) USING BTREE,
-    INDEX `tenant_index` (`tenant_id`) USING BTREE
+    `id`   bigint                                                       NOT NULL AUTO_INCREMENT,
+    `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '角色名',
+    PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 1
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
-  ROW_FORMAT = DYNAMIC;
+  ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of role
 -- ----------------------------
 INSERT INTO `role`
-VALUES (1, 1, '超级管理员');
+VALUES (1, '超级管理员');
 
 -- ----------------------------
 -- Table structure for role_menu
@@ -121,12 +112,13 @@ CREATE TABLE `role_menu`
 (
     `id`      bigint NOT NULL AUTO_INCREMENT,
     `role_id` bigint NOT NULL COMMENT '角色id',
-    `menu_id` bigint NOT NULL COMMENT 'menu id',
-    PRIMARY KEY (`id`) USING BTREE
+    `menu_id` bigint NOT NULL COMMENT '菜单id',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `rm_index` (`role_id`, `menu_id`) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
-  ROW_FORMAT = DYNAMIC;
+  ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of role_menu
@@ -141,33 +133,6 @@ INSERT INTO `role_menu`
 VALUES (4, 1, 4);
 INSERT INTO `role_menu`
 VALUES (5, 1, 5);
-INSERT INTO `role_menu`
-VALUES (6, 1, 6);
-
--- ----------------------------
--- Table structure for tenant
--- ----------------------------
-DROP TABLE IF EXISTS `tenant`;
-CREATE TABLE `tenant`
-(
-    `id`          bigint                                                       NOT NULL AUTO_INCREMENT,
-    `code`        varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '编号',
-    `name`        varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '租户名称',
-    `create_time` datetime(3)                                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `delete_time` datetime(3)                                                  NULL     DEFAULT NULL,
-    PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `code_index` (`code`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 1
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci
-  ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of tenant
--- ----------------------------
-INSERT INTO `tenant`
-VALUES (1, 'V00000000001', '运营平台', now(3), NULL);
 
 -- ----------------------------
 -- Table structure for user
@@ -176,7 +141,6 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
     `id`          bigint                                                        NOT NULL AUTO_INCREMENT,
-    `tenant_id`   bigint                                                        NOT NULL COMMENT '租户id',
     `username`    varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名 昵称',
     `openid`      varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '小程序openid',
     `phone`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '手机号',
@@ -190,7 +154,7 @@ CREATE TABLE `user`
     `create_time` datetime(3)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `update_time` datetime(3)                                                   NULL     DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `openid_index` (`tenant_id`, `openid`) USING BTREE
+    UNIQUE INDEX `openid_index` (`openid`) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci
@@ -199,5 +163,27 @@ CREATE TABLE `user`
 -- ----------------------------
 -- Records of user
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for role_admin
+-- ----------------------------
+DROP TABLE IF EXISTS `role_admin`;
+CREATE TABLE `role_admin`
+(
+    `id`       bigint NOT NULL AUTO_INCREMENT,
+    `role_id`  bigint NOT NULL COMMENT '角色id',
+    `admin_id` bigint NOT NULL COMMENT '管理员用户id',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `ur_index` (`admin_id`, `role_id`) USING BTREE
+) ENGINE = InnoDB
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci
+  ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of role_admin
+-- ----------------------------
+INSERT INTO `role_admin`
+VALUES (1, 1, 1);
 
 SET FOREIGN_KEY_CHECKS = 1;

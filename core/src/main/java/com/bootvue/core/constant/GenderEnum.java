@@ -15,15 +15,15 @@ public enum GenderEnum {
     MALE(1, "男"),
     FEMALE(2, "女");
 
-    @EnumValue
-    private final Integer value;
-    private final String desc;
-
     private static final Map<Integer, GenderEnum> lookup = new HashMap<>();
 
     static {
-        EnumSet.allOf(GenderEnum.class).stream().forEach(e -> lookup.put(e.getValue(), e));
+        EnumSet.allOf(GenderEnum.class).forEach(e -> lookup.put(e.getValue(), e));
     }
+
+    @EnumValue
+    private final Integer value;
+    private final String desc;
 
     public static GenderEnum find(int value) {
         return lookup.get(value);

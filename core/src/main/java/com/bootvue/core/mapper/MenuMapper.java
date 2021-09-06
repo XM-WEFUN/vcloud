@@ -1,12 +1,11 @@
 package com.bootvue.core.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bootvue.core.dto.menu.MenuListDo;
 import com.bootvue.core.entity.Menu;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
-import java.util.Set;
 
 public interface MenuMapper extends BaseMapper<Menu> {
-    List<Menu> findMenuByMenuId(@Param("menus") Set<Long> menus);
+    IPage<MenuListDo> listMenu(Page<MenuListDo> page);
 }

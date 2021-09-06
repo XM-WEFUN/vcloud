@@ -4,12 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
@@ -21,12 +16,6 @@ import lombok.ToString;
 public class Menu {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    /**
-     * tenant id
-     */
-    @TableField(value = "tenant_id")
-    private Long tenantId;
 
     /**
      * 菜单名称

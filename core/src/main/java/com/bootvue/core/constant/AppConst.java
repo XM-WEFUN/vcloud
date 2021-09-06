@@ -10,15 +10,12 @@ public class AppConst {
     // redis cache name
     public static final String ADMIN_CACHE = "cache:admin";
     public static final String USER_CACHE = "cache:user";
-    public static final String ACTION_CACHE = "cache:action";
 
 
     // request headers
-    public static final String HEADER_TENANT_ID = "tenant_id";
     public static final String HEADER_USER_ID = "id";
     public static final String HEADER_USERNAME = "username";
     public static final String HEADER_OPENID = "openid";
-    public static final String HEADER_ROLEID = "role_id";
     public static final String HEADER_PLATFORM = "platform";
 
     //    --------------------正则

@@ -17,7 +17,5 @@ public class UserInfo {
     private String phone;
     private String avatar;
     private GenderEnum gender;
-    private Long tenantId;
     private PlatformType platform;
-    private String roleIds;
 }

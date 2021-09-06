@@ -41,18 +41,6 @@ public class Admin implements Serializable {
     private String password;
 
     /**
-     * 租户id
-     */
-    @TableField(value = "tenant_id")
-    private Long tenantId;
-
-    /**
-     * 角色id集合
-     */
-    @TableField(value = "role_ids")
-    private String roleIds;
-
-    /**
      * 头像
      */
     @TableField(value = "avatar")

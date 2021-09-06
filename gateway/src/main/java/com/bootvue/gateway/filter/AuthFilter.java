@@ -80,12 +80,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
         handleRequestPathValid(path, platform);  // 接口验证
 
         switch (platform) {
-            case AGENT:
-                // 代理端
-                // 禁止 请求 /admin 相关接口  具体业务看着处理
-                // 权限验证和下边admin一样
             case ADMIN:
-                // 数据库再次校验用户信息 (cache)
+                // 再次校验用户信息 (cache)  role--权限拦截自行扩展
                 Admin admin = adminMapperService.findById(userId);
 
                 if (ObjectUtils.isEmpty(admin)) {
@@ -93,7 +89,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 }
 
                 return chain.filter(exchange.mutate().request(
-                                handleRequest(request, platform, admin.getId(), admin.getTenantId(), "", admin.getUsername()))
+                                handleRequest(request, platform, admin.getId(), "", admin.getUsername()))
                         .build());
             default:
                 // 用户平台
@@ -105,12 +101,12 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 }
 
                 return chain.filter(exchange.mutate().request(
-                                handleRequest(request, platform, user.getId(), user.getTenantId(), user.getOpenid(), user.getUsername()))
+                                handleRequest(request, platform, user.getId(), user.getOpenid(), user.getUsername()))
                         .build());
         }
     }
 
-    private ServerHttpRequest handleRequest(ServerHttpRequest request, PlatformType platform, Long id, Long tenantId, String openid, String username) {
+    private ServerHttpRequest handleRequest(ServerHttpRequest request, PlatformType platform, Long id, String openid, String username) {
         // request header添加用户信息
         // request header添加上用户信息  中文需要URIEncode
 
@@ -118,7 +114,6 @@ public class AuthFilter implements GlobalFilter, Ordered {
             headers.add(AppConst.HEADER_USER_ID, String.valueOf(id));
             headers.add(AppConst.HEADER_OPENID, openid);
             headers.add(AppConst.HEADER_USERNAME, String.valueOf(URLEncoder.encode(username, StandardCharsets.UTF_8)));
-            headers.add(AppConst.HEADER_TENANT_ID, String.valueOf(tenantId));
             headers.add(AppConst.HEADER_PLATFORM, String.valueOf(platform.getValue()));
         }).build();
     }
@@ -134,7 +129,6 @@ public class AuthFilter implements GlobalFilter, Ordered {
         boolean flag = true;
 
         switch (platform) {
-            case AGENT:
             case ADMIN:
                 if (!PATH_MATCHER.match("/auth/**", path) &&
                         !PATH_MATCHER.match("/admin/**", path)) {

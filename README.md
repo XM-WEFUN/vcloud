@@ -67,7 +67,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - access_token: `7200s` ,refresh_token: `expire(180d)`秒 每次与access_token同步刷新, 实际有效时间都会延长5分钟
 
-- gateway向后端服务服务转发请求时 header添加了`id` `username` `openid` `tenant_id` 等....
+- gateway向后端服务服务转发请求时 header添加了`id` `username` `openid` `platform` 等....
 
 - 所有用到的cache缓存都要在config.yaml自定义配置中指定 包括 `ttl` `maxIdleTime` 如果没有配置.默认缓存不过期
 
@@ -77,15 +77,17 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - 数据库已有表, flyway sql要从>1的version开始 例如:V2
 
+- 弱权限控制, 可以自行完善
+
 ## Demo
 
 <table>
     <tr>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/3.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/12.png"></td>
         <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/4.png"></td>
     </tr>
      <tr>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/11.png"></td>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/33.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/5.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/10.png"></td>
     </tr>
 </table>
