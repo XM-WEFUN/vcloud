@@ -51,6 +51,13 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 600: 系统异常 其它杂七杂八异常......
 ```
 
+---
+
+## Next Plan
+
+- [ ] swagger文档改造
+- [ ] 多租户改造
+
 ## FAQ
 
 - nacos namespace id, JwtUtil key, appconfig appid secret等需要修改
