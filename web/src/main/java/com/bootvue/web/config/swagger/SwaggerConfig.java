@@ -1,82 +1,37 @@
 package com.bootvue.web.config.swagger;
 
+import com.bootvue.core.model.AppUser;
+import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
+import com.github.xiaoymin.knife4j.spring.extension.OpenApiExtensionResolver;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.ResponseEntity;
-import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.builders.RequestParameterBuilder;
-import springfox.documentation.schema.ScalarType;
-import springfox.documentation.service.ParameterType;
+import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 @Configuration
-@ConditionalOnProperty(value = {"vcloud.swagger"}, havingValue = "true")
+@ConditionalOnProperty(value = {"knife4j.enable"}, havingValue = "true")
+@EnableKnife4j
+@EnableOpenApi
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SwaggerConfig {
 
-    @Bean(value = "auth")
-    public Docket publicApi() {
+    private final OpenApiExtensionResolver openApiExtensionResolver;
+
+    @Bean
+    public Docket authApi() {
         return new Docket(DocumentationType.OAS_30)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.bootvue.auth"))
+                .apis(RequestHandlerSelectors.basePackage("com.bootvue"))
                 .paths(PathSelectors.any())
-                .build().groupName("auth")
-                .pathMapping("/auth")
-                .genericModelSubstitutes(ResponseEntity.class)
-                .useDefaultResponseMessages(false)
-                .enableUrlTemplating(false)
-                .globalRequestParameters(
-                        Arrays.asList(new RequestParameterBuilder()
-                                .name("appid").description("appid").in(ParameterType.QUERY)
-                                .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))
-                                .required(true)
-                                .build(), new RequestParameterBuilder()
-                                .name("secret").description("secret").in(ParameterType.QUERY)
-                                .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))
-                                .required(true)
-                                .build(), new RequestParameterBuilder()
-                                .name("platform").description("0:运营平台 1:代理平台 2:客户平台 3....").in(ParameterType.QUERY)
-                                .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))
-                                .required(true)
-                                .build()))
-                .apiInfo(new ApiInfoBuilder()
-                        .title("VCloud 接口文档")
-                        .version("1.0.0")
-                        .build())
+                .build()
+                .ignoredParameterTypes(AppUser.class)
+                .extensions(openApiExtensionResolver.buildSettingExtensions())
                 ;
     }
-
-    @Bean(value = "admin")
-    public Docket admin() {
-        return new Docket(DocumentationType.OAS_30)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.bootvue.admin"))
-                .paths(PathSelectors.any())
-                .build().groupName("admin")
-                .pathMapping("/admin")
-                .genericModelSubstitutes(ResponseEntity.class)
-                .useDefaultResponseMessages(false)
-                .enableUrlTemplating(false)
-                .globalRequestParameters(
-                        Collections.singletonList(new RequestParameterBuilder()
-                                .name("token")
-                                .description("token信息")
-                                .in(ParameterType.HEADER)
-                                .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))
-                                .required(true)
-                                .build()))
-                .apiInfo(new ApiInfoBuilder()
-                        .title("VCloud 接口文档")
-                        .version("1.0.0")
-                        .build())
-                ;
-    }
-
 }
-

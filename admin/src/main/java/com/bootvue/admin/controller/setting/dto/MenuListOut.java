@@ -1,5 +1,7 @@
 package com.bootvue.admin.controller.setting.dto;
 
+import com.bootvue.core.serializer.LongToStringSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @ApiModel(description = "菜单列表信息")
 public class MenuListOut {
 
+    @JsonSerialize(using = LongToStringSerializer.class)
     private Long id;
     @ApiModelProperty(notes = "标题")
     private String title;
@@ -25,6 +28,7 @@ public class MenuListOut {
     private String path;
     @ApiModelProperty(notes = "icon图标")
     private String icon;
+    @JsonSerialize(using = LongToStringSerializer.class)
     @ApiModelProperty(notes = "pid")
     private Long p_id;
     @ApiModelProperty(notes = "父级菜单")

@@ -1,0 +1,17 @@
+server:
+  port: 9999
+spring:
+  application:
+    name: swagger
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.100.80:8848
+        namespace: ba5679f5-1c70-4527-b8e7-a692401fd337
+        group: DEFAULT_GROUP
+      config:
+        server-addr: 192.168.100.80:8848
+        namespace: ba5679f5-1c70-4527-b8e7-a692401fd337
+        file-extension: yml
+  profiles:
+    active: dev

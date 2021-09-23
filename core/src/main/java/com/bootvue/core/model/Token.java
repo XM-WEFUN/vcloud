@@ -18,7 +18,8 @@ public class Token implements Serializable {
     private static final long serialVersionUID = -1962424963088919992L;
 
     private Long id;
+    private Long tenantId;
     private String username;
-    private Integer platform; // 账号所属平台
     private String type;  // token类型   access_token | refresh_token
+    private String label; // 用户身份标识  管理类用户 | 普通用户
 }

@@ -1,22 +1,27 @@
 package com.bootvue.core.constant;
 
 public class AppConst {
+    // ****************** 运营平台租户信息 **********
+    public static final Long ADMIN_TENANT_ID = 1436592471676354560L;
+
+    // ****************** 常量
     public static final String CAPTCHA_KEY = "captcha:line_%s";
     public static final String SMS_KEY = "code:sms_%s";
 
     public static final String ACCESS_TOKEN = "access_token";
     public static final String REFRESH_TOKEN = "refresh_token";
 
-    // redis cache name
+    //******************* redis cache name
     public static final String ADMIN_CACHE = "cache:admin";
-    public static final String USER_CACHE = "cache:user";
+    public static final String WECHAT_USER_CACHE = "cache:wechat-user";
 
 
-    // request headers
-    public static final String HEADER_USER_ID = "id";
-    public static final String HEADER_USERNAME = "username";
-    public static final String HEADER_OPENID = "openid";
-    public static final String HEADER_PLATFORM = "platform";
+    //******************* jwt token属性名
+    public static final String TOKEN_USER_ID = "id";
+    public static final String TOKEN_TENANT_ID = "tenant_id";
+    public static final String TOKEN_USERNAME = "username";
+    public static final String TOKEN_TYPE = "type";
+    public static final String TOKEN_LABEL = "label";
 
     //    --------------------正则
     // 手机号

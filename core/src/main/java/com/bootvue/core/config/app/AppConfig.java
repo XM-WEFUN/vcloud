@@ -18,7 +18,6 @@ import java.util.Set;
 @Slf4j
 public class AppConfig {
 
-    private Boolean swagger;  // 是否允许生成swagger文档
     private String wechatAppid;  // 微信 appid
     private String wechatSecret; // 微信 app secret
     private Set<String> skipUrls; //  白名单 无需认证 放行uri

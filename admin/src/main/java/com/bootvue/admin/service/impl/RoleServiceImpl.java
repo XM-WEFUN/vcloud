@@ -4,17 +4,22 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bootvue.admin.controller.setting.dto.*;
+import com.bootvue.admin.mapper.RoleMapper;
 import com.bootvue.admin.service.RoleService;
-import com.bootvue.core.entity.Role;
-import com.bootvue.core.entity.RoleAdmin;
-import com.bootvue.core.entity.RoleMenu;
-import com.bootvue.core.mapper.RoleAdminMapper;
-import com.bootvue.core.mapper.RoleMapper;
-import com.bootvue.core.mapper.RoleMenuMapper;
+import com.bootvue.admin.service.mapper.AdminMapperService;
+import com.bootvue.admin.service.mapper.RoleAdminMapperService;
+import com.bootvue.admin.service.mapper.RoleMapperService;
+import com.bootvue.admin.service.mapper.RoleMenuMapperService;
+import com.bootvue.core.constant.AppConst;
+import com.bootvue.core.model.AppUser;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.PageOut;
 import com.bootvue.core.result.RCode;
-import com.bootvue.core.service.RoleMapperService;
+import com.bootvue.db.entity.Admin;
+import com.bootvue.db.entity.Role;
+import com.bootvue.db.entity.RoleAdmin;
+import com.bootvue.db.entity.RoleMenu;
+import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,54 +37,64 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RoleServiceImpl implements RoleService {
-    private final RoleMapperService roleMapperService;
     private final RoleMapper roleMapper;
-    private final RoleAdminMapper roleAdminMapper;
-    private final RoleMenuMapper roleMenuMapper;
+    private final RoleMapperService roleMapperService;
+    private final AdminMapperService adminMapperService;
+    private final RoleMenuMapperService roleMenuMapperService;
+    private final RoleAdminMapperService roleAdminMapperService;
 
     @Override
-    public PageOut<List<RoleListOut>> listRole(RoleListIn param) {
+    public PageOut<List<RoleListOut>> listRole(RoleListIn param, AppUser user) {
         Page<Role> page = new Page<>(param.getCurrent(), param.getPageSize());
-        IPage<Role> roles = roleMapperService.listRole(page, param.getName());
+
+        IPage<RoleListOut> roles = roleMapper.listRole(page, param.getRoleName(), AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) ? null : user.getTenantId());
+
         PageOut<List<RoleListOut>> out = new PageOut<>();
         out.setTotal(roles.getTotal());
-
-        out.setRows(roles.getRecords().stream().map(e -> new RoleListOut(e.getId(), e.getName())).collect(Collectors.toList()));
+        out.setRows(roles.getRecords());
 
         return out;
     }
 
     @Override
-    public void addOrUpdateRole(RoleIn param) {
-        if (!StringUtils.hasText(param.getName())) {
+    public void addOrUpdateRole(RoleIn param, AppUser user) {
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && !user.getTenantId().equals(param.getTenantId())) {
+            throw new AppException(RCode.ACCESS_DENY);
+        }
+
+        if (!StringUtils.hasText(param.getName()) || "超级管理员".equals(param.getName())) {
             throw new AppException(RCode.PARAM_ERROR);
         }
 
         if (param.getId() != null && param.getId().compareTo(0L) > 0) {
-            roleMapper.updateById(new Role(param.getId(), param.getName()));
+            roleMapperService.updateById(new Role().setId(param.getId()).setName(param.getName()));
         } else {
-            Role role = roleMapper.selectOne(new QueryWrapper<Role>()
+            Role role = roleMapperService.getOne(new QueryWrapper<Role>()
                     .lambda().eq(Role::getName, param.getName())
             );
 
             Assert.isNull(role, "名称已存在");
 
-            roleMapper.insert(new Role(null, param.getName()));
+            roleMapper.insert(new Role(null, param.getTenantId(), param.getName()));
         }
     }
 
     @Override
-    public void deleteRole(RoleIn param) {
-        if (ObjectUtils.isEmpty(param.getId()) || !(param.getId().compareTo(0L) > 0)) {
+    public void deleteRole(RoleIn param, AppUser user) {
+        if (ObjectUtils.isEmpty(param.getId()) || ObjectUtils.isEmpty(param.getTenantId()) || !(param.getId().compareTo(0L) > 0)) {
             throw new AppException(RCode.PARAM_ERROR);
         }
-        // 删除角色  role_admin role_menu
-        roleMapper.deleteById(param.getId());
-        roleAdminMapper.delete(new QueryWrapper<RoleAdmin>()
-                .lambda()
-                .eq(RoleAdmin::getRoleId, param.getId())
-        );
-        roleMenuMapper.delete(new QueryWrapper<RoleMenu>()
+
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && !user.getTenantId().equals(param.getTenantId())) {
+            throw new AppException(RCode.ACCESS_DENY);
+        }
+
+        // 删除角色  role role_menu role_admin
+        roleMapperService.removeById(param.getId());
+
+        roleAdminMapperService.remove(new QueryWrapper<>(new RoleAdmin().setRoleId(param.getId())));
+
+        roleMenuMapperService.remove(new QueryWrapper<RoleMenu>()
                 .lambda()
                 .eq(RoleMenu::getRoleId, param.getId())
         );
@@ -87,22 +102,28 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public void assignUser(RoleAdminIn param) {
+    public void assignUser(RoleAdminIn param, AppUser user) {
         Long roleId = param.getRoleId();
         Set<Long> ids = param.getIds();
+        Role role = roleMapperService.getById(roleId);
+        Assert.notNull(role, "参数错误");
+
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && !role.getTenantId().equals(user.getTenantId())) {
+            throw new AppException(RCode.ACCESS_DENY);
+        }
 
         // 为某个角色分配/取消分配用户
-        log.info("角色id: {} 分配用户: {}", roleId, ids);
+        log.info("角色id: {} 分配用户id: {}", roleId, ids);
         if (CollectionUtils.isEmpty(param.getIds())) {
             // 删除此角色对应的所有用户
-            roleAdminMapper.delete(new QueryWrapper<RoleAdmin>().lambda().eq(RoleAdmin::getRoleId, roleId));
+            roleAdminMapperService.remove(new QueryWrapper<>(new RoleAdmin().setRoleId(roleId)));
             return;
         }
 
         // 此角色原有用户
-        List<RoleAdmin> userRoles = roleAdminMapper.selectList(new QueryWrapper<RoleAdmin>().lambda().eq(RoleAdmin::getRoleId, roleId));
+        List<RoleAdmin> userRoles = roleAdminMapperService.list(new QueryWrapper<>(new RoleAdmin().setRoleId(roleId)));
         if (CollectionUtils.isEmpty(userRoles)) {
-            ids.forEach(e -> roleAdminMapper.insert(new RoleAdmin(null, roleId, e)));
+            roleAdminMapperService.saveBatch(ids.stream().map(e -> new RoleAdmin(null, roleId, e)).collect(Collectors.toList()));
             return;
         }
 
@@ -110,74 +131,84 @@ public class RoleServiceImpl implements RoleService {
         // 原有用户id
         Set<Long> orignUserIds = userRoles.stream().map(e -> e.getAdminId()).collect(Collectors.toSet());
 
-        ids.forEach(e -> {
-            if (!orignUserIds.contains(e)) {
-                // 新增
-                roleAdminMapper.insert(new RoleAdmin(null, roleId, e));
-            }
-        });
+        // 不能存在的新增
+        roleAdminMapperService.saveBatch(ids.stream().filter(e -> !orignUserIds.contains(e)).map(i -> new RoleAdmin(null, roleId, i)).collect(Collectors.toList()));
 
-        orignUserIds.forEach(e -> {
-            if (!ids.contains(e)) {
-                // 删除
-                roleAdminMapper.delete(new QueryWrapper<RoleAdmin>().lambda().eq(RoleAdmin::getAdminId, e).eq(RoleAdmin::getRoleId, roleId));
-            }
-        });
+        // 已分配的用户  现在取消了的
+        roleAdminMapperService.remove(new QueryWrapper<RoleAdmin>().lambda()
+                .eq(RoleAdmin::getRoleId, roleId)
+                .in(RoleAdmin::getAdminId, orignUserIds.stream().filter(i -> !ids.contains(i)).collect(Collectors.toSet())));
     }
 
     @Override
-    public void assignMenu(RoleMenuIn param) {
+    public void assignMenu(RoleMenuIn param, AppUser user) {
         Long roleId = param.getRoleId();
         Set<Long> ids = param.getIds();
 
+        Role role = roleMapperService.getById(roleId);
+        Assert.notNull(role, "参数错误");
+
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && !role.getTenantId().equals(user.getTenantId())) {
+            throw new AppException(RCode.ACCESS_DENY);
+        }
+
         // 为某个角色分配/取消分配 菜单
-        log.info("角色id: {} 分配菜单: {}", roleId, ids);
+        log.info("角色id: {} 分配菜单id: {}", roleId, ids);
+
+        // 此租户超级管理员  ---> 所有菜单id
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId())) {
+            Role superRole = roleMapperService.getOne(new QueryWrapper<>(new Role().setName("超级管理员").setTenantId(user.getTenantId())));
+            if (ObjectUtils.isEmpty(superRole)) {
+                throw new AppException(RCode.ACCESS_DENY);
+            }
+            List<RoleMenu> menus = roleMenuMapperService.list(new QueryWrapper<>(new RoleMenu().setRoleId(superRole.getId())));
+            Set<Long> allMenuIds = menus.stream().map(i -> i.getMenuId()).collect(Collectors.toSet());
+            Assert.isTrue(allMenuIds.containsAll(ids), "参数错误");
+        }
+
         if (CollectionUtils.isEmpty(ids)) {
             // 删除此角色对应的所有菜单
-            roleMenuMapper.delete(new QueryWrapper<RoleMenu>().lambda().eq(RoleMenu::getRoleId, roleId));
+            roleMenuMapperService.remove(new QueryWrapper<>(new RoleMenu().setRoleId(roleId)));
             return;
         }
 
         // 此角色原有 菜单
-        List<RoleMenu> roleMenus = roleMenuMapper.selectList(new QueryWrapper<RoleMenu>().lambda().eq(RoleMenu::getRoleId, roleId));
-        if (CollectionUtils.isEmpty(roleMenus)) {
-            ids.forEach(e -> roleMenuMapper.insert(new RoleMenu(null, roleId, e)));
-            return;
-        }
+        List<RoleMenu> roleMenus = roleMenuMapperService.list(new QueryWrapper<>(new RoleMenu().setRoleId(roleId)));
 
         // 要新增/删除的菜单id
         // 原有菜单id
         Set<Long> orignMenuIds = roleMenus.stream().map(e -> e.getMenuId()).collect(Collectors.toSet());
 
-        ids.forEach(e -> {
-            if (!orignMenuIds.contains(e)) {
-                // 新增
-                roleMenuMapper.insert(new RoleMenu(null, roleId, e));
-            }
-        });
+        // 需要剔除的
+        Sets.SetView<Long> removeIds = Sets.difference(orignMenuIds, ids);
+        if (removeIds.size() > 0) {
+            roleMenuMapperService.remove(new QueryWrapper<RoleMenu>().lambda()
+                    .eq(RoleMenu::getRoleId, roleId)
+                    .in(RoleMenu::getMenuId, removeIds)
+            );
+        }
 
-        orignMenuIds.forEach(e -> {
-            if (!ids.contains(e)) {
-                // 删除
-                roleMenuMapper.delete(new QueryWrapper<RoleMenu>().lambda().eq(RoleMenu::getMenuId, e).eq(RoleMenu::getRoleId, roleId));
-            }
-        });
+        // 不存在的新增
+        Sets.SetView<Long> addIds = Sets.difference(ids, orignMenuIds);
+        if (addIds.size() > 0) {
+            roleMenuMapperService.saveBatch(addIds.stream().map(i -> new RoleMenu(null, roleId, i)).collect(Collectors.toList()));
+        }
     }
 
     @Override
-    public List<RoleListOut> listAllRole() {
-        List<Role> roles = roleMapper.selectList(new QueryWrapper<>());
-
-        return roles.stream().map(e -> new RoleListOut(e.getId(), e.getName())).collect(Collectors.toList());
+    public List<RoleListOut> listAllRole(AppUser user) {
+        return roleMapper.listAllRole(AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) ? null : user.getTenantId());
     }
 
     @Override
-    public List<Long> listRoleIdByAdminId(AdminIn param) {
-        List<RoleAdmin> roleAdmins = roleAdminMapper.selectList(new QueryWrapper<RoleAdmin>()
-                .lambda()
-                .eq(RoleAdmin::getAdminId, param.getId())
-        );
+    public List<String> listRoleIdByAdminId(AdminIn param, AppUser user) {
+        Admin admin = adminMapperService.getById(param.getId());
+        Assert.notNull(admin, "参数错误");
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && admin.getTenantId().equals(user.getTenantId())) {
+            throw new AppException(RCode.ACCESS_DENY);
+        }
 
-        return roleAdmins.stream().map(e -> e.getRoleId()).collect(Collectors.toList());
+        return roleAdminMapperService.list(new QueryWrapper<>(new RoleAdmin().setAdminId(param.getId())))
+                .stream().map(e -> String.valueOf(e.getRoleId())).collect(Collectors.toList());
     }
 }

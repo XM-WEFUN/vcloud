@@ -37,6 +37,8 @@ subprojects {
 
     [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
+    compileJava.options.compilerArgs.addAll(['-parameters'])
+
     jar {
         enabled = true
     }
@@ -64,8 +66,8 @@ subprojects {
         useJUnitPlatform()
     }
 
-    // 模块自定义配置
-    if (project.name != 'core' && project.name != 'web') {
+    // **************************** 模块自定义配置****************************
+    if (project.name != 'core' && project.name != 'web' && project.name != 'db') {
 
         apply plugin: 'org.springframework.boot'
 
@@ -86,8 +88,15 @@ subprojects {
         switch (project.name) {
             case 'gateway':
                 dependencies {
-                    implementation project(":core")
+                    implementation project(":db")
                     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+                }
+                break
+            case 'auth':
+            case 'admin':
+                dependencies {
+                    implementation project(":db")
+                    implementation project(":web")
                 }
                 break
             default:
@@ -98,9 +107,15 @@ subprojects {
 
         task copyResources(type: Copy) {
             from "${project(':core').projectDir}/src/main/resources"
+
             if (project.name != 'gateway') {
                 from "${project(':web').projectDir}/src/main/resources"
             }
+
+            if (project.name != 'swagger') {
+                from "${project(':db').projectDir}/src/main/resources"
+            }
+
             into "${project.buildDir}/resources/main"
             exclude '**/rebel.xml'
             includeEmptyDirs = true

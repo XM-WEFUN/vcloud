@@ -1,8 +1,5 @@
 # vcloud
 
-Sponsor [![paypal.me/bootvue](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/icon/paypal.svg)](https://www.paypal.me/bootvue)
-☕☕☕
-
 ## 依赖
 
 [版本依赖](https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E)
@@ -13,14 +10,15 @@ Sponsor [![paypal.me/bootvue](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/ico
 
 ## 模块
 
-- auth: 用户认证
-- gateway: 网关
-- core: 基础配置+redis/spring data数据源等等.....
+- core: 基础配置等等.....
+- db: mysql redis数据源....
 - web: webmvc相关config
-- admin: 后台管理相关接口服务
+- gateway 8080: 网关
+- swagger 9999: 接口文档
+- auth 8081: 用户认证
+- admin 8082: 后台管理相关接口服务
 - scheduler: 任务调度
 - mq: 消息服务
-- xxx: 其它服务
 
 ## docker
 
@@ -32,11 +30,11 @@ Sponsor [![paypal.me/bootvue](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/ico
 docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/localtime registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
 ```
 
-## spring-fox api
+## swagger文档
 
-[认证相关 /auth/oauth](http://localhost:8080/auth/swagger-ui/index.html?urls.primaryName=auth)
+启动`SwaggerApplication`
 
-[管理平台后端接口 /admin](http://localhost:8080/admin/swagger-ui/index.html?urls.primaryName=admin)
+> http://localhost:8080/swagger/doc.html
 
 ## 状态码
 
@@ -53,11 +51,6 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 ---
 
-## Next Plan
-
-- [ ] swagger文档改造
-- [ ] 多租户改造
-
 ## FAQ
 
 - nacos namespace id, JwtUtil key, appconfig appid secret等需要修改
@@ -68,32 +61,34 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - 前后端 `password` `其它敏感数据...`等信息RSA公钥加密传输
 
-- 客户端/auth/oauth/**下所有接口queryString需要携带对应的`appid` `secret`
+- 客户端/auth/oauth/**下所有接口queryString需要携带对应的`appid` `secret` `platform`参数
 
 - 除了skip-urls 其它接口请求头都要携带token:`access_token`
 
 - access_token: `7200s` ,refresh_token: `expire(180d)`秒 每次与access_token同步刷新, 实际有效时间都会延长5分钟
 
-- gateway向后端服务服务转发请求时 header添加了`id` `username` `openid` `platform` 等....
+- gateway向后端服务服务转发请求时 通过`queryString` 传递了`AppUser`对象信息....
 
 - 所有用到的cache缓存都要在config.yaml自定义配置中指定 包括 `ttl` `maxIdleTime` 如果没有配置.默认缓存不过期
 
 - nacos config.yml定义了mysql redis sentinel等等配置
 
-- 图形验证码无法生成的 系统需要安装字体库
-
 - 数据库已有表, flyway sql要从>1的version开始 例如:V2
 
 - 弱权限控制, 可以自行完善
+
+## Contact
+
+![battery_wx](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/wechat.jpg)
 
 ## Demo
 
 <table>
     <tr>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/12.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/1.png"></td>
         <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/4.png"></td>
     </tr>
-     <tr>
+    <tr>
         <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/5.png"></td>
         <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/10.png"></td>
     </tr>

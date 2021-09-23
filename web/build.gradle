@@ -1,6 +1,6 @@
 dependencies {
     api project(":core")
-    api libs.get('spring-fox')
+    api libs.get('knife4j')
     api 'org.springframework.boot:spring-boot-starter-web'
     api 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }

@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @ApiModel(description = "菜单查询参数")
 public class MenuListIn {
+
     private Long current = 1L;
     private Long pageSize = 10L;
 }

@@ -10,7 +10,9 @@ import java.util.Set;
 @Getter
 @Setter
 public class AdminRoleIn {
+
     @NotNull(message = "用户id不能为空")
+    @ApiModelProperty(notes = "管理员id")
     private Long adminId;
     @ApiModelProperty(notes = "role id集合")
     private Set<Long> ids;

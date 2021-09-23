@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bootvue.admin.mapper.RoleMapper">
+    <select id="listRole" resultType="com.bootvue.admin.controller.setting.dto.RoleListOut">
+        select r.id   id,
+               r.name role_name,
+               t.id   tenant_id,
+               t.name tenant_name
+        from `role` r,
+             tenant t
+                where r.tenant_id = t.id
+        <if test="name != null and name != ''">
+            and r.name like concat('%', #{name}, '%')
+        </if>
+        <if test="tenant_id != null">
+            and t.id = #{tenant_id}
+        </if>
+    </select>
+    <select id="listAllRole" resultType="com.bootvue.admin.controller.setting.dto.RoleListOut">
+        select r.id   id,
+               r.name role_name,
+               t.id   tenant_id,
+               t.name tenant_name
+        from `role` r,
+             tenant t
+                where r.tenant_id = t.id
+        <if test="tenant_id != null">
+            and t.id = #{tenant_id}
+        </if>
+    </select>
+
+    <select id="listRoleByAdminId" resultType="com.bootvue.db.entity.Role">
+        select r.*
+        from role r,
+             role_admin ra
+        where r.id = ra.role_id
+          and ra.admin_id = #{admin_id}
+    </select>
+</mapper>

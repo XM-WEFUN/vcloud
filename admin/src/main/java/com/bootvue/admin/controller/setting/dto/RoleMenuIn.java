@@ -10,7 +10,9 @@ import java.util.Set;
 @Getter
 @Setter
 public class RoleMenuIn {
+
     @NotNull(message = "角色id不能为空")
+    @ApiModelProperty(notes = "角色id")
     private Long roleId;
     @ApiModelProperty(notes = "menu id集合")
     private Set<Long> ids;

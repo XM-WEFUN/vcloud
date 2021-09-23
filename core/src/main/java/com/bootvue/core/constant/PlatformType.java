@@ -11,9 +11,9 @@ import java.util.Map;
 @AllArgsConstructor
 @Getter
 @ToString
-public enum PlatformType {  // 账号所属平台
-    ADMIN(0, "运营平台"),
-    CUSTOMER(1, "客户平台"),
+public enum PlatformType {  // 客户端类型
+    WEB(0, "web端"),
+    WECHAT_APP(1, "微信小程序端"),
     ;
 
     private static final Map<Integer, PlatformType> lookup = new HashMap<>();

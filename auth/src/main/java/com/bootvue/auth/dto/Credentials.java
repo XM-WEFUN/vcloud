@@ -16,6 +16,9 @@ import javax.validation.constraints.NotNull;
 @ApiModel(description = "登录相关凭证")
 public class Credentials {
 
+    @ApiModelProperty(notes = "租户编号")
+    private String tenantCode;
+
     @ApiModelProperty(notes = "用户名")
     private String username;
 
@@ -31,11 +34,11 @@ public class Credentials {
     @ApiModelProperty(notes = "图形验证码的key")
     private String key;
 
-    @ApiModelProperty(notes = "认证方式 0: 换取新的access_token与refresh_token 1: 用户名密码登录 2: 短信登录 3: 微信小程序认证", required = true)
+    @ApiModelProperty(notes = "认证方式 0: 换取新的access_token与refresh_token 1: 管理端用户名密码登录 2: 管理端短信登录 3: 微信小程序认证", required = true)
     @NotNull(message = "认证方式不能为空")
     private AuthType type;
 
-    @ApiModelProperty(notes = "客户端平台类型 0:运营平台 1:代理平台 2:客户平台 3....", required = true)
+    @ApiModelProperty(notes = "客户端类型 0:web 1:小程序端", required = true)
     @NotNull(message = "platform不能为空")
     private PlatformType platform;
 

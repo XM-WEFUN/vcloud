@@ -9,9 +9,12 @@ import lombok.Setter;
 @Setter
 @ApiModel(description = "角色查询参数")
 public class RoleListIn {
+
     private Long current = 1L;
     private Long pageSize = 10L;
 
     @ApiModelProperty(notes = "角色名")
-    private String name;
+    private String roleName;
+    @ApiModelProperty(notes = "租户名")
+    private String tenantName;
 }
