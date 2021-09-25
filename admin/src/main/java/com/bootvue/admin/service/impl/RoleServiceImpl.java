@@ -1,5 +1,6 @@
 package com.bootvue.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -47,7 +48,11 @@ public class RoleServiceImpl implements RoleService {
     public PageOut<List<RoleListOut>> listRole(RoleListIn param, AppUser user) {
         Page<Role> page = new Page<>(param.getCurrent(), param.getPageSize());
 
-        IPage<RoleListOut> roles = roleMapper.listRole(page, param.getRoleName(), AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) ? null : user.getTenantId());
+        Long tenantId = AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) ?
+                (user.getTenantId().equals(param.getTenantId()) ? null : param.getTenantId())
+                : user.getTenantId();
+
+        IPage<RoleListOut> roles = roleMapper.listRole(page, param.getRoleName(), tenantId);
 
         PageOut<List<RoleListOut>> out = new PageOut<>();
         out.setTotal(roles.getTotal());
@@ -62,20 +67,26 @@ public class RoleServiceImpl implements RoleService {
             throw new AppException(RCode.ACCESS_DENY);
         }
 
-        if (!StringUtils.hasText(param.getName()) || "超级管理员".equals(param.getName())) {
+        if (!StringUtils.hasText(param.getRoleName())) {
             throw new AppException(RCode.PARAM_ERROR);
         }
 
+        Role existRole = roleMapperService.getOne(new QueryWrapper<Role>()
+                .lambda()
+                .eq(Role::getName, param.getRoleName())
+                .eq(Role::getTenantId, param.getTenantId())
+        );
+
+        Assert.isNull(existRole, "名称已存在");
+
         if (param.getId() != null && param.getId().compareTo(0L) > 0) {
-            roleMapperService.updateById(new Role().setId(param.getId()).setName(param.getName()));
+            if (AppConst.ADMIN_TENANT_ID.equals(param.getTenantId())) {
+                Role role = roleMapperService.getById(param.getId());
+                Assert.isTrue(!"超级管理员".equals(role.getName()), "运营平台 超级管理员不可更改");
+            }
+            roleMapperService.updateById(new Role().setId(param.getId()).setName(param.getRoleName()));
         } else {
-            Role role = roleMapperService.getOne(new QueryWrapper<Role>()
-                    .lambda().eq(Role::getName, param.getName())
-            );
-
-            Assert.isNull(role, "名称已存在");
-
-            roleMapper.insert(new Role(null, param.getTenantId(), param.getName()));
+            roleMapper.insert(new Role(null, param.getTenantId(), param.getRoleName()));
         }
     }
 
@@ -87,6 +98,11 @@ public class RoleServiceImpl implements RoleService {
 
         if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && !user.getTenantId().equals(param.getTenantId())) {
             throw new AppException(RCode.ACCESS_DENY);
+        }
+
+        if (AppConst.ADMIN_TENANT_ID.equals(user.getTenantId())) {
+            Role role = roleMapperService.getById(param.getId());
+            Assert.isTrue(!"超级管理员".equals(role.getName()), "运营平台 超级管理员不可删除");
         }
 
         // 删除角色  role role_menu role_admin
@@ -120,6 +136,12 @@ public class RoleServiceImpl implements RoleService {
             return;
         }
 
+        // 验证所有用户 是否与此角色属于同一租户下
+        Set<Long> tenants = adminMapperService.list(new LambdaQueryWrapper<Admin>().in(Admin::getId, ids)).stream().map(e -> e.getTenantId()).collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(tenants) || tenants.size() != 1 || !tenants.stream().findFirst().get().equals(role.getTenantId())) {
+            throw new AppException(RCode.PARAM_ERROR);
+        }
+
         // 此角色原有用户
         List<RoleAdmin> userRoles = roleAdminMapperService.list(new QueryWrapper<>(new RoleAdmin().setRoleId(roleId)));
         if (CollectionUtils.isEmpty(userRoles)) {
@@ -131,13 +153,18 @@ public class RoleServiceImpl implements RoleService {
         // 原有用户id
         Set<Long> orignUserIds = userRoles.stream().map(e -> e.getAdminId()).collect(Collectors.toSet());
 
-        // 不能存在的新增
-        roleAdminMapperService.saveBatch(ids.stream().filter(e -> !orignUserIds.contains(e)).map(i -> new RoleAdmin(null, roleId, i)).collect(Collectors.toList()));
-
         // 已分配的用户  现在取消了的
-        roleAdminMapperService.remove(new QueryWrapper<RoleAdmin>().lambda()
-                .eq(RoleAdmin::getRoleId, roleId)
-                .in(RoleAdmin::getAdminId, orignUserIds.stream().filter(i -> !ids.contains(i)).collect(Collectors.toSet())));
+        Sets.SetView<Long> removeIds = Sets.difference(orignUserIds, ids);
+        if (removeIds.size() > 0) {
+            roleAdminMapperService.remove(new QueryWrapper<RoleAdmin>().lambda()
+                    .eq(RoleAdmin::getRoleId, roleId)
+                    .in(RoleAdmin::getAdminId, removeIds));
+        }
+        // 不能存在的新增
+        Sets.SetView<Long> addIds = Sets.difference(ids, orignUserIds);
+        if (addIds.size() > 0) {
+            roleAdminMapperService.saveBatch(addIds.stream().map(i -> new RoleAdmin(null, roleId, i)).collect(Collectors.toList()));
+        }
     }
 
     @Override
@@ -204,7 +231,7 @@ public class RoleServiceImpl implements RoleService {
     public List<String> listRoleIdByAdminId(AdminIn param, AppUser user) {
         Admin admin = adminMapperService.getById(param.getId());
         Assert.notNull(admin, "参数错误");
-        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && admin.getTenantId().equals(user.getTenantId())) {
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && !admin.getTenantId().equals(user.getTenantId())) {
             throw new AppException(RCode.ACCESS_DENY);
         }
 

@@ -20,8 +20,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 -- Table structure for admin
 -- ----------------------------
-DROP TABLE IF EXISTS `admin`;
-CREATE TABLE `admin`
+drop table IF EXISTS `admin`;
+create TABLE `admin`
 (
     `id`          bigint                                                        NOT NULL,
     `tenant_id`   bigint                                                        NOT NULL COMMENT '租户id',
@@ -44,14 +44,14 @@ CREATE TABLE `admin`
 -- ----------------------------
 -- Records of admin
 -- ----------------------------
-INSERT INTO `admin`
-VALUES (1436592471676354580, 1436592471676354560, 'admin', '17705920000', md5('123456'), '', 1, now(3), null, null);
+insert into `admin`
+values (1436592471676354580, 1, 'admin', '17705920000', md5('123456'), '', 1, now(3), null, null);
 
 -- ----------------------------
 -- Table structure for menu
 -- ----------------------------
-DROP TABLE IF EXISTS `menu`;
-CREATE TABLE `menu`
+drop table IF EXISTS `menu`;
+create TABLE `menu`
 (
     `id`             bigint                                                       NOT NULL,
     `title`          varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '菜单名称',
@@ -72,24 +72,24 @@ CREATE TABLE `menu`
 -- ----------------------------
 -- Records of menu
 -- ----------------------------
-INSERT INTO `menu`
-VALUES (1436596625371119616, '首页', 0, 'index', '/index', 'HomeOutlined', 0, 1, 1, 0);
-INSERT INTO `menu`
-VALUES (1436596625371119617, '系统设置', 500, 'setting', '/', 'SettingOutlined', 0, 1, 0, 1);
-INSERT INTO `menu`
-VALUES (1436596625371119618, '菜单管理', 501, 'menu', '/menu', '', 1436596625371119617, 1, 0, 0);
-INSERT INTO `menu`
-VALUES (1436596625371119619, '租户管理', 502, 'tenant', '/tenant', '', 1436596625371119617, 1, 0, 0);
-INSERT INTO `menu`
-VALUES (1436596625371119620, '角色管理', 503, 'role', '/role', '', 1436596625371119617, 1, 0, 0);
-INSERT INTO `menu`
-VALUES (1436596625371119621, '用户管理', 504, 'admin', '/admin', '', 1436596625371119617, 1, 0, 0);
+insert into `menu`
+values (1436596625371119616, '首页', 0, 'index', '/index', 'HomeOutlined', 0, 1, 1, 0);
+insert into `menu`
+values (1436596625371119617, '系统设置', 500, 'setting', '/', 'SettingOutlined', 0, 1, 0, 1);
+insert into `menu`
+values (1436596625371119618, '菜单管理', 501, 'menu', '/menu', '', 1436596625371119617, 1, 0, 0);
+insert into `menu`
+values (1436596625371119619, '租户管理', 502, 'tenant', '/tenant', '', 1436596625371119617, 1, 0, 0);
+insert into `menu`
+values (1436596625371119620, '角色管理', 503, 'role', '/role', '', 1436596625371119617, 1, 0, 0);
+insert into `menu`
+values (1436596625371119621, '用户管理', 504, 'admin', '/admin', '', 1436596625371119617, 1, 0, 0);
 
 -- ----------------------------
 -- Table structure for role
 -- ----------------------------
-DROP TABLE IF EXISTS `role`;
-CREATE TABLE `role`
+drop table IF EXISTS `role`;
+create TABLE `role`
 (
     `id`        bigint                                                       NOT NULL,
     `tenant_id` bigint                                                       NOT NULL COMMENT '租户id',
@@ -103,14 +103,14 @@ CREATE TABLE `role`
 -- ----------------------------
 -- Records of role
 -- ----------------------------
-INSERT INTO `role`
-VALUES (1436596625371119621, 1436592471676354560, '超级管理员');
+insert into `role`
+values (1436596625371119621, 1, '超级管理员');
 
 -- ----------------------------
 -- Table structure for role_admin
 -- ----------------------------
-DROP TABLE IF EXISTS `role_admin`;
-CREATE TABLE `role_admin`
+drop table IF EXISTS `role_admin`;
+create TABLE `role_admin`
 (
     `id`       bigint NOT NULL,
     `role_id`  bigint NOT NULL COMMENT '角色id',
@@ -125,14 +125,14 @@ CREATE TABLE `role_admin`
 -- ----------------------------
 -- Records of role_admin
 -- ----------------------------
-INSERT INTO `role_admin`
-VALUES (1436596625371119600, 1436596625371119621, 1436592471676354580);
+insert into `role_admin`
+values (1436596625371119600, 1436596625371119621, 1436592471676354580);
 
 -- ----------------------------
 -- Table structure for role_menu
 -- ----------------------------
-DROP TABLE IF EXISTS `role_menu`;
-CREATE TABLE `role_menu`
+drop table IF EXISTS `role_menu`;
+create TABLE `role_menu`
 (
     `id`      bigint NOT NULL,
     `role_id` bigint NOT NULL COMMENT '角色id',
@@ -147,24 +147,24 @@ CREATE TABLE `role_menu`
 -- ----------------------------
 -- Records of role_menu
 -- ----------------------------
-INSERT INTO `role_menu`
-VALUES (1436596625371119622, 1436596625371119621, 1436596625371119616);
-INSERT INTO `role_menu`
-VALUES (1436596625371119623, 1436596625371119621, 1436596625371119617);
-INSERT INTO `role_menu`
-VALUES (1436596625371119624, 1436596625371119621, 1436596625371119618);
-INSERT INTO `role_menu`
-VALUES (1436596625371119625, 1436596625371119621, 1436596625371119619);
-INSERT INTO `role_menu`
-VALUES (1436596625371119626, 1436596625371119621, 1436596625371119620);
-INSERT INTO `role_menu`
-VALUES (1436596625371119627, 1436596625371119621, 1436596625371119621);
+insert into `role_menu`
+values (1436596625371119622, 1436596625371119621, 1436596625371119616);
+insert into `role_menu`
+values (1436596625371119623, 1436596625371119621, 1436596625371119617);
+insert into `role_menu`
+values (1436596625371119624, 1436596625371119621, 1436596625371119618);
+insert into `role_menu`
+values (1436596625371119625, 1436596625371119621, 1436596625371119619);
+insert into `role_menu`
+values (1436596625371119626, 1436596625371119621, 1436596625371119620);
+insert into `role_menu`
+values (1436596625371119627, 1436596625371119621, 1436596625371119621);
 
 -- ----------------------------
 -- Table structure for tenant
 -- ----------------------------
-DROP TABLE IF EXISTS `tenant`;
-CREATE TABLE `tenant`
+drop table IF EXISTS `tenant`;
+create TABLE `tenant`
 (
     `id`          bigint                                                       NOT NULL,
     `code`        varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '租户编号',
@@ -183,14 +183,14 @@ CREATE TABLE `tenant`
 -- ----------------------------
 -- Records of tenant
 -- ----------------------------
-INSERT INTO `tenant`
-VALUES (1436592471676354560, 'V0000001', '运营平台', now(3), NULL, NULL);
+insert into `tenant`
+values (1, 'V0000001', '运营平台', now(3), null, null);
 
 -- ----------------------------
 -- Table structure for wechat_user
 -- ----------------------------
-DROP TABLE IF EXISTS `wechat_user`;
-CREATE TABLE `wechat_user`
+drop table IF EXISTS `wechat_user`;
+create TABLE `wechat_user`
 (
     `id`          bigint                                                        NOT NULL,
     `tenant_id`   bigint                                                        NOT NULL COMMENT '租户id',

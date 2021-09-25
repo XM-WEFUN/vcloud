@@ -1,5 +1,7 @@
 package com.bootvue.auth.dto;
 
+import com.bootvue.core.serializer.LongToStringSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -15,6 +17,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResponse {
+
+    @ApiModelProperty(notes = "用户id", required = true)
+    @JsonSerialize(using = LongToStringSerializer.class)
+    private Long id;
 
     @ApiModelProperty(notes = "用户名", required = true)
     private String username;

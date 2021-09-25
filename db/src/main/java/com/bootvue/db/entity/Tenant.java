@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class Tenant {
 
     @JsonSerialize(using = LongToStringSerializer.class)
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     @TableField(value = "code")

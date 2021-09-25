@@ -19,5 +19,5 @@ public interface AdminService {
 
     void updateSelf(AdminIn param, AppUser user);
 
-    List<Long> listAdminIdByRole(RoleIn param, AppUser user);
+    List<String> listAdminIdByRole(RoleIn param, AppUser user);
 }

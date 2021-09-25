@@ -23,6 +23,7 @@ import com.bootvue.db.entity.Role;
 import com.bootvue.db.entity.Tenant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -54,32 +55,31 @@ public class TenantServiceImpl implements TenantService {
         PageOut<List<TenantListOut>> out = new PageOut<>();
 
         out.setTotal(tenants.getTotal());
-        out.setRows(tenants.getRecords().stream().map(e -> new TenantListOut(e.getId(), e.getName(), e.getCreateTime())).collect(Collectors.toList()));
+        out.setRows(tenants.getRecords().stream().map(e -> new TenantListOut(e.getId(), e.getName(), e.getCode(), e.getCreateTime(), e.getDeleteTime()))
+                .collect(Collectors.toList()));
 
         return out;
     }
 
     @Override
-    public void addTenant(TenantIn param, AppUser user) {
-        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId())) {
-            throw new AppException(RCode.ACCESS_DENY);
-        }
+    public void addTenant(TenantIn param) {
 
         Tenant tenant = tenantMapperService.getOne(new QueryWrapper<>(new Tenant().setName(param.getName().trim())));
         Assert.isNull(tenant, "租户名已存在");
 
-        String code = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + RandomUtil.randomNumbers(5);
+        String code = "T" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + RandomUtil.randomNumbers(5);
         tenantMapperService.save(new Tenant(null, code, param.getName().trim(), LocalDateTime.now(), null, null));
     }
 
     @Override
-    public void updateTenant(TenantIn param, AppUser user) {
-        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId())) {
-            throw new AppException(RCode.ACCESS_DENY);
-        }
+    public void updateTenant(TenantIn param) {
 
         Tenant tenant = tenantMapperService.getById(param.getId());
         Assert.notNull(tenant, "参数错误");
+
+        if (tenant.getName().equals(param.getName())) {
+            return;
+        }
 
         Tenant existTenant = tenantMapperService.getOne(new QueryWrapper<>(new Tenant().setName(param.getName().trim())));
         Assert.isNull(existTenant, "租户名已存在");
@@ -90,16 +90,15 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional
-    public void delTenant(TenantIn param, AppUser user) {
-        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId())) {
-            throw new AppException(RCode.ACCESS_DENY);
-        }
+    @CacheEvict(cacheNames = AppConst.ADMIN_CACHE, allEntries = true)
+    public void delTenant(TenantIn param) {
+        Assert.isTrue(!AppConst.ADMIN_TENANT_ID.equals(param.getId()), "运营平台不可删除");
         // 删除tenant admin 相关数据
         Tenant tenant = tenantMapperService.getById(param.getId());
         Assert.notNull(tenant, "参数错误");
 
         tenant.setDeleteTime(LocalDateTime.now());
-        tenantMapperService.save(tenant);
+        tenantMapperService.updateById(tenant);
 
         adminMapperService.update(new UpdateWrapper<Admin>()
                 .lambda()

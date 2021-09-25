@@ -4,6 +4,7 @@ import com.bootvue.admin.controller.setting.dto.*;
 import com.bootvue.admin.service.MenuService;
 import com.bootvue.core.model.AppUser;
 import com.bootvue.core.result.PageOut;
+import com.bootvue.web.annotation.PreAuth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class MenuController {
 
     @ApiOperation("某个角色对应的菜单id")
     @PostMapping("/list_by_role")
-    public List<Long> listMenuByRole(@RequestBody RoleIn param, AppUser user) {
+    public List<String> listMenuByRole(@RequestBody RoleIn param, AppUser user) {
         return menuService.listMenuByRole(param, user);
     }
 
@@ -42,19 +43,22 @@ public class MenuController {
 
     @ApiOperation("新增菜单")
     @PostMapping("/add")
-    public void addMenu(@RequestBody MenuIn param, AppUser user) {
-        menuService.addOrUpdateMenu(param, user);
+    @PreAuth(superOnly = true)
+    public void addMenu(@RequestBody MenuIn param) {
+        menuService.addOrUpdateMenu(param);
     }
 
     @ApiOperation("更新菜单")
     @PostMapping("/update")
-    public void updateMenu(@RequestBody MenuIn param, AppUser user) {
-        menuService.addOrUpdateMenu(param, user);
+    @PreAuth(superOnly = true)
+    public void updateMenu(@RequestBody MenuIn param) {
+        menuService.addOrUpdateMenu(param);
     }
 
     @ApiOperation("删除菜单")
     @PostMapping("/delete")
-    public void delMenu(@RequestBody MenuIn param, AppUser user) {
-        menuService.delMenu(param.getId(), user);
+    @PreAuth(superOnly = true)
+    public void delMenu(@RequestBody MenuIn param) {
+        menuService.delMenu(param.getId());
     }
 }

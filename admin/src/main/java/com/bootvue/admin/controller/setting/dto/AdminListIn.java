@@ -16,4 +16,7 @@ public class AdminListIn {
     private String username;
     @ApiModelProperty(notes = "手机号")
     private String phone;
+
+    @ApiModelProperty(notes = "租户id")
+    private Long tenantId;
 }

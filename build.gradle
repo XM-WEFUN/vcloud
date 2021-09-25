@@ -10,7 +10,7 @@ apply from: 'version.gradle'
 
 allprojects {
     group 'com.bootvue'
-    version '1.0.0'
+    version '2.1.0-RC1'
 
     repositories {
         maven {
@@ -90,6 +90,7 @@ subprojects {
                 dependencies {
                     implementation project(":db")
                     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+                    implementation 'com.alibaba.cloud:spring-cloud-alibaba-sentinel-gateway'
                 }
                 break
             case 'auth':

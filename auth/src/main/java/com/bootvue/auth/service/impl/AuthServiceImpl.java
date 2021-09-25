@@ -6,6 +6,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.bootvue.auth.dto.*;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
@@ -66,16 +68,20 @@ public class AuthServiceImpl implements AuthService {
 
     @Cacheable(cacheNames = AppConst.ADMIN_CACHE, key = "#id", unless = "#result==null")
     public Admin findByAdminId(Long id) {
-        return adminMapperService.getOne(new QueryWrapper<>(
-                new Admin().setId(id).setStatus(true)
-        ).lambda().isNull(Admin::getDeleteTime));
+        return adminMapperService.getOne(new QueryWrapper<Admin>()
+                .lambda()
+                .eq(Admin::getId, id)
+                .eq(Admin::getStatus, true)
+                .isNull(Admin::getDeleteTime));
     }
 
     @Cacheable(cacheNames = AppConst.WECHAT_USER_CACHE, key = "#id", unless = "#result==null")
     public WechatUser findByUserId(Long id) {
-        return wechatUserMapperService.getOne(new QueryWrapper<>(
-                new WechatUser().setId(id).setStatus(true)
-        ).lambda().isNull(WechatUser::getDeleteTime));
+        return wechatUserMapperService.getOne(new QueryWrapper<WechatUser>()
+                .lambda()
+                .eq(WechatUser::getId, id)
+                .eq(WechatUser::getStatus, true)
+                .isNull(WechatUser::getDeleteTime));
     }
 
     @Override
@@ -135,9 +141,13 @@ public class AuthServiceImpl implements AuthService {
             Tenant tenant = getTenant(credentials.getTenantCode());
 
             Assert.notNull(tenant, "租户不存在");
-            WechatUser user = wechatUserMapperService.getOne(new QueryWrapper<>(
-                    new WechatUser().setTenantId(tenant.getId()).setOpenid(wechatSession.getOpenid()).setStatus(true)
-            ).lambda().isNull(WechatUser::getDeleteTime));
+            WechatUser user = wechatUserMapperService.getOne(new QueryWrapper<WechatUser>()
+                    .lambda()
+                    .eq(WechatUser::getTenantId, tenant.getId())
+                    .eq(WechatUser::getOpenid, wechatSession.getOpenid())
+                    .eq(WechatUser::getStatus, true)
+                    .isNull(WechatUser::getDeleteTime)
+            );
 
             String country = StringUtils.hasText(encryptData.getString("country")) ? encryptData.getString("country") : "";
             String avatar = StringUtils.hasText(encryptData.getString("avatarUrl")) ? encryptData.getString("avatarUrl") : "";
@@ -179,10 +189,12 @@ public class AuthServiceImpl implements AuthService {
         Tenant tenant = getTenant(phoneParams.getTenantCode());
 
         Assert.notNull(tenant, "租户不存在");
-        Admin admin = adminMapperService.getOne(
-                new QueryWrapper<>(
-                        new Admin().setTenantId(tenant.getId()).setPhone(phoneParams.getPhone()).setStatus(true)
-                ).lambda().isNull(Admin::getDeleteTime));
+        Admin admin = adminMapperService.getOne(new QueryWrapper<Admin>()
+                .lambda()
+                .eq(Admin::getTenantId, tenant.getId())
+                .eq(Admin::getPhone, phoneParams.getPhone())
+                .eq(Admin::getStatus, true)
+                .isNull(Admin::getDeleteTime));
         if (ObjectUtils.isEmpty(admin)) {
             throw new AppException(RCode.PARAM_ERROR);
         }
@@ -197,9 +209,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private Tenant getTenant(String tenantCode) {
-        return tenantMapperService.getOne(new QueryWrapper<>(
-                new Tenant().setCode(tenantCode)
-        ).lambda().isNull(Tenant::getDeleteTime));
+        return tenantMapperService.getOne(new LambdaQueryWrapper<Tenant>().eq(Tenant::getCode, tenantCode).isNull(Tenant::getDeleteTime));
     }
 
     @Override
@@ -253,6 +263,8 @@ public class AuthServiceImpl implements AuthService {
                     throw new AppException(RCode.UNAUTHORIZED_ERROR);
                 }
                 List<RoleAdmin> roles = roleAdminMapperService.list(new QueryWrapper<RoleAdmin>().lambda().eq(RoleAdmin::getAdminId, admin.getId()));
+                Assert.notEmpty(roles, "用户角色未分配");
+
                 return getAuthResponse(new UserInfo(id, tenantId, admin.getUsername(), admin.getPhone(),
                         admin.getAvatar(), GenderEnum.UNKNOWN, TokenLabelEnum.ADMIN, roles.stream().map(e -> e.getRoleId()).collect(Collectors.toList())));
             default: // 其它平台
@@ -288,11 +300,17 @@ public class AuthServiceImpl implements AuthService {
 
         Assert.notNull(tenant, "租户不存在");
 
-        Admin admin = adminMapperService.getOne(new QueryWrapper<>(
-                new Admin().setTenantId(tenant.getId()).setPhone(credentials.getPhone()).setStatus(true)
-        ).lambda().isNull(Admin::getDeleteTime));
+        Admin admin = adminMapperService.getOne(new QueryWrapper<Admin>()
+                .lambda()
+                .eq(Admin::getTenantId, tenant.getId())
+                .eq(Admin::getPhone, credentials.getPhone())
+                .eq(Admin::getStatus, true)
+                .isNull(Admin::getDeleteTime)
+        );
         Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
         List<RoleAdmin> roles = roleAdminMapperService.list(new QueryWrapper<RoleAdmin>().lambda().eq(RoleAdmin::getAdminId, admin.getId()));
+        Assert.notEmpty(roles, "用户角色未分配");
+
         return getAuthResponse(new UserInfo(admin.getId(), tenant.getId(), admin.getUsername(), admin.getPhone(),
                 admin.getAvatar(), GenderEnum.UNKNOWN, TokenLabelEnum.ADMIN, roles.stream().map(i -> i.getRoleId()).collect(Collectors.toList())));
     }
@@ -324,13 +342,18 @@ public class AuthServiceImpl implements AuthService {
         Assert.notNull(tenant, "租户不存在");
 
         // 验证 用户名 密码
-        Admin admin = adminMapperService.getOne(new QueryWrapper<>(
-                new Admin().setTenantId(tenant.getId()).setUsername(credentials.getUsername()).setPassword(DigestUtils.md5Hex(password))
-                        .setStatus(true)
-        ).lambda().isNull(Admin::getDeleteTime));
+        Admin admin = adminMapperService.getOne(new QueryWrapper<Admin>()
+                .lambda()
+                .eq(Admin::getTenantId, tenant.getId())
+                .eq(Admin::getUsername, credentials.getUsername())
+                .eq(Admin::getPassword, DigestUtils.md5Hex(password))
+                .eq(Admin::getStatus, true)
+                .isNull(Admin::getDeleteTime)
+        );
 
         Assert.notNull(admin, RCode.PARAM_ERROR.getMsg());
         List<RoleAdmin> roles = roleAdminMapperService.list(new QueryWrapper<RoleAdmin>().lambda().eq(RoleAdmin::getAdminId, admin.getId()));
+        Assert.notEmpty(roles, "用户角色未分配");
 
         return getAuthResponse(new UserInfo(admin.getId(), tenant.getId(), admin.getUsername(), admin.getPhone(),
                 admin.getAvatar(), GenderEnum.UNKNOWN, TokenLabelEnum.ADMIN, roles.stream().map(i -> i.getRoleId()).collect(Collectors.toList())));
@@ -365,6 +388,7 @@ public class AuthServiceImpl implements AuthService {
         // response对象
         AuthResponse response = new AuthResponse();
 
+        response.setId(info.getId());
         response.setUsername(info.getUsername());
         response.setPhone(info.getPhone());
         response.setAvatar(info.getAvatar());

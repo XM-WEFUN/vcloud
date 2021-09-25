@@ -12,11 +12,11 @@ import java.util.List;
 public interface TenantService {
     PageOut<List<TenantListOut>> listTenant(TenantListIn param, AppUser user);
 
-    void addTenant(TenantIn param, AppUser user);
+    void addTenant(TenantIn param);
 
-    void updateTenant(TenantIn param, AppUser user);
+    void updateTenant(TenantIn param);
 
-    void delTenant(TenantIn param, AppUser user);
+    void delTenant(TenantIn param);
 
     List<Tenant> listAllTenant(AppUser user);
 }

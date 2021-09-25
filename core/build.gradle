@@ -10,4 +10,5 @@ dependencies {
     api libs.get('commons-text')
     api libs.get('commons-io')
     api libs.get('commons-fileupload')
+    api 'com.alibaba.cloud:spring-cloud-starter-alibaba-sentinel'
 }

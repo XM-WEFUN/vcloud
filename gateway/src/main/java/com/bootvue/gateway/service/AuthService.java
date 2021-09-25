@@ -17,15 +17,19 @@ public class AuthService {
 
     @Cacheable(cacheNames = AppConst.ADMIN_CACHE, key = "#id", unless = "#result==null")
     public Admin findByAdminId(Long id) {
-        return adminMapperService.getOne(new QueryWrapper<>(
-                new Admin().setId(id).setStatus(true)
-        ).lambda().isNull(Admin::getDeleteTime));
+        return adminMapperService.getOne(new QueryWrapper<Admin>()
+                .lambda()
+                .eq(Admin::getId, id)
+                .eq(Admin::getStatus, true)
+                .isNull(Admin::getDeleteTime));
     }
 
     @Cacheable(cacheNames = AppConst.WECHAT_USER_CACHE, key = "#id", unless = "#result==null")
     public WechatUser findByUserId(Long id) {
-        return wechatUserMapperService.getOne(new QueryWrapper<>(
-                new WechatUser().setId(id).setStatus(true)
-        ).lambda().isNull(WechatUser::getDeleteTime));
+        return wechatUserMapperService.getOne(new QueryWrapper<WechatUser>()
+                .lambda()
+                .eq(WechatUser::getId, id)
+                .eq(WechatUser::getStatus, true)
+                .isNull(WechatUser::getDeleteTime));
     }
 }

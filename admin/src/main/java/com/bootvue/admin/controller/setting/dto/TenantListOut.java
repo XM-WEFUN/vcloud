@@ -24,6 +24,10 @@ public class TenantListOut {
     private Long id;
     @ApiModelProperty(notes = "租户名")
     private String name;
+    @ApiModelProperty(notes = "租户编号")
+    private String code;
     @JsonSerialize(using = LocalDateTimeSerializer.class, nullsUsing = LocalDateTimeSerializer.class)
     private LocalDateTime createTime;
+    @JsonSerialize(using = LocalDateTimeSerializer.class, nullsUsing = LocalDateTimeSerializer.class)
+    private LocalDateTime deleteTime;
 }

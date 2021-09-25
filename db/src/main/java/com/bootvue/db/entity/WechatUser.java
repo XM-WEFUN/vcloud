@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class WechatUser implements Serializable {
     private static final long serialVersionUID = 2112159784340829390L;
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     @TableField(value = "tenant_id")

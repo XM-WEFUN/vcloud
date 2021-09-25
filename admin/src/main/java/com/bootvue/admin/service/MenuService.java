@@ -11,9 +11,9 @@ public interface MenuService {
 
     List<MenuParentList> listMenuParent();
 
-    void delMenu(Long id, AppUser user);
+    void delMenu(Long id);
 
-    void addOrUpdateMenu(MenuIn param, AppUser user);
+    void addOrUpdateMenu(MenuIn param);
 
-    List<Long> listMenuByRole(RoleIn param, AppUser user);
+    List<String> listMenuByRole(RoleIn param, AppUser user);
 }

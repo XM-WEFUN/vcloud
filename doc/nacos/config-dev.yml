@@ -31,6 +31,12 @@ spring:
     property-naming-strategy: SNAKE_CASE
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  cloud:
+    sentinel:
+      enabled: true
+      transport:
+        port: 8719
+        dashboard: 192.168.100.80:8080
 
 logging:
   config: classpath:logback.xml

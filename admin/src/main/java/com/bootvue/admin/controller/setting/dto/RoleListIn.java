@@ -15,6 +15,6 @@ public class RoleListIn {
 
     @ApiModelProperty(notes = "角色名")
     private String roleName;
-    @ApiModelProperty(notes = "租户名")
-    private String tenantName;
+    @ApiModelProperty(notes = "租户id")
+    private Long tenantId;
 }

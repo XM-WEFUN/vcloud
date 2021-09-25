@@ -6,9 +6,11 @@
 
 |  Spring Cloud   | Spring Cloud Alibaba  | Spring Boot| Nacos | Sentinel| RocketMQ | Seata|
 |  ----  | ----  | ----  | ----  | ----  | ----  | ----  |
-| 2020.0.3  | 2.2.6.RELEASE |2.4.10 |    1.4.2 |1.8.1 |4.4.0|1.3.0|
+| 2020.0.4  | 2.2.6.RELEASE |2.5.5 |    1.4.2 |1.8.1 |4.4.0|1.3.0|
 
 ## 模块
+
+> 可以按实际需要更细粒度的拆分模块功能
 
 - core: 基础配置等等.....
 - db: mysql redis数据源....
@@ -23,16 +25,21 @@
 ## docker
 
 ```bash
-# sentinel组件已经被剔除 需要引入可以自行加入
+# sentinel dashboard
 
 # sentinel-dashboard image:  registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
 
-docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/localtime registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
+docker run -d --name sentinel-dashboard \
+              -p 8080:8080 \
+              -e USERNAME=sentinel \
+              -e PASSWORD=sentinel \
+              -v /etc/localtime:/etc/localtime \
+              registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
 ```
 
 ## swagger文档
 
-启动`SwaggerApplication`
+在其它服务启动后, 启动`SwaggerApplication`
 
 > http://localhost:8080/swagger/doc.html
 
@@ -48,6 +55,11 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 600: 系统异常 其它杂七杂八异常......
 ```
+
+## next plan
+
+- [ ] 功能完善
+- [ ] 说明文档完善
 
 ---
 
@@ -75,7 +87,7 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 
 - 数据库已有表, flyway sql要从>1的version开始 例如:V2
 
-- 弱权限控制, 可以自行完善
+- 弱权限控制, 可以自行完善 `PreAuth`
 
 ## Contact
 
@@ -86,10 +98,10 @@ docker run -d --name sentinel-dashboard -p 8080:8080 -v /etc/localtime:/etc/loca
 <table>
     <tr>
         <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/1.png"></td>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/4.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/11.png"></td>
     </tr>
     <tr>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/5.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/22.png"></td>
         <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/10.png"></td>
     </tr>
 </table>

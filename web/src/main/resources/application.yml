@@ -7,3 +7,5 @@ feign:
     config:
       default:
         loggerLevel: NONE
+  sentinel:
+    enabled: true

@@ -1,11 +1,13 @@
 package com.bootvue.admin.controller.setting.dto;
 
+import com.bootvue.core.constant.AppConst;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter

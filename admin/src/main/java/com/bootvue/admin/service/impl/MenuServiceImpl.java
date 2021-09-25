@@ -2,6 +2,7 @@ package com.bootvue.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bootvue.admin.controller.setting.dto.*;
 import com.bootvue.admin.mapper.MenuMapper;
@@ -37,10 +38,16 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public PageOut<List<MenuListOut>> listMenu(MenuListIn param, AppUser user) {
-        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId())) {
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && !user.getTenantId().equals(param.getTenantId())) {
             throw new AppException(RCode.ACCESS_DENY);
         }
-        IPage<MenuListDo> menus = menuMapper.listMenu(new Page<>(param.getCurrent(), param.getPageSize()));
+
+        // 对应  租户下超级管理员 角色id
+        Role superRole = roleMapperService.getOne(Wrappers.lambdaQuery(new Role().setName("超级管理员")
+                .setTenantId(user.getTenantId())));
+        Assert.notNull(superRole, "此租户不存在超级管理员");
+
+        IPage<MenuListDo> menus = menuMapper.listMenu(new Page<>(param.getCurrent(), param.getPageSize()), superRole.getId());
 
         PageOut<List<MenuListOut>> out = new PageOut<>();
         out.setTotal(menus.getTotal());
@@ -59,7 +66,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public void delMenu(Long id, AppUser user) {
+    public void delMenu(Long id) {
         // menu与role_menu都删除
         Menu menu = menuMapperService.getById(id);
         menuMapperService.removeById(menu);
@@ -71,9 +78,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public void addOrUpdateMenu(MenuIn param, AppUser user) {
-        Assert.isTrue(AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()), "参数错误");
-
+    public void addOrUpdateMenu(MenuIn param) {
         if (param.getId() != null && param.getId().compareTo(0L) > 0) {
             // 更新
             Menu menu = menuMapper.selectById(param.getId());
@@ -96,16 +101,18 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public List<Long> listMenuByRole(RoleIn param, AppUser user) {
+    public List<String> listMenuByRole(RoleIn param, AppUser user) {
         Role role = roleMapperService.getById(param.getId());
         Assert.notNull(role, "参数错误");
 
-        Assert.isTrue(role.getTenantId().equals(user.getTenantId()), "参数错误");
+        if (!AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) && !role.getTenantId().equals(user.getTenantId())) {
+            throw new AppException(RCode.PARAM_ERROR);
+        }
 
         List<RoleMenu> roleMenus = roleMenuMapperService.list(new QueryWrapper<RoleMenu>()
                 .lambda()
                 .eq(RoleMenu::getRoleId, param.getId())
         );
-        return roleMenus.stream().map(e -> e.getMenuId()).collect(Collectors.toList());
+        return roleMenus.stream().map(e -> String.valueOf(e.getMenuId())).collect(Collectors.toList());
     }
 }

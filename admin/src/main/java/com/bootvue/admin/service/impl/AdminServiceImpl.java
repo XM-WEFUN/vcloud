@@ -17,6 +17,7 @@ import com.bootvue.core.model.AppUser;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.PageOut;
 import com.bootvue.core.result.RCode;
+import com.bootvue.core.util.AppUtil;
 import com.bootvue.core.util.RsaUtil;
 import com.bootvue.db.entity.Admin;
 import com.bootvue.db.entity.Role;
@@ -35,7 +36,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,8 +53,11 @@ public class AdminServiceImpl implements AdminService {
     public PageOut<List<AdminListOut>> listAdmin(AdminListIn param, AppUser user) {
         Page<Admin> page = new Page<>(param.getCurrent(), param.getPageSize());
 
-        IPage<AdminListOut> admins = adminMapperService.list(page, param.getUsername(), param.getPhone(),
-                AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) ? null : user.getTenantId());
+        Long tenantId = AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) ?
+                (ObjectUtils.isEmpty(param.getTenantId()) ? null : param.getTenantId())
+                : user.getTenantId();
+
+        IPage<AdminListOut> admins = adminMapperService.list(page, param.getUsername(), param.getPhone(), tenantId);
 
         PageOut<List<AdminListOut>> out = new PageOut<>();
         out.setTotal(admins.getTotal());
@@ -63,6 +66,7 @@ public class AdminServiceImpl implements AdminService {
                 .username(e.getUsername())
                 .phone(e.getPhone())
                 .status(e.getStatus())
+                .tenantId(e.getTenantId())
                 .tenantName(e.getTenantName())
                 .roles(e.getRoles())
                 .createTime(e.getCreateTime())
@@ -86,24 +90,27 @@ public class AdminServiceImpl implements AdminService {
             }
             Admin existAdmin;
             if (StringUtils.hasText(param.getUsername()) && !param.getUsername().trim().equals(admin.getUsername())) {
+                AppUtil.checkPattern(param.getUsername(), AppConst.ACCOUNT_REGEX);
                 existAdmin = adminMapperService.getOne(Wrappers.lambdaQuery(new Admin().setTenantId(user.getTenantId()).setUsername(param.getUsername().trim())));
                 Assert.isNull(existAdmin, "用户名已存在");
                 admin.setUsername(param.getUsername().trim());
             }
 
-            if (StringUtils.hasText(param.getPhone())) {
+            if (StringUtils.hasText(param.getPhone()) && !param.getPhone().trim().equals(admin.getPhone())) {
+                AppUtil.checkPattern(param.getPhone(), AppConst.PHONE_REGEX);
                 existAdmin = adminMapperService.getOne(Wrappers.lambdaQuery(new Admin().setTenantId(user.getTenantId()).setPhone(param.getPhone().trim())));
                 Assert.isNull(existAdmin, "手机号已存在");
                 admin.setPhone(param.getPhone());
             }
 
             if (StringUtils.hasText(param.getPassword())) {
-                admin.setPassword(DigestUtils.md5Hex(RsaUtil.getPassword(appConfig, platform, param.getPassword())));
+                admin.setPassword(DigestUtils.md5Hex(AppUtil.checkPattern(RsaUtil.getPassword(appConfig, platform, param.getPassword()), AppConst.PASSWORD_REGEX)));
             }
             admin.setUpdateTime(LocalDateTime.now());
             adminMapperService.updateById(admin);
         } else {
             // 新增
+            AppUtil.checkPattern(param.getUsername(), AppConst.ACCOUNT_REGEX);
             Admin adminQuery = new Admin().setTenantId(AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) ? param.getTenantId() : user.getTenantId()).
                     setUsername(param.getUsername().trim());
             LambdaQueryWrapper<Admin> queryWrapper = Wrappers.lambdaQuery(adminQuery);
@@ -113,8 +120,8 @@ public class AdminServiceImpl implements AdminService {
             Admin existAdmin = adminMapperService.getOne(queryWrapper);
             Assert.isNull(existAdmin, "用户名已存在");
             Admin admin = new Admin(null, AppConst.ADMIN_TENANT_ID.equals(user.getTenantId()) ? param.getTenantId() : user.getTenantId(), param.getUsername().trim(),
-                    StringUtils.hasText(param.getPhone()) ? param.getPhone().trim() : "",
-                    DigestUtils.md5Hex(RsaUtil.getPassword(appConfig, platform, param.getPassword())),
+                    StringUtils.hasText(param.getPhone()) ? AppUtil.checkPattern(param.getPhone(), AppConst.PHONE_REGEX) : "",
+                    DigestUtils.md5Hex(AppUtil.checkPattern(RsaUtil.getPassword(appConfig, platform, param.getPassword()), AppConst.PASSWORD_REGEX)),
                     "", true, LocalDateTime.now(), null, null);
             adminMapperService.save(admin);
         }
@@ -171,7 +178,8 @@ public class AdminServiceImpl implements AdminService {
         // 验证role id是否都是此用户所属租户下的
         List<Role> roles = roleMapperService.listByIds(ids);
         Set<Long> tenantIds = roles.stream().map(i -> i.getTenantId()).collect(Collectors.toSet());
-        if (CollectionUtils.isEmpty(tenantIds) || tenantIds.size() != 1) {
+        if (CollectionUtils.isEmpty(tenantIds) || tenantIds.size() != 1 ||
+                !tenantIds.stream().findFirst().get().equals(admin.getTenantId())) {
             throw new AppException(RCode.PARAM_ERROR);
         }
 
@@ -200,25 +208,30 @@ public class AdminServiceImpl implements AdminService {
     public void updateSelf(AdminIn param, AppUser user) {
         PlatformType platform = PlatformType.getPlatform(param.getPlatform());
 
-        if (!user.getId().equals(param.getId())) {
+        if (!StringUtils.hasText(param.getPassword()) || !user.getId().equals(param.getId())) {
             throw new AppException(RCode.PARAM_ERROR);
         }
 
         Admin admin = adminMapperService.getById(param.getId());
 
         if (StringUtils.hasText(param.getPassword())) {
-            admin.setPassword(DigestUtils.md5Hex(RsaUtil.getPassword(appConfig, platform, param.getPassword())));
+            admin.setPassword(DigestUtils.md5Hex(AppUtil.checkPattern(RsaUtil.getPassword(appConfig, platform, param.getPassword()), AppConst.PASSWORD_REGEX)));
             admin.setUpdateTime(LocalDateTime.now());
-            adminMapperService.updateById(admin);
         }
+
+        if (StringUtils.hasText(param.getPhone()) && !param.getPhone().equals(admin.getPhone())) {
+            admin.setPhone(AppUtil.checkPattern(param.getPhone(), AppConst.PHONE_REGEX));
+        }
+
+        adminMapperService.updateById(admin);
     }
 
     @Override
-    public List<Long> listAdminIdByRole(RoleIn param, AppUser user) {
+    public List<String> listAdminIdByRole(RoleIn param, AppUser user) {
         Long roleId = param.getId();
         Assert.notNull(roleId, "参数错误");
 
         return roleAdminMapperService.list(new QueryWrapper<RoleAdmin>().lambda().eq(RoleAdmin::getRoleId, roleId))
-                .stream().map(i -> i.getAdminId()).collect(Collectors.toList());
+                .stream().map(i -> String.valueOf(i.getAdminId())).collect(Collectors.toList());
     }
 }

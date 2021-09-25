@@ -15,5 +15,5 @@ public class RoleIn {
     @ApiModelProperty(notes = "租户id")
     private Long tenantId;
     @ApiModelProperty(notes = "角色名")
-    private String name;
+    private String roleName;
 }

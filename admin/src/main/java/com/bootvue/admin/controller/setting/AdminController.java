@@ -33,7 +33,7 @@ public class AdminController {
 
     @ApiOperation("某个角色下的所有用户id")
     @PostMapping("/list_by_role")
-    public List<Long> listAdminIdByRole(@RequestBody RoleIn param, AppUser user) {
+    public List<String> listAdminIdByRole(@RequestBody RoleIn param, AppUser user) {
         return adminService.listAdminIdByRole(param, user);
     }
 

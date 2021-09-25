@@ -20,7 +20,7 @@ import lombok.experimental.Accessors;
 public class Role {
 
     @JsonSerialize(using = LongToStringSerializer.class)
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     @JsonSerialize(using = LongToStringSerializer.class)

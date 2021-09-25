@@ -5,9 +5,9 @@ ext {
             mysql             : '8.0.26',
             xxlJob            : '2.3.0',
             mybatis           : '2.2.0',
-            mybatisPlus       : '3.4.3.2',
+            mybatisPlus       : '3.4.3.4',
             httpmime          : '4.5.13',
-            hutool            : '5.7.10',
+            hutool            : '5.7.13',
             commonsFileupload : '1.4',
             commonsPool       : '2.11.1',
             commonsIo         : '2.11.0',
@@ -15,12 +15,13 @@ ext {
             guava             : '30.1.1-jre',
             knife4j           : '3.0.3',
             knife4jAggregation: '2.0.9',
-            easyexcel         : '2.2.10',
-            javaJwt           : '3.18.1',
+            validator         : '7.0.1.Final',
+            easyexcel         : '2.2.11',
+            javaJwt           : '3.18.2',
             jjwt              : '0.9.1',
             jjwtImpl          : '0.11.2',
-            flyway            : '7.14.0',
-            caffeine          : '3.0.3'
+            flyway            : '7.15.0',
+            caffeine          : '3.0.4'
     ]
 
     libs = [
@@ -39,6 +40,7 @@ ext {
             'guava'              : "com.google.guava:guava:${versions.guava}",
             'knife4j'            : "com.github.xiaoymin:knife4j-micro-spring-boot-starter:${versions.knife4j}",
             'knife4j-aggregation': "com.github.xiaoymin:knife4j-aggregation-spring-boot-starter:${versions.knife4jAggregation}",
+            'validator'          : "org.hibernate.validator:hibernate-validator:${versions.validator}",
             'excel'              : "com.alibaba:easyexcel:${versions.easyexcel}",
             'java-jwt'           : "com.auth0:java-jwt:${versions.javaJwt}",
             'jjwt'               : "io.jsonwebtoken:jjwt:${versions.jjwt}",

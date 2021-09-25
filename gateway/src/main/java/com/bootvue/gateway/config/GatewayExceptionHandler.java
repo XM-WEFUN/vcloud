@@ -1,5 +1,6 @@
 package com.bootvue.gateway.config;
 
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.bootvue.core.result.AppException;
 import com.bootvue.core.result.RCode;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,11 @@ public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
         } else if (error instanceof ResponseStatusException) {
             response.put("code", RCode.NOT_FOUND.getCode());
             response.put("msg", "Service Not Found");
+        } else if (BlockException.isBlockException(error)) {
+            BlockException exception = (BlockException) error;
+            // sentinel 拦截
+            response.put("code", RCode.GATEWAY_ERROR.getCode());
+            response.put("msg", "当前请求受限");
         } else {
             response.put("code", RCode.DEFAULT.getCode());
             response.put("msg", RCode.DEFAULT.getMsg());

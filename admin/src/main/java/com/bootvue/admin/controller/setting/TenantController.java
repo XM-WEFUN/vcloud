@@ -7,6 +7,7 @@ import com.bootvue.admin.service.TenantService;
 import com.bootvue.core.model.AppUser;
 import com.bootvue.core.result.PageOut;
 import com.bootvue.db.entity.Tenant;
+import com.bootvue.web.annotation.PreAuth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -39,19 +40,22 @@ public class TenantController {
 
     @PostMapping("/add")
     @ApiOperation("新增租户")
-    public void addTenant(@RequestBody TenantIn param, AppUser user) {
-        tenantService.addTenant(param, user);
+    @PreAuth(superOnly = true)
+    public void addTenant(@RequestBody TenantIn param) {
+        tenantService.addTenant(param);
     }
 
     @PostMapping("/update")
     @ApiOperation("更新租户信息")
-    public void updateTenant(@RequestBody TenantIn param, AppUser user) {
-        tenantService.updateTenant(param, user);
+    @PreAuth(superOnly = true)
+    public void updateTenant(@RequestBody TenantIn param) {
+        tenantService.updateTenant(param);
     }
 
     @PostMapping("/del")
     @ApiOperation("删除租户")
-    public void delTenant(@RequestBody TenantIn param, AppUser user) {
-        tenantService.delTenant(param, user);
+    @PreAuth(superOnly = true)
+    public void delTenant(@RequestBody TenantIn param) {
+        tenantService.delTenant(param);
     }
 }
