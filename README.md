@@ -12,15 +12,7 @@
 
 > 可以按实际需要更细粒度的拆分模块功能
 
-- core: 基础配置等等.....
-- db: mysql redis数据源....
-- web: webmvc相关config
-- gateway 8080: 网关
-- swagger 9999: 接口文档
-- auth 8081: 用户认证
-- admin 8082: 后台管理相关接口服务
-- scheduler: 任务调度
-- mq: 消息服务
+![arch](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/arch.svg)
 
 ## docker
 
