@@ -1,8 +1,8 @@
 package com.bootvue.gateway.config;
 
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.bootvue.core.result.AppException;
-import com.bootvue.core.result.RCode;
+import com.bootvue.common.result.AppException;
+import com.bootvue.common.result.RCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;

@@ -1,9 +1,7 @@
 package com.bootvue.gateway.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.bootvue.core.constant.AppConst;
-import com.bootvue.db.entity.Admin;
-import com.bootvue.db.entity.WechatUser;
+import com.bootvue.common.constant.AppConst;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;

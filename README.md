@@ -10,7 +10,20 @@
 
 ## 模块
 
-> 可以按实际需要更细粒度的拆分模块功能
+```
+
+common          common模块
+datasource      数据源
+web             spring mvc相关配置
+api             业务模块api封装 (entity feign dto)                  
+service         服务拆分 (可以自定义)
+    ├── admin     web端后台管理服务
+    ├── mq        消息中间件服务
+    ├── scheduler 任务调度服务
+    ├── swagger   文档服务
+    ├── xxx       其它模块               
+
+```
 
 ![arch](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/arch.svg)
 

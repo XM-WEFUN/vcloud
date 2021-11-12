@@ -1,9 +1,9 @@
 package com.bootvue.web.aop;
 
 import cn.hutool.core.annotation.AnnotationUtil;
-import com.bootvue.core.constant.AppConst;
-import com.bootvue.core.result.AppException;
-import com.bootvue.core.result.RCode;
+import com.bootvue.common.constant.AppConst;
+import com.bootvue.common.result.AppException;
+import com.bootvue.common.result.RCode;
 import com.bootvue.web.annotation.PreAuth;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,7 +13,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 

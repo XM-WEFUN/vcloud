@@ -2,8 +2,8 @@ package com.bootvue.web.sentinel;
 
 import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.bootvue.core.result.AppException;
-import com.bootvue.core.result.RCode;
+import com.bootvue.common.result.AppException;
+import com.bootvue.common.result.RCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 

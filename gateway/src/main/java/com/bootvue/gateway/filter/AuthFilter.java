@@ -1,15 +1,13 @@
 package com.bootvue.gateway.filter;
 
-import com.bootvue.core.config.app.AppConfig;
-import com.bootvue.core.config.app.Key;
-import com.bootvue.core.constant.AppConst;
-import com.bootvue.core.constant.TokenLabelEnum;
-import com.bootvue.core.model.AppUser;
-import com.bootvue.core.result.AppException;
-import com.bootvue.core.result.RCode;
-import com.bootvue.core.util.JwtUtil;
-import com.bootvue.db.entity.Admin;
-import com.bootvue.db.entity.WechatUser;
+import com.bootvue.common.config.app.AppConfig;
+import com.bootvue.common.config.app.Key;
+import com.bootvue.common.constant.AppConst;
+import com.bootvue.common.constant.TokenLabelEnum;
+import com.bootvue.common.model.AppUser;
+import com.bootvue.common.result.AppException;
+import com.bootvue.common.result.RCode;
+import com.bootvue.common.util.JwtUtil;
 import com.bootvue.gateway.service.AuthService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;

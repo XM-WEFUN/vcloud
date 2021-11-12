@@ -1,6 +1,6 @@
 package com.bootvue.web.config.swagger;
 
-import com.bootvue.core.model.AppUser;
+import com.bootvue.common.model.AppUser;
 import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import com.github.xiaoymin.knife4j.spring.extension.OpenApiExtensionResolver;
 import lombok.RequiredArgsConstructor;

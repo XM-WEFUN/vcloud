@@ -10,7 +10,7 @@ apply from: 'version.gradle'
 
 allprojects {
     group 'com.bootvue'
-    version '2.1.0-RC1'
+    version '3.0.0-RC1'
 
     repositories {
         maven {
@@ -21,6 +21,11 @@ allprojects {
 }
 
 subprojects {
+    def folders = ['api', 'service']
+    if (folders.contains(project.name)) {
+        return
+    }
+
     apply plugin: 'java-library'
     apply plugin: 'io.spring.dependency-management'
 
@@ -67,65 +72,68 @@ subprojects {
     }
 
     // **************************** 模块自定义配置****************************
-    if (project.name != 'core' && project.name != 'web' && project.name != 'db') {
+    def baseModules = ['common', 'web', 'datasource']
+    if (baseModules.contains(project.name)) {
+        return
+    }
 
-        apply plugin: 'org.springframework.boot'
+    apply plugin: 'org.springframework.boot'
 
-        bootJar {
-            enabled = true
-            mainClass.set("com.bootvue." + project.name.substring(0, 1).toUpperCase() + project.name.substring(1) + "Application")
-            destinationDirectory = file(getRootProject().getBuildDir())
-            archiveFileName = project.name + '.jar'
-        }
+    bootJar {
+        enabled = true
+        // springboot application 命名规范: group.项目名(首字母大写)Application
+        mainClass.set(rootProject.group + "." + project.name.substring(0, 1).toUpperCase() + project.name.substring(1) + "Application")
+        destinationDirectory = file(getRootProject().getBuildDir())
+        archiveFileName = project.name + '.jar'
+    }
 
-        dependencies {
-            implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
-            implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
-            implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
-            implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
-        }
+    dependencies {
+        implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+        implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+        implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
+        implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+    }
 
-        switch (project.name) {
-            case 'gateway':
-                dependencies {
-                    implementation project(":db")
-                    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
-                    implementation 'com.alibaba.cloud:spring-cloud-alibaba-sentinel-gateway'
-                }
-                break
-            case 'auth':
-            case 'admin':
-                dependencies {
-                    implementation project(":db")
-                    implementation project(":web")
-                }
-                break
-            default:
-                dependencies {
-                    implementation project(":web")
-                }
-        }
-
-        task copyResources(type: Copy) {
-            from "${project(':core').projectDir}/src/main/resources"
-
-            if (project.name != 'gateway') {
-                from "${project(':web').projectDir}/src/main/resources"
+    switch (project.name) {
+        case 'gateway':
+            dependencies {
+                implementation project(":datasource")
+                implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+                implementation 'com.alibaba.cloud:spring-cloud-alibaba-sentinel-gateway'
             }
-
-            if (project.name != 'swagger') {
-                from "${project(':db').projectDir}/src/main/resources"
+            break
+        case 'auth':
+        case 'admin':
+            dependencies {
+                implementation project(":datasource")
+                implementation project(":web")
             }
+            break
+        default:
+            dependencies {
+                implementation project(":web")
+            }
+    }
 
-            into "${project.buildDir}/resources/main"
-            exclude '**/rebel.xml'
-            includeEmptyDirs = true
+    task copyResources(type: Copy) {
+        from "${project(':common').projectDir}/src/main/resources"
+
+        if (project.name != 'gateway') {
+            from "${project(':web').projectDir}/src/main/resources"
         }
 
-        afterEvaluate {
-            tasks.matching {
-                t -> t.name.startsWith('process')
-            }.each { it.dependsOn(copyResources) }
+        if (project.name != 'swagger') {
+            from "${project(':datasource').projectDir}/src/main/resources"
         }
+
+        into "${project.buildDir}/resources/main"
+        exclude '**/rebel.xml'
+        includeEmptyDirs = true
+    }
+
+    afterEvaluate {
+        tasks.matching {
+            t -> t.name.startsWith('process')
+        }.each { it.dependsOn(copyResources) }
     }
 }

@@ -1,6 +1,6 @@
 package com.bootvue.web.handler;
 
-import com.bootvue.core.result.R;
+import com.bootvue.common.result.R;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ObjectUtils;
