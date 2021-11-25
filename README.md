@@ -15,32 +15,20 @@
 common          common模块
 datasource      数据源
 web             spring mvc相关配置
-api             业务模块api封装 (entity feign dto)                  
+gateway         网关服务                                                 8080
+auth            认证服务                                                 8081                                
 service         服务拆分 (可以自定义)
-    ├── admin     web端后台管理服务
-    ├── mq        消息中间件服务
+    ├── admin     web端后台管理服务                                       8082
+    ├── mq        消息中间件服务  
     ├── scheduler 任务调度服务
-    ├── swagger   文档服务
+    ├── swagger   文档服务                                                9999
     ├── xxx       其它模块               
 
 ```
 
-![arch](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/arch.svg)
-
 ## docker
 
-```bash
-# sentinel dashboard
-
-# sentinel-dashboard image:  registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
-
-docker run -d --name sentinel-dashboard \
-              -p 8080:8080 \
-              -e USERNAME=sentinel \
-              -e PASSWORD=sentinel \
-              -v /etc/localtime:/etc/localtime \
-              registry.cn-shanghai.aliyuncs.com/bootvue/sentinel:latest
-```
+[sentinel-dashboard](https://hub.docker.com/repository/docker/vbeats/sentinel-dashboard)
 
 ## swagger文档
 
@@ -63,28 +51,21 @@ docker run -d --name sentinel-dashboard \
 
 ## next plan
 
-- [ ] 功能完善
-- [ ] 说明文档完善
+- [ ] v3版本
 
 ---
 
 ## FAQ
 
-- nacos namespace id, JwtUtil key, appconfig appid secret等需要修改
-
-- RSA公钥私钥对, 小程序appid secret要改
+- nacos namespace id, JwtUtil key,RSA密钥对 ... 等需要修改
 
 - RSA密钥位数: `4096` 密钥格式: `PKCS8`  文本格式: `PEM/Baws64` 填充模式: `pkcs1` 证书密码: `空`
 
 - 前后端 `password` `其它敏感数据...`等信息RSA公钥加密传输
 
-- 客户端/auth/oauth/**下所有接口queryString需要携带对应的`appid` `secret` `platform`参数
-
 - 除了skip-urls 其它接口请求头都要携带token:`access_token`
 
-- access_token: `7200s` ,refresh_token: `expire(180d)`秒 每次与access_token同步刷新, 实际有效时间都会延长5分钟
-
-- gateway向后端服务服务转发请求时 通过`queryString` 传递了`AppUser`对象信息....
+- gateway向后端服务服务转发请求时, 会通过`queryString` 传递`AppUser`对象信息....
 
 - 所有用到的cache缓存都要在config.yaml自定义配置中指定 包括 `ttl` `maxIdleTime` 如果没有配置.默认缓存不过期
 
@@ -92,7 +73,7 @@ docker run -d --name sentinel-dashboard \
 
 - 数据库已有表, flyway sql要从>1的version开始 例如:V2
 
-- 弱权限控制, 可以自行完善 `PreAuth`
+- 角色权限验证: `@hasRole` `@hasPermission`
 
 ## Contact
 

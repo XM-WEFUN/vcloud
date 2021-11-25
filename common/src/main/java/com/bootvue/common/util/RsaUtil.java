@@ -1,13 +1,6 @@
 package com.bootvue.common.util;
 
-import com.bootvue.common.config.app.AppConfig;
-import com.bootvue.common.config.app.Key;
-import com.bootvue.common.constant.PlatformType;
-import com.bootvue.common.result.AppException;
-import com.bootvue.common.result.RCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import javax.crypto.Cipher;
 import java.security.*;
@@ -41,7 +34,7 @@ public class RsaUtil {
         try {
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
             // 密钥位数
-            keyPairGen.initialize(2048);
+            keyPairGen.initialize(4096);
             // 密钥对
             KeyPair keyPair = keyPairGen.generateKeyPair();
             // 公钥
@@ -189,20 +182,4 @@ public class RsaUtil {
         return null;
     }
 
-
-    // 获取明文密码
-    public static String getPassword(AppConfig appConfig, PlatformType platformType, String encryptedData) {
-        if (!StringUtils.hasText(encryptedData)) {
-            throw new AppException(RCode.PARAM_ERROR);
-        }
-        try {
-            Key keys = AppConfig.getKeys(appConfig, platformType);
-            Assert.notNull(keys, RCode.PARAM_ERROR.getMsg());
-            String password = RsaUtil.decrypt(keys.getPrivateKey(), encryptedData);
-            Assert.notNull(password, RCode.PARAM_ERROR.getMsg());
-            return password;
-        } catch (Exception e) {
-            throw new AppException(RCode.PARAM_ERROR);
-        }
-    }
 }

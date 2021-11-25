@@ -3,7 +3,7 @@ package com.bootvue.web.config.webmvc;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -29,7 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         converter.setObjectMapper(mapper);
         converters.add(converter);

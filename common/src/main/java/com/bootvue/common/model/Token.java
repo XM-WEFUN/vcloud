@@ -21,5 +21,5 @@ public class Token implements Serializable {
     private Long tenantId;
     private String username;
     private String type;  // token类型   access_token | refresh_token
-    private String label; // 用户身份标识  管理类用户 | 普通用户
+    private Integer accountType; // 账号类型   0普通用户  1租户管理员  2平台管理员
 }

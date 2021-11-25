@@ -21,7 +21,7 @@ allprojects {
 }
 
 subprojects {
-    def folders = ['api', 'service']
+    def folders = ['service']
     if (folders.contains(project.name)) {
         return
     }
@@ -102,15 +102,15 @@ subprojects {
                 implementation 'com.alibaba.cloud:spring-cloud-alibaba-sentinel-gateway'
             }
             break
-        case 'auth':
-        case 'admin':
+
+        case 'swagger':
             dependencies {
-                implementation project(":datasource")
                 implementation project(":web")
             }
             break
         default:
             dependencies {
+                implementation project(":datasource")
                 implementation project(":web")
             }
     }

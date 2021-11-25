@@ -5,7 +5,7 @@ import com.bootvue.common.result.AppException;
 import com.bootvue.common.result.RCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
-import org.springframework.boot.autoconfigure.web.ResourceProperties;
+import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
@@ -27,12 +27,13 @@ public class GatewayExceptionHandler extends DefaultErrorWebExceptionHandler {
      * Create a new {@code DefaultErrorWebExceptionHandler} instance.
      *
      * @param errorAttributes    the error attributes
-     * @param resourceProperties the resources configuration properties
+     * @param resources          the resources configuration properties
      * @param errorProperties    the error configuration properties
      * @param applicationContext the current application context
+     * @since 2.4.0
      */
-    public GatewayExceptionHandler(ErrorAttributes errorAttributes, ResourceProperties resourceProperties, ErrorProperties errorProperties, ApplicationContext applicationContext) {
-        super(errorAttributes, resourceProperties, errorProperties, applicationContext);
+    public GatewayExceptionHandler(ErrorAttributes errorAttributes, WebProperties.Resources resources, ErrorProperties errorProperties, ApplicationContext applicationContext) {
+        super(errorAttributes, resources, errorProperties, applicationContext);
     }
 
 

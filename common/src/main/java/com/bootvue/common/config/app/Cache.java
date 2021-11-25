@@ -1,10 +1,16 @@
 package com.bootvue.common.config.app;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Cache {
-    private String cacheName;
-    private Long ttl;
-    private Long maxIdleTime;
+    private String cacheName;  // redis cache 名
+    private Long ttl;           // 最大生存时间
+    private Long maxIdleTime;   // 最大空闲时间
 }

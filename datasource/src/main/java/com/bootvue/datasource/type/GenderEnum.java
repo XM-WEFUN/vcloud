@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public enum GenderEnum {
+public enum GenderEnum {  // 性别
     UNKNOWN(0, "未知"),
     MALE(1, "男"),
     FEMALE(2, "女");

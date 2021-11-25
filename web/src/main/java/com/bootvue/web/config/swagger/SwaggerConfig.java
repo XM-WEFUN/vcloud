@@ -1,6 +1,5 @@
 package com.bootvue.web.config.swagger;
 
-import com.bootvue.common.model.AppUser;
 import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import com.github.xiaoymin.knife4j.spring.extension.OpenApiExtensionResolver;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.basePackage("com.bootvue"))
                 .paths(PathSelectors.any())
                 .build()
-                .ignoredParameterTypes(AppUser.class)
+                //.ignoredParameterTypes(AppUser.class)
                 .extensions(openApiExtensionResolver.buildSettingExtensions())
                 ;
     }
