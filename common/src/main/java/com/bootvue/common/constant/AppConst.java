@@ -14,9 +14,8 @@ public class AppConst {
     //******************* redis cache name
     public static final String ADMIN_CACHE = "cache:admin";
 
-
-    //******************* jwt token属性名
-    public static final String TOKEN_TENANT_ID = "tenant_id";
+    //******************* token 请求头
+    public static final String REQUEST_HEADER_TOKEN = "Authorization";
 
 
     //******************正则

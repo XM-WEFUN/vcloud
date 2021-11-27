@@ -102,15 +102,15 @@ subprojects {
                 implementation 'com.alibaba.cloud:spring-cloud-alibaba-sentinel-gateway'
             }
             break
-
         case 'swagger':
             dependencies {
-                implementation project(":web")
+                implementation(project(":web")) {
+                    exclude group: rootProject.group, module: 'datasource'
+                }
             }
             break
         default:
             dependencies {
-                implementation project(":datasource")
                 implementation project(":web")
             }
     }

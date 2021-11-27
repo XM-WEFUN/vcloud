@@ -4,10 +4,10 @@
     <select id="getClientInfo" resultType="com.bootvue.datasource.entity.Oauth2Client">
         select oc.*
         from oauth2_client oc,
-             tenant t
+        tenant t
         where t.code = #{tenantCode}
-          and oc.client_id = #{clientId}
-          and oc.secret = #{secret}
-          and oc.platform = #{platform}
+        and oc.client_id = #{clientId}
+        and oc.secret = #{secret}
+        and oc.platform = #{platform}
     </select>
 </mapper>

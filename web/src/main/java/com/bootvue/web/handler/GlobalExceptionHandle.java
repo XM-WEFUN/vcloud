@@ -4,6 +4,8 @@ import com.bootvue.common.result.AppException;
 import com.bootvue.common.result.R;
 import com.bootvue.common.result.RCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,6 +31,9 @@ public class GlobalExceptionHandle {
     @ResponseBody
     public <T> R<T> handleException(Exception e) {
         log.error("拦截到未知异常: ", e);
+        if (e instanceof HttpMessageConversionException || e instanceof BindException) {
+            return R.error(new AppException(RCode.PARAM_ERROR));
+        }
         return R.error(new AppException(RCode.DEFAULT.getCode(), RCode.DEFAULT.getMsg()));
     }
 

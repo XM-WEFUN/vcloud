@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Oauth2Client {
@@ -50,6 +49,21 @@ public class Oauth2Client {
      * 平台类型 0 WEB 1 APP 2 小程序
      */
     private PlatformEnum platform;
+
+    /**
+     * access token 有效时长 s
+     */
+    private Long accessTokenExpire;
+
+    /**
+     * refresh token 有效时长 s
+     */
+    private Long refreshTokenExpire;
+
+    /**
+     * 重定向url
+     */
+    private String redirectUrl;
 
     /**
      * 公钥

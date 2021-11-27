@@ -19,7 +19,7 @@ public class Token implements Serializable {
 
     private Long id;
     private Long tenantId;
-    private String username;
-    private String type;  // token类型   access_token | refresh_token
+    private String account;
+    private String tokenType;  // token类型   access_token | refresh_token
     private Integer accountType; // 账号类型   0普通用户  1租户管理员  2平台管理员
 }

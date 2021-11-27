@@ -1,5 +1,7 @@
 package com.bootvue.auth.endpoints;
 
+import com.bootvue.auth.dto.AuthParam;
+import com.bootvue.auth.dto.AuthResponse;
 import com.bootvue.auth.dto.Captcha;
 import com.bootvue.auth.dto.ClientInfo;
 import com.bootvue.auth.service.AuthService;
@@ -10,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -30,5 +30,12 @@ public class AuthController {
     public Captcha getCaptcha(@Valid ClientInfo param, BindingResult result) {
         R.handleErr(result);
         return authService.getCaptcha(param);
+    }
+
+    @PostMapping("/token")
+    @ApiOperation("认证接口")
+    public AuthResponse token(@Valid @RequestBody AuthParam param, BindingResult result) {
+        R.handleErr(result);
+        return authService.token(param);
     }
 }

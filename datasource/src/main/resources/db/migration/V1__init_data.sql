@@ -76,19 +76,23 @@ CREATE TABLE `menu`
 DROP TABLE IF EXISTS `oauth2_client`;
 CREATE TABLE `oauth2_client`
 (
-    `id`          bigint UNSIGNED                                              NOT NULL,
-    `tenant_id`   bigint                                                       NOT NULL COMMENT '租户id',
-    `client_id`   varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'client id',
-    `secret`      varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'secret',
-    `grant_type`  varchar(64)                                                  NOT NULL COMMENT 'code,password,refresh_token',
-    `scope`       varchar(64)                                                  NOT NULL COMMENT 'all||basic_info',
-    `platform`    tinyint(1)                                                   NOT NULL COMMENT '平台类型 0 WEB 1 APP 2 小程序',
-    `public_key`  text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci        NOT NULL COMMENT '公钥',
-    `private_key` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci        NOT NULL COMMENT '私钥',
-    `create_time` datetime(3)                                                  NOT NULL COMMENT '创建时间',
-    `update_time` datetime(3)                                                  NULL DEFAULT NULL COMMENT '更新时间',
-    `delete_time` datetime(3)                                                  NULL DEFAULT NULL COMMENT '删除时间',
-    PRIMARY KEY (`id`) USING BTREE
+    `id`                   bigint UNSIGNED                                                NOT NULL,
+    `tenant_id`            bigint                                                         NOT NULL COMMENT '租户id',
+    `client_id`            varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT 'client id',
+    `secret`               varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci   NOT NULL COMMENT 'secret',
+    `grant_type`           varchar(64)                                                    NOT NULL COMMENT 'code,password,refresh_token',
+    `scope`                varchar(64)                                                    NOT NULL COMMENT 'all||basic_info',
+    `platform`             tinyint(1)                                                     NOT NULL COMMENT '平台类型 0 WEB 1 APP 2 小程序',
+    `access_token_expire`  bigint                                                         NOT NULL COMMENT 'access_token 有效时长 s',
+    `refresh_token_expire` bigint                                                         NOT NULL COMMENT 'refresh_token 有效时长 s',
+    `redirect_url`         varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '重定向url地址',
+    `public_key`           text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci          NOT NULL COMMENT '公钥',
+    `private_key`          text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci          NOT NULL COMMENT '私钥',
+    `create_time`          datetime(3)                                                    NOT NULL COMMENT '创建时间',
+    `update_time`          datetime(3)                                                    NULL DEFAULT NULL COMMENT '更新时间',
+    `delete_time`          datetime(3)                                                    NULL DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `tc_index` (`tenant_id`, `client_id`) USING BTREE COMMENT '租户id, 客户端id 唯一索引'
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT = 'oauth2客户端'
@@ -98,7 +102,8 @@ CREATE TABLE `oauth2_client`
 -- Records of oauth2_client
 -- ----------------------------
 insert into oauth2_client
-values (1, 1, 'de0b55913ac7', '939da067-8899-40a0-9c21-15f0b0001add', 'code,password,refresh_token', 'all', 0, '-----BEGIN PUBLIC KEY-----
+values (1, 1, 'de0b55913ac7', '939da067-8899-40a0-9c21-15f0b0001add', 'code,password,refresh_token', 'all', 0, 7200,
+        2592000, '', '-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA9il0ZDHwNwEGLKjvCYpJ
 fjDrM7J2UxXwgwoe+Pgnlvg+jIrXYSe5vwLtrjqJ5M7jlmH4qbG2PYT2WlRkA5Ip
 zeOWYph6vAVth7CnHX+Kda/TWJD4dEEcCn+Hk8ulkCf5a0+cBnw/vyJ3+GD8z5f5
@@ -222,7 +227,8 @@ CREATE TABLE `tenant`
     `create_time`   datetime(3)                                                  NOT NULL COMMENT '创建时间',
     `update_time`   datetime(3)                                                  NULL DEFAULT NULL COMMENT '更新时间',
     `delete_time`   datetime(3)                                                  NULL DEFAULT NULL COMMENT '删除时间',
-    PRIMARY KEY (`id`) USING BTREE
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `tc_index` (`code`) USING BTREE COMMENT '租户编号 唯一索引'
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT = '租户表'
@@ -256,7 +262,8 @@ CREATE TABLE `user`
     `create_time` datetime(3)                                                   NOT NULL COMMENT '创建时间',
     `update_time` datetime(3)                                                   NULL DEFAULT NULL COMMENT '更新时间',
     `delete_time` datetime(3)                                                   NULL DEFAULT NULL COMMENT '删除时间',
-    PRIMARY KEY (`id`) USING BTREE
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `ta_index` (`tenant_id`, `account`) USING BTREE COMMENT '租户id, 账号 唯一索引'
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表'

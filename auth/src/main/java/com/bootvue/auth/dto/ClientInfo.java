@@ -1,5 +1,6 @@
 package com.bootvue.auth.dto;
 
+import com.bootvue.datasource.type.PlatformEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -14,21 +15,21 @@ import javax.validation.constraints.NotNull;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(description = "客户端参数")
+@ApiModel("客户端参数")
 public class ClientInfo {
-    @ApiModelProperty(notes = "租户编号", required = true)
+    @ApiModelProperty(value = "租户编号", required = true)
     @NotEmpty(message = "租户编号不能为空")
-    private String tenantCode;
+    private String tenant_code;
 
-    @ApiModelProperty(notes = "client_id", required = true)
+    @ApiModelProperty(value = "client_id", required = true)
     @NotEmpty(message = "client_id不能为空")
-    private String clientId;
+    private String client_id;
 
-    @ApiModelProperty(notes = "secret", required = true)
+    @ApiModelProperty(value = "secret", required = true)
     @NotEmpty(message = "secret不能为空")
     private String secret;
 
-    @ApiModelProperty(notes = "平台类型 0 WEB 1 APP 2 小程序", required = true)
+    @ApiModelProperty(value = "平台类型", required = true)
     @NotNull(message = "平台类型不能为空")
-    private Integer platform;
+    private PlatformEnum platform;
 }

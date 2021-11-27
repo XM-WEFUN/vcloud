@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum AccountTypeEnum {    // 账号类型
     COMMON(0, "普通用户"),
     TENANT_ADMIN(1, "租户管理员"),
-    ADMIN(2, "普通管理员");
+    ADMIN(2, "平台管理员");
 
     @EnumValue
     private Integer value;

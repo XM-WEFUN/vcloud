@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "验证码")
+@ApiModel("验证码")
 public class Captcha {  // 图形验证码
 
     @ApiModelProperty(notes = "key", required = true)

@@ -1,5 +1,6 @@
 dependencies {
     api project(":common")
+    api project(":datasource")
     api libs.get('knife4j')
     api libs.get('validator')
     api 'org.springframework.boot:spring-boot-starter-web'

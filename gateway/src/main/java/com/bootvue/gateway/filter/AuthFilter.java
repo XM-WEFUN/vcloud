@@ -1,6 +1,13 @@
 package com.bootvue.gateway.filter;
 
 import com.bootvue.common.config.app.AppConfig;
+import com.bootvue.common.constant.AppConst;
+import com.bootvue.common.result.AppException;
+import com.bootvue.common.result.RCode;
+import com.bootvue.common.util.JwtUtil;
+import com.bootvue.datasource.entity.User;
+import com.bootvue.gateway.service.UserMapperService;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +16,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -25,21 +30,43 @@ public class AuthFilter implements GlobalFilter, Ordered {
     private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private final AppConfig appConfig;
+    private final UserMapperService userMapperService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        return chain.filter(exchange);
+        // uri校验
+        if (!CollectionUtils.isEmpty(appConfig.getSkipUrls())) {
+            for (String skipUrl : appConfig.getSkipUrls()) {
+                if (PATH_MATCHER.match(skipUrl, path)) {
+                    return chain.filter(exchange);
+                }
+            }
+        }
 
-       /* return chain.filter(exchange.mutate().request(
-                        handleRequest(request, null))
-                .build());*/
+        // 校验token
+        String token = "";
+        try {
+            token = request.getHeaders().getFirst(AppConst.REQUEST_HEADER_TOKEN).substring("Bearer ".length());
+        } catch (Exception e) {
+            throw new AppException(RCode.UNAUTHORIZED_ERROR);
+        }
 
-    }
+        if (!StringUtils.hasText(token) || !JwtUtil.isVerify(token)) {
+            throw new AppException(RCode.UNAUTHORIZED_ERROR);
+        }
 
-    private ServerHttpRequest handleRequest(ServerHttpRequest request, Object o) {
+        Claims claims = JwtUtil.decode(token);
+
+        // 再次校验用户状态
+        Long id = claims.get("id", Long.class);
+        User user = userMapperService.findById(id);
+        if (ObjectUtils.isEmpty(user) || !user.getStatus() || !ObjectUtils.isEmpty(user.getDeleteTime())) {
+            throw new AppException(RCode.UNAUTHORIZED_ERROR);
+        }
+
         // request parameters 添加用户信息 中文需要URIEncode
         URI uri = request.getURI();
         StringBuilder query = new StringBuilder();
@@ -52,16 +79,16 @@ public class AuthFilter implements GlobalFilter, Ordered {
             }
         }
 
-        /*query.append("id=").append(appUser.getId())
-                .append("&tenantId=").append(appUser.getTenantId())
-                .append("&username=").append(URLEncoder.encode(appUser.getUsername(), StandardCharsets.UTF_8))
-                .append("&openid=").append(appUser.getOpenid())
-                .append("&label=").append(appUser.getLabel())
-        ;*/
+        query.append("id=").append(user.getId())
+                .append("&tenantId=").append(user.getTenantId())
+                .append("&account=").append(user.getAccount())
+                .append("&type=").append(user.getType().getValue())
+        ;
 
-        return request.mutate()
-                .uri(UriComponentsBuilder.fromUri(uri).replaceQuery(query.toString()).build(true).toUri())
-                .build();
+        return chain.filter(exchange.mutate().request(request.mutate()
+                .uri(UriComponentsBuilder.fromUri(uri).replaceQuery(query.toString())
+                        .build(true).toUri())
+                .build()).build());
     }
 
     @Override

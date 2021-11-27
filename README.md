@@ -15,14 +15,14 @@
 common          common模块
 datasource      数据源
 web             spring mvc相关配置
-gateway         网关服务                                                 8080
-auth            认证服务                                                 8081                                
+gateway         网关服务                    8080
+auth            认证服务                    8081                                
 service         服务拆分 (可以自定义)
-    ├── admin     web端后台管理服务                                       8082
-    ├── mq        消息中间件服务  
-    ├── scheduler 任务调度服务
-    ├── swagger   文档服务                                                9999
-    ├── xxx       其它模块               
+    ├── admin       后台web端基础服务        8082
+    ├── mq          消息中间件服务  
+    ├── scheduler   任务调度服务
+    ├── swagger     文档服务                9999
+    ├── xxx         其它模块               
 
 ```
 
@@ -63,7 +63,7 @@ service         服务拆分 (可以自定义)
 
 - 前后端 `password` `其它敏感数据...`等信息RSA公钥加密传输
 
-- 除了skip-urls 其它接口请求头都要携带token:`access_token`
+- 除了skip-urls 其它接口请求头都要携带`Authorization: Bearer access_token_value`
 
 - gateway向后端服务服务转发请求时, 会通过`queryString` 传递`AppUser`对象信息....
 
@@ -73,7 +73,7 @@ service         服务拆分 (可以自定义)
 
 - 数据库已有表, flyway sql要从>1的version开始 例如:V2
 
-- 角色权限验证: `@hasRole` `@hasPermission`
+- 角色权限验证: `@PreAuth(hasRole, hasPermission, superOnly)`
 
 ## Contact
 

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@MapperScan(basePackages = "com.bootvue.auth.mapper.**")
+@MapperScan(basePackages = "com.bootvue.**.mapper.**")
 public class MybatisPlusConfig {
 
     @Bean
