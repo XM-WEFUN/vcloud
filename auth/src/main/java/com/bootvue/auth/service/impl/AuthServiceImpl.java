@@ -124,16 +124,11 @@ public class AuthServiceImpl implements AuthService {
         // 生成token
         AuthResponse response = new AuthResponse();
 
-        response.setAccount(user.getAccount());
-        response.setNickName(user.getNickName());
-        response.setGender(user.getGender().getDesc());
-        response.setAvatar(user.getAvatar());
+        Token accessToken = new Token(user.getId(), user.getTenantId(), clientInfo.getId(), user.getAccount(), AppConst.ACCESS_TOKEN, user.getType().getValue());
+        Token refreshToken = new Token(user.getId(), user.getTenantId(), clientInfo.getId(), user.getAccount(), AppConst.REFRESH_TOKEN, user.getType().getValue());
 
-        Token accessToken = new Token(user.getId(), user.getTenantId(), user.getAccount(), AppConst.ACCESS_TOKEN, user.getType().getValue());
-        Token refreshToken = new Token(user.getId(), user.getTenantId(), user.getAccount(), AppConst.REFRESH_TOKEN, user.getType().getValue());
-
-        response.setAccessToken(JwtUtil.encode(LocalDateTime.now().plusSeconds(clientInfo.getAccessTokenExpire()), BeanUtil.beanToMap(accessToken)));
-        response.setRefreshToken(JwtUtil.encode(LocalDateTime.now().plusSeconds(clientInfo.getRefreshTokenExpire()), BeanUtil.beanToMap(refreshToken)));
+        response.setAccessToken(JwtUtil.encode(LocalDateTime.now().plusSeconds(clientInfo.getAccessTokenExpire()), BeanUtil.beanToMap(accessToken, true, true)));
+        response.setRefreshToken(JwtUtil.encode(LocalDateTime.now().plusSeconds(clientInfo.getRefreshTokenExpire()), BeanUtil.beanToMap(refreshToken, true, true)));
 
         return response;
     }

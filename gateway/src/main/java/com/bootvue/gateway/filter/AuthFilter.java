@@ -5,7 +5,9 @@ import com.bootvue.common.constant.AppConst;
 import com.bootvue.common.result.AppException;
 import com.bootvue.common.result.RCode;
 import com.bootvue.common.util.JwtUtil;
+import com.bootvue.datasource.entity.Oauth2Client;
 import com.bootvue.datasource.entity.User;
+import com.bootvue.gateway.service.Oauth2ClientMapperService;
 import com.bootvue.gateway.service.UserMapperService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -31,13 +33,14 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
     private final AppConfig appConfig;
     private final UserMapperService userMapperService;
+    private final Oauth2ClientMapperService oauth2ClientMapperService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        // uri校验
+        // *************1************** uri校验
         if (!CollectionUtils.isEmpty(appConfig.getSkipUrls())) {
             for (String skipUrl : appConfig.getSkipUrls()) {
                 if (PATH_MATCHER.match(skipUrl, path)) {
@@ -46,7 +49,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
             }
         }
 
-        // 校验token
+        // *************2************ 校验token
         String token = "";
         try {
             token = request.getHeaders().getFirst(AppConst.REQUEST_HEADER_TOKEN).substring("Bearer ".length());
@@ -60,14 +63,20 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         Claims claims = JwtUtil.decode(token);
 
-        // 再次校验用户状态
+        // ***********3********** 用户与oauth2信息校验
         Long id = claims.get("id", Long.class);
         User user = userMapperService.findById(id);
         if (ObjectUtils.isEmpty(user) || !user.getStatus() || !ObjectUtils.isEmpty(user.getDeleteTime())) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 
-        // request parameters 添加用户信息 中文需要URIEncode
+        Long oauth2Id = claims.get("oauth2_id", Long.class);
+        Oauth2Client client = oauth2ClientMapperService.findById(oauth2Id);
+        if (ObjectUtils.isEmpty(client) || !ObjectUtils.isEmpty(client.getDeleteTime()) || !user.getTenantId().equals(client.getTenantId())) {
+            throw new AppException(RCode.UNAUTHORIZED_ERROR);
+        }
+
+        // *********4*********** request parameters 添加用户信息 中文需要URIEncode
         URI uri = request.getURI();
         StringBuilder query = new StringBuilder();
         String originalQuery = uri.getRawQuery();

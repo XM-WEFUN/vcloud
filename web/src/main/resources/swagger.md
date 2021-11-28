@@ -6,7 +6,7 @@
 
 ### 项目地址: [vbeats](https://github.com/vbeats)
 
-### 联系我:
+### 微信:
 
 ![battery_wx](https://cdn.jsdelivr.net/gh/boot-vue/pics@main/wechat.jpg)
 

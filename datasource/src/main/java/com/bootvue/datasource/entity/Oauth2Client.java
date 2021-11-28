@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.bootvue.datasource.type.PlatformEnum;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -15,7 +16,9 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class Oauth2Client {
+public class Oauth2Client implements Serializable {
+
+    private static final long serialVersionUID = 637946546033655114L;
 
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;

@@ -14,7 +14,7 @@
 
 common          common模块
 datasource      数据源
-web             spring mvc相关配置
+web             spring mvc aop...
 gateway         网关服务                    8080
 auth            认证服务                    8081                                
 service         服务拆分 (可以自定义)

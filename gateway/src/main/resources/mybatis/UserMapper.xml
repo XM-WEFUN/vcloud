@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.bootvue.gateway.mapper.UserMapper">
+    <select id="findById" resultType="com.bootvue.datasource.entity.User">
+        select u.*
+        from `user` u,
+        tenant t
+        where u.id = #{id}
+        and u.tenant_id = t.id
+        and t.status = 1
+        and t.delete_time is null
+    </select>
 </mapper>

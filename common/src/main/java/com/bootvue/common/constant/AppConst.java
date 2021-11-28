@@ -13,6 +13,7 @@ public class AppConst {
 
     //******************* redis cache name
     public static final String ADMIN_CACHE = "cache:admin";
+    public static final String OAUTH2_CACHE = "cache:oauth2";
 
     //******************* token 请求头
     public static final String REQUEST_HEADER_TOKEN = "Authorization";

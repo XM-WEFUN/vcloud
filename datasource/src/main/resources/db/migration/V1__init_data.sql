@@ -69,6 +69,77 @@ CREATE TABLE `menu`
 -- ----------------------------
 -- Records of menu
 -- ----------------------------
+INSERT INTO `menu`
+VALUES (1464843243430195200, '首页', 'index', '/index', 'HomeOutlined', 0, 0, 0, '', 1, 1, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195201, '系统管理', 'system', '/system', 'SettingOutlined', 500, 0, 0, '', 1, 0, 1);
+INSERT INTO `menu`
+VALUES (1464843243430195202, '租户管理', 'tenant', '/tenant', '', 501, 1464843243430195201, 0, 'tenant:list', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195203, '新增', '', '', '', 0, 1464843243430195202, 1, 'tenant:add', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195204, '更新', '', '', '', 0, 1464843243430195202, 1, 'tenant:update', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195205, '删除', '', '', '', 0, 1464843243430195202, 1, 'tenant:delete', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195206, '禁用', '', '', '', 0, 1464843243430195202, 1, 'tenant:disable', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195207, '菜单管理', 'menu', '/menu', 'BarsOutlined', 502, 1464843243430195201, 0, 'menu:list', 1, 0,
+        0);
+INSERT INTO `menu`
+VALUES (1464843243430195208, '新增', '', '', '', 0, 1464843243430195207, 1, 'menu:add', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195209, '更新', '', '', '', 0, 1464843243430195207, 1, 'menu:update', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195210, '删除', '', '', '', 0, 1464843243430195207, 1, 'menu:delete', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195211, '角色管理', 'role', '/role', 'SlidersOutlined', 503, 1464843243430195201, 0, 'role:list', 1, 0,
+        0);
+INSERT INTO `menu`
+VALUES (1464843243430195212, '新增', '', '', '', 0, 1464843243430195211, 1, 'role:add', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195213, '更新', '', '', '', 0, 1464843243430195211, 1, 'role:update', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195214, '删除', '', '', '', 0, 1464843243430195211, 1, 'role:delete', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195215, '分配用户', '', '', '', 0, 1464843243430195211, 1, 'role:assign', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195216, '部门管理', 'dept', '/dept', 'AuditOutlined', 504, 1464843243430195201, 0, 'dept:list', 1, 0,
+        0);
+INSERT INTO `menu`
+VALUES (1464843243430195217, '新增', '', '', '', 0, 1464843243430195216, 1, 'dept:add', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195218, '更新', '', '', '', 0, 1464843243430195216, 1, 'dept:update', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195219, '删除', '', '', '', 0, 1464843243430195216, 1, 'dept:delete', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195220, '分配用户', '', '', '', 0, 1464843243430195216, 1, 'dept:assign', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195221, '用户管理', 'user', '/user', 'UserOutlined', 505, 1464843243430195201, 0, 'user:list', 1, 0,
+        0);
+INSERT INTO `menu`
+VALUES (1464843243430195222, '新增', '', '', '', 0, 1464843243430195221, 1, 'user:add', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195223, '更新', '', '', '', 0, 1464843243430195221, 1, 'user:update', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195224, '禁用', '', '', '', 0, 1464843243430195221, 1, 'user:disable', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195225, '删除', '', '', '', 0, 1464843243430195221, 1, 'user:delete', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195226, '分配角色', '', '', '', 0, 1464843243430195221, 1, 'user:assign_role', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195227, '分配部门', '', '', '', 0, 1464843243430195221, 1, 'user:assign_dept', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195228, 'Oauth2管理', 'oauth', '/oauth', 'DropboxOutlined', 506, 1464843243430195201, 0,
+        'oauth:list',
+        1, 0,
+        0);
+INSERT INTO `menu`
+VALUES (1464843243430195229, '新增', '', '', '', 0, 1464843243430195228, 1, 'oauth:add', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195230, '更新', '', '', '', 0, 1464843243430195228, 1, 'oauth:update', 1, 0, 0);
+INSERT INTO `menu`
+VALUES (1464843243430195231, '删除', '', '', '', 0, 1464843243430195228, 1, 'oauth:delete', 1, 0, 0);
 
 -- ----------------------------
 -- Table structure for oauth2_client
@@ -211,6 +282,70 @@ CREATE TABLE `role_menu`
 -- ----------------------------
 -- Records of role_menu
 -- ----------------------------
+insert into `role_menu`
+values (1, 1, 1464843243430195200);
+insert into `role_menu`
+values (2, 1, 1464843243430195201);
+insert into `role_menu`
+values (3, 1, 1464843243430195202);
+insert into `role_menu`
+values (4, 1, 1464843243430195203);
+insert into `role_menu`
+values (5, 1, 1464843243430195204);
+insert into `role_menu`
+values (6, 1, 1464843243430195205);
+insert into `role_menu`
+values (7, 1, 1464843243430195206);
+insert into `role_menu`
+values (8, 1, 1464843243430195207);
+insert into `role_menu`
+values (9, 1, 1464843243430195208);
+insert into `role_menu`
+values (10, 1, 1464843243430195209);
+insert into `role_menu`
+values (11, 1, 1464843243430195210);
+insert into `role_menu`
+values (12, 1, 1464843243430195211);
+insert into `role_menu`
+values (13, 1, 1464843243430195212);
+insert into `role_menu`
+values (14, 1, 1464843243430195213);
+insert into `role_menu`
+values (15, 1, 1464843243430195214);
+insert into `role_menu`
+values (16, 1, 1464843243430195215);
+insert into `role_menu`
+values (17, 1, 1464843243430195216);
+insert into `role_menu`
+values (18, 1, 1464843243430195217);
+insert into `role_menu`
+values (19, 1, 1464843243430195218);
+insert into `role_menu`
+values (20, 1, 1464843243430195219);
+insert into `role_menu`
+values (21, 1, 1464843243430195220);
+insert into `role_menu`
+values (22, 1, 1464843243430195221);
+insert into `role_menu`
+values (23, 1, 1464843243430195222);
+insert into `role_menu`
+values (24, 1, 1464843243430195223);
+insert into `role_menu`
+values (25, 1, 1464843243430195224);
+insert into `role_menu`
+values (26, 1, 1464843243430195225);
+insert into `role_menu`
+values (27, 1, 1464843243430195226);
+insert into `role_menu`
+values (28, 1, 1464843243430195227);
+insert into `role_menu`
+values (29, 1, 1464843243430195228);
+insert into `role_menu`
+values (30, 1, 1464843243430195229);
+insert into `role_menu`
+values (31, 1, 1464843243430195230);
+insert into `role_menu`
+values (32, 1, 1464843243430195231);
 
 -- ----------------------------
 -- Table structure for tenant
@@ -313,5 +448,7 @@ CREATE TABLE `user_role`
 -- ----------------------------
 -- Records of user_role
 -- ----------------------------
+insert into `user_role`
+values (1, 1, 1);
 
 SET FOREIGN_KEY_CHECKS = 1;
