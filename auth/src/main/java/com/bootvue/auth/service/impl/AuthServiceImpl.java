@@ -19,6 +19,7 @@ import com.bootvue.common.util.JwtUtil;
 import com.bootvue.common.util.RsaUtil;
 import com.bootvue.datasource.entity.Oauth2Client;
 import com.bootvue.datasource.entity.User;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -84,10 +85,45 @@ public class AuthServiceImpl implements AuthService {
                 return handlePasswordAuth(param, clientInfo);
             case REFRESH_TOKEN:
                 log.info("用户认证: refresh_token 模式.......");
-                return null;
+                return handleRefreshToken(param, clientInfo);
             default:
                 throw new AppException(RCode.PARAM_ERROR);
         }
+    }
+
+    /**
+     * refresh_token
+     *
+     * @param param
+     * @param clientInfo
+     * @return
+     */
+    private AuthResponse handleRefreshToken(AuthParam param, Oauth2Client clientInfo) {
+        // 校验 refresh token
+        if (!JwtUtil.isVerify(param.getRefreshToken())) {
+            throw new AppException(RCode.UNAUTHORIZED_ERROR);
+        }
+
+        Claims claims = JwtUtil.decode(param.getRefreshToken());
+        Long tenantId = claims.get("tenant_id", Long.class);
+        Long oauth2Id = claims.get("oauth2_id", Long.class);
+        String tokenType = claims.get("token_type", String.class);
+
+        if (!clientInfo.getTenantId().equals(tenantId) || !clientInfo.getId().equals(oauth2Id) || !AppConst.REFRESH_TOKEN.equalsIgnoreCase(tokenType)) {
+            throw new AppException(RCode.ACCESS_DENY);
+        }
+
+        // 新access_token
+        Long id = claims.get("id", Long.class);
+        Integer accountType = claims.get("account_type", Integer.class);
+        String account = claims.get("account", String.class);
+        Token accessToken = new Token(id, tenantId, oauth2Id, account, AppConst.ACCESS_TOKEN, accountType);
+
+        AuthResponse response = new AuthResponse();
+        response.setAccessToken(JwtUtil.encode(LocalDateTime.now().plusSeconds(clientInfo.getAccessTokenExpire()), BeanUtil.beanToMap(accessToken, true, true)));
+        response.setRefreshToken(param.getRefreshToken());
+
+        return response;
     }
 
     /**
