@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AccountTypeEnum {    // 账号类型
     COMMON(0, "普通用户"),
-    TENANT_ADMIN(1, "租户管理员"),
-    ADMIN(2, "平台管理员");
+    TENANT_ADMIN(1, "租户账号"),
+    ADMIN(2, "平台账号");
 
     @EnumValue
     private Integer value;

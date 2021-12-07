@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.bootvue.auth.mapper.Oauth2ClientMapper">
-    <select id="getClientInfo" resultType="com.bootvue.datasource.entity.Oauth2Client">
-        select oc.*
-        from oauth2_client oc,
-        tenant t
-        where t.code = #{tenantCode}
-        and oc.client_id = #{clientId}
-        and oc.secret = #{secret}
-        and oc.platform = #{platform}
-    </select>
 </mapper>

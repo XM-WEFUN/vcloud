@@ -5,9 +5,7 @@ import com.bootvue.common.constant.AppConst;
 import com.bootvue.common.result.AppException;
 import com.bootvue.common.result.RCode;
 import com.bootvue.common.util.JwtUtil;
-import com.bootvue.datasource.entity.Oauth2Client;
 import com.bootvue.datasource.entity.User;
-import com.bootvue.gateway.service.Oauth2ClientMapperService;
 import com.bootvue.gateway.service.UserMapperService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +31,6 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
     private final AppConfig appConfig;
     private final UserMapperService userMapperService;
-    private final Oauth2ClientMapperService oauth2ClientMapperService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -63,16 +60,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         Claims claims = JwtUtil.decode(token);
 
-        // ***********3********** 用户与oauth2信息校验
+        // ***********3********** 用户信息校验
         Long id = claims.get("id", Long.class);
         User user = userMapperService.findById(id);
         if (ObjectUtils.isEmpty(user) || !user.getStatus() || !ObjectUtils.isEmpty(user.getDeleteTime())) {
-            throw new AppException(RCode.UNAUTHORIZED_ERROR);
-        }
-
-        Long oauth2Id = claims.get("oauth2_id", Long.class);
-        Oauth2Client client = oauth2ClientMapperService.findById(oauth2Id);
-        if (ObjectUtils.isEmpty(client) || !ObjectUtils.isEmpty(client.getDeleteTime()) || !user.getTenantId().equals(client.getTenantId())) {
             throw new AppException(RCode.UNAUTHORIZED_ERROR);
         }
 

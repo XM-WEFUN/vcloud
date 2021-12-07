@@ -3,6 +3,7 @@ package com.bootvue.datasource.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Tenant implements Serializable {
     private static final long serialVersionUID = -3161519350405977674L;
 

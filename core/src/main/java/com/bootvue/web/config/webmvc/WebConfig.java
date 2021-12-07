@@ -26,6 +26,7 @@ public class WebConfig implements WebMvcConfigurer {
         converters.removeIf(converter -> converter instanceof MappingJackson2HttpMessageConverter);
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         ObjectMapper mapper = new ObjectMapper();
+        mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));

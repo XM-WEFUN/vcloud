@@ -3,6 +3,7 @@ package com.bootvue.datasource.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 角色表
@@ -12,6 +13,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Role {
 
     @TableId(type = IdType.ASSIGN_ID)

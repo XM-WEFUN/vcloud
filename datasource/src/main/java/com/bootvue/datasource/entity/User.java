@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.bootvue.datasource.type.AccountTypeEnum;
 import com.bootvue.datasource.type.GenderEnum;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class User implements Serializable {
     private static final long serialVersionUID = 9036773750958954304L;
 
@@ -29,7 +31,7 @@ public class User implements Serializable {
     private Long tenantId;
 
     /**
-     * 账号类型 0普通用户 1租户管理员 2平台管理员
+     * 账号类型 0普通用户 1租户 2平台
      */
     private AccountTypeEnum type;
 
@@ -72,6 +74,11 @@ public class User implements Serializable {
      * 市
      */
     private String city;
+
+    /**
+     * 区
+     */
+    private String region;
 
     /**
      * 头像

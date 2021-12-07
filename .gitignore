@@ -84,3 +84,4 @@ fabric.properties
 
 **/rebel.xml
 .jpb/
+!doc/**

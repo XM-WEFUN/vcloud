@@ -14,7 +14,7 @@
 
 common          common模块
 datasource      数据源
-web             spring mvc aop...
+core             spring mvc aop...
 gateway         网关服务                    8080
 auth            认证服务                    8081                                
 service         服务拆分 (可以自定义)
@@ -51,7 +51,7 @@ service         服务拆分 (可以自定义)
 
 ## next plan
 
-- [ ] v3版本
+- [ ] v3优化
 
 ---
 
@@ -71,6 +71,8 @@ service         服务拆分 (可以自定义)
 
 - nacos config.yml定义了mysql redis sentinel等等配置
 
+- `config.yml` 自定义配置信息 `vcloud` , 对应对象 `AppConfig`
+
 - 数据库已有表, flyway sql要从>1的version开始 例如:V2
 
 - 角色权限验证: `@PreAuth(hasRole, hasPermission, superOnly)`
@@ -83,11 +85,15 @@ service         服务拆分 (可以自定义)
 
 <table>
     <tr>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/1.png"></td>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/11.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/42.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/41.png"></td>
     </tr>
     <tr>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/22.png"></td>
-        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/10.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/45.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vdashboard/next/49.png"></td>
+    </tr>
+    <tr>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/45.png"></td>
+        <td><img src="https://cdn.jsdelivr.net/gh/boot-vue/pics@main/vcloud/next/46.png"></td>
     </tr>
 </table>

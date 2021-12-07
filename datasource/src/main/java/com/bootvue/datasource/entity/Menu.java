@@ -1,9 +1,11 @@
 package com.bootvue.datasource.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.bootvue.datasource.type.MenuTypeEnum;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 菜单/按钮表
@@ -13,6 +15,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Menu {
 
     @TableId(type = IdType.ASSIGN_ID)
@@ -26,6 +29,7 @@ public class Menu {
     /**
      * 唯一标识
      */
+    @TableField(value = "`key`")
     private String key;
 
     /**
@@ -41,6 +45,7 @@ public class Menu {
     /**
      * 顺序
      */
+    @TableField(value = "`sort`")
     private Integer sort;
 
     /**
@@ -51,6 +56,7 @@ public class Menu {
     /**
      * 类型 0 菜单 1按钮
      */
+    @TableField(value = "`type`")
     private MenuTypeEnum type;
 
     /**
@@ -61,6 +67,7 @@ public class Menu {
     /**
      * 菜单栏是否展示 0 不显示 1显示
      */
+    @TableField(value = "`show`")
     private Boolean show;
 
     /**

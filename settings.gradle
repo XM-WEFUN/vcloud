@@ -2,7 +2,7 @@ rootProject.name = 'vcloud'
 
 include 'common'
 include 'datasource'
-include 'web'
+include 'core'
 include 'gateway'
 include 'auth'
 include 'service:admin'

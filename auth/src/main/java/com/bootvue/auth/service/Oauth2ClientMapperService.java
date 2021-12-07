@@ -14,7 +14,4 @@ public class Oauth2ClientMapperService extends ServiceImpl<Oauth2ClientMapper, O
 
     private final Oauth2ClientMapper oauth2ClientMapper;
 
-    public Oauth2Client getByClientInfo(String tenantCode, String clientId, String secret, Integer platform) {
-        return oauth2ClientMapper.getClientInfo(tenantCode, clientId, secret, platform);
-    }
 }

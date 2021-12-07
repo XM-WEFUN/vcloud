@@ -12,5 +12,5 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Oauth2ClientMapperService extends ServiceImpl<Oauth2ClientMapper, Oauth2Client> implements IService<Oauth2Client> {
 
-
+    private final Oauth2ClientMapper oauth2ClientMapper;
 }

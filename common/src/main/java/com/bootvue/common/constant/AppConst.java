@@ -3,6 +3,7 @@ package com.bootvue.common.constant;
 public class AppConst {
     // ****************** 运营平台租户信息 **********
     public static final Long ADMIN_TENANT_ID = 1L;
+    public static final String ADMIN_ROLE_NAME = "超级管理员";
 
     // ****************** 常量
     public static final String CAPTCHA_KEY = "captcha:line_%s";
@@ -13,7 +14,6 @@ public class AppConst {
 
     //******************* redis cache name
     public static final String ADMIN_CACHE = "cache:admin";
-    public static final String OAUTH2_CACHE = "cache:oauth2";
 
     //******************* token 请求头
     public static final String REQUEST_HEADER_TOKEN = "Authorization";

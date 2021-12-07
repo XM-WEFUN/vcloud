@@ -20,8 +20,8 @@ ext {
             javaJwt           : '3.18.2',
             jjwt              : '0.9.1',
             jjwtImpl          : '0.11.2',
-            flyway            : '8.0.5',
-            caffeine          : '3.0.4'
+            flyway            : '8.2.0',
+            caffeine          : '3.0.5'
     ]
 
     libs = [

@@ -3,7 +3,7 @@
 <mapper namespace="com.bootvue.auth.mapper.UserMapper">
     <select id="getByTenantCodeAndAccount" resultType="com.bootvue.datasource.entity.User">
         select u.*
-        from user u,
+        from `user` u,
         tenant t
         where u.tenant_id = t.id
         and t.code = #{tenantCode}

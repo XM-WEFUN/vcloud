@@ -10,7 +10,7 @@ apply from: 'version.gradle'
 
 allprojects {
     group 'com.bootvue'
-    version '3.0.0-RC1'
+    version '3.0.0-RC.1'
 
     repositories {
         maven {
@@ -72,7 +72,7 @@ subprojects {
     }
 
     // **************************** 模块自定义配置****************************
-    def baseModules = ['common', 'web', 'datasource']
+    def baseModules = ['common', 'core', 'datasource']
     if (baseModules.contains(project.name)) {
         return
     }
@@ -102,28 +102,25 @@ subprojects {
                 implementation 'com.alibaba.cloud:spring-cloud-alibaba-sentinel-gateway'
             }
             break
-        case 'swagger':
+        case 'mq':
+        case 'scheduler':
             dependencies {
-                implementation(project(":web")) {
-                    exclude group: rootProject.group, module: 'datasource'
-                }
+                implementation project(":common")
             }
             break
         default:
             dependencies {
-                implementation project(":web")
+                implementation project(":core")
             }
     }
 
     task copyResources(type: Copy) {
         from "${project(':common').projectDir}/src/main/resources"
 
-        if (project.name != 'gateway') {
-            from "${project(':web').projectDir}/src/main/resources"
-        }
+        from "${project(':datasource').projectDir}/src/main/resources"
 
-        if (project.name != 'swagger') {
-            from "${project(':datasource').projectDir}/src/main/resources"
+        if (project.name != 'gateway') {
+            from "${project(':core').projectDir}/src/main/resources"
         }
 
         into "${project.buildDir}/resources/main"

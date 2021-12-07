@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.bootvue.admin.mapper.RoleMenuMapper">
-    <select id="getMenusByRoleIds" resultType="com.bootvue.datasource.entity.Menu">
-        SELECT m.*
+    <select id="getMenusByRoleIds" resultType="com.bootvue.admin.dto.MenuItem">
+        SELECT m.id id,
+        m.title title,
+        m.p_id pid,
+        (select p.title from menu p where p.id = m.p_id) ptitle,
+        m.`key` `key`,
+        m.path path,
+        m.icon icon,
+        m.`sort` `sort`,
+        m.`type` `type`,
+        m.`action` `action`,
+        m.`show` `show`,
+        m.default_select default_select,
+        m.default_open default_open
         FROM menu m
         WHERE m.id IN (
         SELECT DISTINCT (rm.menu_id)
@@ -12,5 +24,28 @@
             #{id}
         </foreach>
         )
+    </select>
+
+    <select id="menus" resultType="com.bootvue.admin.dto.MenuItem">
+        SELECT m.id id,
+        m.title title,
+        m.p_id pid,
+        (select p.title from menu p where p.id = m.p_id) ptitle,
+        m.`key` `key`,
+        m.path path,
+        m.icon icon,
+        m.`sort` `sort`,
+        m.`type` `type`,
+        m.`action` `action`,
+        m.`show` `show`,
+        m.default_select default_select,
+        m.default_open default_open
+        FROM role_menu rm,
+        `role` r,
+        menu m
+        WHERE rm.role_id = r.id
+        and r.tenant_id = #{tenantId}
+        and r.`name` = '超级管理员'
+        and rm.menu_id = m.id
     </select>
 </mapper>

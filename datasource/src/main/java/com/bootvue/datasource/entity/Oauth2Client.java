@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.bootvue.datasource.type.PlatformEnum;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -16,17 +17,13 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Oauth2Client implements Serializable {
 
     private static final long serialVersionUID = 637946546033655114L;
 
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
-
-    /**
-     * 租户id
-     */
-    private Long tenantId;
 
     /**
      * client id
@@ -67,16 +64,6 @@ public class Oauth2Client implements Serializable {
      * 重定向url
      */
     private String redirectUrl;
-
-    /**
-     * 公钥
-     */
-    private String publicKey;
-
-    /**
-     * 私钥
-     */
-    private String privateKey;
 
     /**
      * 创建时间

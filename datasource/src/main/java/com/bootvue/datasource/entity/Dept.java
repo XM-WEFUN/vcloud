@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.bootvue.datasource.type.DeptTypeEnum;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 部门表
@@ -13,6 +14,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Dept {
 
     @TableId(type = IdType.ASSIGN_ID)
@@ -51,7 +53,7 @@ public class Dept {
     /**
      * 联系方式
      */
-    private String contractPhone;
+    private String contactPhone;
 
     /**
      * 备注

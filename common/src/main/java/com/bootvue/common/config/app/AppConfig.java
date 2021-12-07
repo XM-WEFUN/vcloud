@@ -21,4 +21,8 @@ public class AppConfig {
 
     private Set<Cache> caches; // redis cache
 
+    private String publicKey; // rsa 公钥
+
+    private String privateKey; // rsa 私钥
+
 }
